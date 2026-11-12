@@ -97,18 +97,31 @@ th,td{border:1px solid #e2e8f0;padding:8px;text-align:center;white-space:nowrap;
         <input type="file" id="ef" accept=".xlsx,.xls,.csv" style="border:1px dashed #cbd5e1;padding:10px;">
         <button class="b1" onclick="impEx()">استيراد</button>
       </div>
+      
       <div class="card"><h2>🏫 الشعب</h2>
-        <div class="row"><input id="sn" placeholder="اسم الشعبة"><button class="b2" onclick="addS()" style="width:80px;margin:0;">إضافة</button></div>
+        <p style="font-size:12px; color:#64748b; margin-bottom:10px;">اختر الشعب التي تريد إضافتها:</p>
+        <div style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px;">
+          <button class="b2" onclick="quickAdd('أ')" style="width:auto; padding:8px 15px; margin:0;">أ</button>
+          <button class="b2" onclick="quickAdd('ب')" style="width:auto; padding:8px 15px; margin:0;">ب</button>
+          <button class="b2" onclick="quickAdd('ج')" style="width:auto; padding:8px 15px; margin:0;">ج</button>
+          <button class="b2" onclick="quickAdd('د')" style="width:auto; padding:8px 15px; margin:0;">د</button>
+          <button class="b2" onclick="quickAdd('هـ')" style="width:auto; padding:8px 15px; margin:0;">هـ</button>
+        </div>
+        <div class="row"><input id="sn" placeholder="أو اكتب اسم شعبة مخصصة"><button class="b2" onclick="addS()" style="width:80px;margin:0;">إضافة</button></div>
         <div id="sl" style="margin-top:10px;"></div>
       </div>
+      
       <div class="card"><h2>📚 المواد</h2>
         <input id="sub" placeholder="اسم المادة">
         <div class="row"><input id="sm" type="number" placeholder="العظمى" value="100"><input id="sp" type="number" placeholder="النجاح" value="50"></div>
         <button class="b2" onclick="addSub()">إضافة</button>
         <div id="subl" style="margin-top:10px;"></div>
+        <button class="b3" onclick="clearSubs()" style="margin-top:10px; font-size:12px;">🗑️ حذف كل المواد</button>
       </div>
+      
       <div class="card"><h2>🔐 كلمة المرور</h2><input type="password" id="np" placeholder="الجديدة"><button class="b4" onclick="chPass()">تحديث</button></div>
-      <div class="card"><h2>⚠️ الخطر</h2><button class="b3" onclick="clearAll()">🗑️ حذف الكل</button></div>
+      
+      <div class="card"><h2>⚠️ الخطر</h2><button class="b3" onclick="clearAll()">🗑️ حذف كل بيانات المدرسة</button></div>
     </section>
   </main>
 </div>
@@ -136,6 +149,12 @@ function chPass(){let p=document.getElementById('np').value;if(p.length>3){DB.ad
 
 document.querySelectorAll('.nb').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('.nb').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById(b.dataset.tab).classList.add('active');if(b.dataset.tab==='att')document.getElementById('ad').valueAsDate=new Date();ref();});});
 
+// دالة إضافة شعب سريعة
+function quickAdd(n){
+  if(!DB.sections.includes(n)){ DB.sections.push(n); sv(); ref(); tst('تمت إضافة شعبة '+n); }
+  else { tst('الشعبة موجودة بالفعل', 'e'); }
+}
+
 function impEx(){
   let f=document.getElementById('ef').files[0],sec=document.getElementById('is').value;
   if(!sec)return tst('اختر الشعبة أولاً','e');if(!f)return tst('اختر الملف','e');
@@ -159,10 +178,11 @@ function impEx(){
   };r.readAsArrayBuffer(f);
 }
 
-function addS(){let n=document.getElementById('sn').value.trim();if(n){if(!DB.sections.includes(n))DB.sections.push(n);sv();ref();document.getElementById('sn').value='';tst('تمت إضافة الشعبة');}}
+function addS(){let n=document.getElementById('sn').value.trim();if(n){if(!DB.sections.includes(n)){DB.sections.push(n);sv();ref();document.getElementById('sn').value='';tst('تمت إضافة الشعبة');}else tst('موجودة','e');}}
 function delS(n){if(confirm('حذف الشعبة؟')){DB.sections=DB.sections.filter(x=>x!==n);DB.students=DB.students.filter(x=>x.section!==n);sv();init();}}
 function addSub(){let n=document.getElementById('sub').value.trim();if(n){DB.subjects.push({id:nid(DB.subjects),name:n,max:+document.getElementById('sm').value,pass:+document.getElementById('sp').value});sv();ref();document.getElementById('sub').value='';tst('تمت إضافة المادة');}}
 function delSub(id){if(confirm('حذف المادة؟')){DB.subjects=DB.subjects.filter(x=>x.id!==id);sv();init();}}
+function clearSubs(){if(confirm('حذف كل المواد؟')){DB.subjects=[];sv();init();tst('تم حذف المواد');}}
 function delSt(id){if(confirm('حذف الطالب؟')){DB.students=DB.students.filter(x=>x.id!==id);sv();renderSt();}}
 function clearAll(){if(confirm('تأكيد مسح الكل؟')){if(prompt('اكتب "حذف":')==='حذف'){DB={"students":[],"sections":[],"subjects":[],"grades":[],"attendance":{},"activity":{},"adminPass":"123456"};sv();init();tst('تم المسح');}}}
 
@@ -174,10 +194,7 @@ function renderSt(){
   h.innerHTML=f.map(x=>`<div class="li"><div><b>${x.name}</b><small>الشعبة: ${x.section} | الكود: ${x.code}</small></div><button class="ib" onclick="delSt(${x.id})">🗑️</button></div>`).join('');
 }
 
-function init(){
-  ref();
-  renderSt();
-}
+function init(){ ref(); renderSt(); }
 
 function ref(){
   let so=DB.sections.map(x=>`<option value="${x}">${x}</option>`).join(''),suo=DB.subjects.map(x=>`<option value="${x.id}">${x.name}</option>`).join('');
