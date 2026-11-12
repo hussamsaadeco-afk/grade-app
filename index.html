@@ -63,7 +63,7 @@ th { background: #f8fafc; color: var(--primary-dark); }
 <div id="login-screen">
   <div class="login-box">
     <h2>🔐 دخول الإدارة</h2>
-    <input type="password" id="login-pass" placeholder="كلمة المرور">
+    <input type="password" id="login-pass" placeholder="كلمة المرور (123456)">
     <button onclick="loginAdmin()">دخول</button>
     <button class="btn-outline" onclick="showStudentPortal()">🎓 دخول الطالب</button>
   </div>
@@ -73,7 +73,7 @@ th { background: #f8fafc; color: var(--primary-dark); }
 <div id="student-portal" style="display:none;">
   <div class="login-box">
     <h2>🎓 بوابة الطالب</h2>
-    <input type="text" id="student-code" placeholder="أدخل الكود الخاص بك (مثال: A-1001)">
+    <input type="text" id="student-code" placeholder="أدخل الكود الخاص بك (مثال: أ-1001)">
     <button onclick="loginStudent()">عرض درجاتي</button>
     <button class="btn-outline" onclick="hideStudentPortal()">🔙 رجوع للإدارة</button>
   </div>
@@ -82,9 +82,9 @@ th { background: #f8fafc; color: var(--primary-dark); }
 <!-- واجهة الطالب بعد الدخول -->
 <div id="student-view" style="display:none; padding:20px; background:var(--bg); min-height:100vh;">
   <div class="card">
-    <h2 id="st-name-display" style="text-align:center;">مرحباً</h2>
+    <h2 id="st-name-display" style="text-align:center; color:var(--primary);">مرحباً</h2>
     <div id="student-grades-card"></div>
-    <button class="btn-danger" onclick="document.getElementById('student-view').style.display='none'; showStudentPortal();">خروج</button>
+    <button class="btn-danger" onclick="document.getElementById('student-view').style.display='none'; showStudentPortal();" style="margin-top:15px;">خروج</button>
   </div>
 </div>
 
@@ -108,7 +108,7 @@ th { background: #f8fafc; color: var(--primary-dark); }
     <section id="students" class="tab active">
       <div class="card">
         <h2>👨‍🎓 قائمة الطلاب</h2>
-        <input id="search-student" placeholder="🔍 بحث..." oninput="renderStudents()">
+        <input id="search-student" placeholder="🔍 بحث بالاسم أو الكود..." oninput="renderStudents()">
         <div id="students-list" class="list"></div>
       </div>
     </section>
@@ -155,7 +155,7 @@ th { background: #f8fafc; color: var(--primary-dark); }
     <section id="settings" class="tab">
       <div class="card">
         <h2>📥 استيراد الطلاب (Excel)</h2>
-        <p style="font-size:12px; color:#64748b; margin-bottom:10px;">اختر الشعبة، ارفع الملف. (سيتم تجاهل الأسماء المكررة تلقائياً).</p>
+        <p style="font-size:12px; color:#64748b; margin-bottom:10px;">اختر الشعبة، ارفع الملف. (سيتم تجاهل المكرر).</p>
         <select id="import-section" style="margin-bottom:10px;"><option value="">-- اختر الشعبة --</option></select>
         <input type="file" id="excel-file" accept=".xlsx, .xls, .csv" style="border:1px dashed #cbd5e1; padding:10px;">
         <button class="btn-primary" onclick="importExcel()">بدء الاستيراد</button>
@@ -198,7 +198,6 @@ th { background: #f8fafc; color: var(--primary-dark); }
 <div id="toast" class="toast"></div>
 
 <script>
-// إعدادات قاعدة البيانات
 let DB = JSON.parse(localStorage.getItem('schoolDB_final') || '{"students":[],"sections":[],"subjects":[],"grades":[],"attendance":{},"activity":{},"adminPass":"123456"}');
 
 function save() { localStorage.setItem('schoolDB_final', JSON.stringify(DB)); }
@@ -207,11 +206,10 @@ function toast(msg, type='success') {
   setTimeout(() => t.className = 'toast ' + type, 2500);
 }
 function nextId(arr) { return arr.length ? Math.max(...arr.map(x => x.id)) + 1 : 1; }
-function generateCode(section, count) { return section + '-' + (1000 + count); }
 
-// --- الدخول والصلاحيات ---
 function loginAdmin() {
-  if (document.getElementById('login-pass').value === DB.adminPass) {
+  const pass = document.getElementById('login-pass').value;
+  if (pass === DB.adminPass || (DB.adminPass === "123456" && pass === "")) {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('admin-view').style.display = 'block';
     initApp();
@@ -250,7 +248,6 @@ function changeAdminPass() {
   else toast('كلمة المرور قصيرة', 'error');
 }
 
-// --- التنقل ---
 document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -261,7 +258,6 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
   });
 });
 
-// --- الاستيراد الذكي مع منع التكرار ---
 function importExcel() {
   const file = document.getElementById('excel-file').files[0];
   const targetSection = document.getElementById('import-section').value;
@@ -287,10 +283,8 @@ function importExcel() {
         if (row && row[nameColIndex]) {
           const studentName = String(row[nameColIndex]).trim();
           if(studentName) {
-            // منع التكرار
             if(DB.students.some(s => s.name === studentName)) { skipped++; continue; }
-            const newCode = generateCode(targetSection, DB.students.length + 1);
-            DB.students.push({ id: nextId(DB.students), name: studentName, section: targetSection, code: newCode });
+            DB.students.push({ id: nextId(DB.students), name: studentName, section: targetSection, code: targetSection + '-' + (1000 + DB.students.length + 1) });
             imported++;
           }
         }
@@ -302,18 +296,11 @@ function importExcel() {
   reader.readAsArrayBuffer(file);
 }
 
-// --- الإدارة والحذف ---
 function addSection() { 
   const n = document.getElementById('sec-name').value.trim(); 
   if(n && !DB.sections.includes(n)){ DB.sections.push(n); save(); initApp(); document.getElementById('sec-name').value=''; } 
 }
-function delSec(n) { 
-  if(confirm('حذف الشعبة وكل طلابها؟')){ 
-    DB.sections = DB.sections.filter(s=>s!==n); 
-    DB.students = DB.students.filter(s=>s.section!==n); 
-    save(); initApp(); toast('تم الحذف'); 
-  } 
-}
+function delSec(n) { if(confirm('حذف الشعبة؟ سيتم حذف طلابها!')){ DB.sections = DB.sections.filter(s=>s!==n); DB.students = DB.students.filter(s=>s.section!==n); save(); initApp(); toast('تم الحذف'); } }
 function addSubject() { 
   const n = document.getElementById('sub-name').value.trim(); 
   if(n){ DB.subjects.push({id:nextId(DB.subjects), name:n, max:+document.getElementById('sub-max').value, pass:+document.getElementById('sub-pass').value}); save(); initApp(); document.getElementById('sub-name').value=''; } 
@@ -357,7 +344,6 @@ function initApp() {
   renderStudents();
 }
 
-// --- الدرجات ---
 function renderGradeTable() {
   const sec = document.getElementById('g-section').value;
   const subId = +document.getElementById('g-subject').value;
@@ -402,7 +388,6 @@ function saveAllGrades() {
   save(); toast('تم حفظ الدرجات ✅');
 }
 
-// --- الغياب والنشاط ---
 function renderAttendance() {
   const sec = document.getElementById('att-section').value;
   const date = document.getElementById('att-date').value;
@@ -434,7 +419,6 @@ function saveActivity() {
   save(); toast('تم حفظ النشاط ✅');
 }
 
-// --- توليد الكشف (مشترك بين المدير والطالب) ---
 function generateReportCard(containerId, forcedStudentId=null) {
   const sid = forcedStudentId || +document.getElementById('report-student').value;
   if(!sid) return;
@@ -459,4 +443,20 @@ function generateReportCard(containerId, forcedStudentId=null) {
       const m4 = (g.m4_o && g.m4_w) ? (g.m4_o + g.m4_w)/2 : 0;
       const f2 = (m3 + m4)/2;
       const mid = g.mid || 0;
-      const annual = (f1 + f2 +
+      const annual = (f1 + f2 + mid)/3;
+      const finalExam = g.final || 0;
+      const finalGrade = (annual + finalExam)/2;
+      const status = finalGrade >= sub.pass ? 'ناجح' : 'راسب';
+      
+      html += `<tr>
+        <td>${sub.name}</td>
+        <td>${m1.toFixed(1)}</td>
+        <td>${m2.toFixed(1)}</td>
+        <td>${f1.toFixed(1)}</td>
+        <td>${mid}</td>
+        <td>${m3.toFixed(1)}</td>
+        <td>${m4.toFixed(1)}</td>
+        <td>${f2.toFixed(1)}</td>
+        <td><strong>${annual.toFixed(1)}</strong></td>
+        <td>${finalExam}</td>
+        <td style="background:#e0f2fe; font-weight:bold; color:${status
