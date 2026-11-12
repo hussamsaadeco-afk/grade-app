@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>نظام إدارة الدرجات</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; color: #1f2937; padding-bottom: 80px; min-height: 100vh; }
+header { background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; padding: 18px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,.15); }
+header h1 { font-size: 20px; }
+main { padding: 12px; }
+.tab { display: none; }
+.tab.active { display: block; animation: fadeIn .25s; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
+.card { background: white; border-radius: 14px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.card h2 { font-size: 16px; color: #1e3a8a; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb; }
+input, select { width: 100%; padding: 13px; margin-bottom: 10px; border: 1.5px solid #d1d5db; border-radius: 10px; font-size: 16px; font-family: inherit; background: white; }
+input:focus, select:focus { outline: none; border-color: #3b82f6; }
+button { border: none; border-radius: 10px; padding: 13px 18px; font-size: 16px; font-family: inherit; cursor: pointer; font-weight: bold; }
+.btn-primary { width: 100%; background: #16a34a; color: white; }
+.btn-secondary { width: 100%; background: #2563eb; color: white; margin-bottom: 10px; }
+.list { margin-top: 8px; }
+.item { background: #f9fafb; border-right: 4px solid #3b82f6; padding: 12px; margin-bottom: 8px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.item-info { flex: 1; min-width: 0; }
+.item-info strong { display: block; font-size: 15px; color: #111827; }
+.item-info small { color: #6b7280; font-size: 13px; }
+.icon-btn { padding: 8px 10px; border-radius: 8px; font-size: 14px; background: #ef4444; color: white; }
+.empty { text-align: center; padding: 20px; color: #9ca3af; font-size: 14px; }
+.average-box { margin-top: 12px; padding: 15px; background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; border-radius: 12px; text-align: center; font-size: 20px; font-weight: bold; }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 8px 0; box-shadow: 0 -2px 12px rgba(0,0,0,.1); z-index: 100; }
+.nav-btn { background: none; display: flex; flex-direction: column; align-items: center; padding: 6px 10px; color: #9ca3af; font-size: 22px; border-radius: 10px; flex: 1; }
+.nav-btn span { font-size: 11px; margin-top: 2px; font-weight: 600; }
+.nav-btn.active { color: #1e3a8a; background: #eff6ff; }
+.toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(100px); background: #111827; color: white; padding: 12px 22px; border-radius: 25px; font-size: 14px; opacity: 0; transition: all .3s; z-index: 200; text-align: center; }
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.toast.error { background: #dc2626; }
+.toast.success { background: #16a34a; }
+</style>
+</head>
+<body>
+
+<header><h1>🎓 إدارة الدرجات</h1></header>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" data-tab="students">👨‍🎓<span>الطلاب</span></button>
+  <button class="nav-btn" data-tab="subjects">📚<span>المواد</span></button>
+  <button class="nav-btn" data-tab="grades">📝<span>الدرجات</span></button>
+  <button class="nav-btn" data-tab="reports">📊<span>التقارير</span></button>
+</nav>
+
+<main>
+  <section id="students" class="tab active">
+    <div class="card">
+      <h2>➕ إضافة طالب</h2>
+      <input id="s-name" placeholder="اسم الطالب">
+      <input id="s-nid" placeholder="الرقم الوطني" inputmode="numeric">
+      <input id="s-level" placeholder="الصف">
+      <input id="s-section" placeholder="الشعبة">
+      <input id="s-phone" placeholder="الهاتف" type="tel">
+      <button class="btn-primary" onclick="addStudent()">إضافة</button>
+    </div>
+    <div class="card">
+      <input id="search-student" placeholder="🔍 بحث..." oninput="renderStudents()">
+      <div id="students-list" class="list"></div>
+    </div>
+  </section>
+
+  <section id="subjects" class="tab">
+    <div class="card">
+      <h2>➕ إضافة مادة</h2>
+      <input id="sub-name" placeholder="اسم المادة">
+      <input id="sub-max" placeholder="الدرجة العظمى" value="100" inputmode="numeric">
+      <input id="sub-pass" placeholder="درجة النجاح" value="50" inputmode="numeric">
+      <button class="btn-primary" onclick="addSubject()">إضافة</button>
+    </div>
+    <div class="card"><div id="subjects-list" class="list"></div></div>
+  </section>
+
+  <section id="grades" class="tab">
+    <div class="card">
+      <h2>📝 إدخال درجة</h2>
+      <select id="g-student"></select>
+      <select id="g-subject"></select>
+      <select id="g-semester">
+        <option>الفصل الأول</option>
+        <option>الفصل الثاني</option>
+        <option>الفصل الصيفي</option>
+      </select>
+      <input id="g-grade" placeholder="الدرجة" type="number" inputmode="decimal">
+      <button class="btn-primary" onclick="saveGrade()">💾 حفظ الدرجة</button>
+    </div>
+    <div class="card">
+      <h2>📋 سجل الدرجات</h2>
+      <div id="grades-list" class="list"></div>
+      <div id="average-box" class="average-box">المعدل: —</div>
+    </div>
+  </section>
+
+  <section id="reports" class="tab">
+    <div class="card">
+      <h2>📊 تقرير عام</h2>
+      <button class="btn-secondary" onclick="exportCSV()">📄 تصدير Excel (CSV)</button>
+      <div id="reports-list" class="list"></div>
+    </div>
+  </section>
+</main>
+
+<div id="toast" class="toast"></div>
+
+<script>
+let DB = JSON.parse(localStorage.getItem('gradeDB') || '{"students":[],"subjects":[],"grades":[]}');
+function save() { localStorage.setItem('gradeDB', JSON.stringify(DB)); }
+function toast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show ' + type;
+  setTimeout(() => t.className = 'toast ' + type, 2200);
+}
+function nextId(arr) { return arr.length ? Math.max(...arr.map(x => x.id)) + 1 : 1; }
+
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'reports') renderReports();
+    if (btn.dataset.tab === 'grades') refreshGradeSelects();
+  });
+});
+
+function addStudent() {
+  const name = document.getElementById('s-name').value.trim();
+  const nid = document.getElementById('s-nid').value.trim();
+  if (!name || !nid) return toast('الاسم والرقم مطلوبان', 'error');
+  if (DB.students.some(s => s.national_id === nid)) return toast('الرقم مسجل مسبقاً', 'error');
+  DB.students.push({ id: nextId(DB.students), name, national_id: nid,
+    grade_level: document.getElementById('s-level').value.trim(),
+    section: document.getElementById('s-section').value.trim(),
+    phone: document.getElementById('s-phone').value.trim() });
+  save();
+  ['s-name','s-nid','s-level','s-section','s-phone'].forEach(id => document.getElementById(id).value = '');
+  renderStudents(); refreshGradeSelects(); toast('تمت الإضافة ✅');
+}
+
+function deleteStudent(id) {
+  if (!confirm('حذف الطالب وكل درجاته؟')) return;
+  DB.students = DB.students.filter(s => s.id !== id);
+  DB.grades = DB.grades.filter(g => g.student_id !== id);
+  save(); renderStudents(); refreshGradeSelects(); renderReports(); toast('تم الحذف');
+}
+
+function renderStudents() {
+  const q = document.getElementById('search-student').value.trim();
+  const list = document.getElementById('students-list');
+  const filtered = DB.students.filter(s => s.name.includes(q) || s.national_id.includes(q));
+  if (!filtered.length) { list.innerHTML = '<div class="empty">لا يوجد طلاب</div>'; return; }
+  list.innerHTML = filtered.map(s => `
+    <div class="item">
+      <div class="item-info">
+        <strong>${s.name}</strong>
+        <small>${s.national_id} • ${s.grade_level || '—'} ${s.section || ''}</small>
+      </div>
+      <button class="icon-btn" onclick="deleteStudent(${s.id})">🗑️</button>
+    </div>`).join('');
+}
+
+function addSubject() {
+  const name = document.getElementById('sub-name').value.trim();
+  if (!name) return toast('اسم المادة مطلوب', 'error');
+  if (DB.subjects.some(s => s.name === name)) return toast('المادة موجودة', 'error');
+  DB.subjects.push({ id: nextId(DB.subjects), name,
+    max: +document.getElementById('sub-max').value || 100,
+    pass: +document.getElementById('sub-pass').value || 50 });
+  save(); document.getElementById('sub-name').value = '';
+  renderSubjects(); refreshGradeSelects(); toast('تمت الإضافة ✅');
+}
+
+function deleteSubject(id) {
+  if (!confirm('حذف المادة وكل درجاتها؟')) return;
+  DB.subjects = DB.subjects.filter(s => s.id !== id);
+  DB.grades = DB.grades.filter(g => g.subject_id !== id);
+  save(); renderSubjects(); refreshGradeSelects(); renderReports(); toast('تم الحذف');
+}
+
+function renderSubjects() {
+  const list = document.getElementById('subjects-list');
+  if (!DB.subjects.length) { list.innerHTML = '<div class="empty">لا توجد مواد</div>'; return; }
+  list.innerHTML = DB.subjects.map(s => `
+    <div class="item">
+      <div class="item-info">
+        <strong>${s.name}</strong>
+        <small>العظمى: ${s.max} • النجاح: ${s.pass}</small>
+      </div>
+      <button class="icon-btn" onclick="deleteSubject(${s.id})">🗑️</button>
+    </div>`).join('');
+}
+
+function refreshGradeSelects() {
+  const studentSel = document.getElementById('g-student');
+  const subjectSel = document.getElementById('g-subject');
+  studentSel.innerHTML = '<option value="">اختر الطالب</option>' +
+    DB.students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+  subjectSel.innerHTML = '<option value="">اختر المادة</option>' +
+    DB.subjects.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+  studentSel.onchange = renderStudentGrades;
+  renderStudentGrades();
+}
+
+function saveGrade() {
+  const sid = +document.getElementById('g-student').value;
+  const subId = +document.getElementById('g-subject').value;
+  const sem = document.getElementById('g-semester').value;
+  const grade = +document.getElementById('g-grade').value;
+  if (!sid || !subId || isNaN(grade)) return toast('أكمل الحقول', 'error');
+  const sub = DB.subjects.find(s => s.id === subId);
+  if (grade > sub.max) return toast(`الدرجة أكبر من ${sub.max}`, 'error');
+  const existing = DB.grades.find(g => g.student_id === sid && g.subject_id === subId && g.semester === sem);
+  if (existing) existing.grade = grade;
+  else DB.grades.push({ id: nextId(DB.grades), student_id: sid, subject_id: subId, semester: sem, grade });
+  save(); document.getElementById('g-grade').value = '';
+  renderStudentGrades(); toast('تم الحفظ ✅');
+}
+
+function renderStudentGrades() {
+  const sid = +document.getElementById('g-student').value;
+  const list = document.getElementById('grades-list');
+  const avgBox = document.getElementById('average-box');
+  if (!sid) { list.innerHTML = '<div class="empty">اختر طالباً</div>'; avgBox.textContent = 'المعدل: —'; return; }
+  const grades = DB.grades.filter(g => g.student_id === sid);
+  if (!grades.length) { list.innerHTML = '<div class="empty">لا توجد درجات</div>'; avgBox.textContent = 'المعدل: 0%'; return; }
+  let sum = 0;
+  list.innerHTML = grades.map(g => {
+    const sub = DB.subjects.find(s => s.id === g.subject_id);
+    const pct = (g.grade / sub.max) * 100;
+    sum += pct;
+    const ok = g.grade >= sub.pass;
+    return `<div class="item" style="border-color:${ok?'#16a34a':'#dc2626'}">
+      <div class="item-info">
+        <strong>${sub.name}</strong>
+        <small>${g.semester} • ${g.grade}/${sub.max} • ${ok?'✅ ناجح':'❌ راسب'}</small>
+      </div>
+      <button class="icon-btn" onclick="deleteGrade(${g.id})">🗑️</button>
+    </div>`;
+  }).join('');
+  avgBox.textContent = 'المعدل: ' + (sum / grades.length).toFixed(2) + '%';
+}
+
+function deleteGrade(id) {
+  if (!confirm('حذف الدرجة؟')) return;
+  DB.grades = DB.grades.filter(g => g.id !== id);
+  save(); renderStudentGrades(); renderReports(); toast('تم الحذف');
+}
+
+function renderReports() {
+  const list = document.getElementById('reports-list');
+  if (!DB.students.length) { list.innerHTML = '<div class="empty">لا يوجد طلاب</div>'; return; }
+  list.innerHTML = DB.students.map(s => {
+    const gs = DB.grades.filter(g => g.student_id === s.id);
+    let avg = 0;
+    if (gs.length) {
+      const total = gs.reduce((acc, g) => {
+        const sub = DB.subjects.find(x => x.id === g.subject_id);
+        return acc + (g.grade / sub.max) * 100;
+      }, 0);
+      avg = (total / gs.length).toFixed(2);
+    }
+    return `<div class="item">
+      <div class="item-info">
+        <strong>${s.name}</strong>
+        <small>${gs.length} مادة • المعدل: ${avg}%</small>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function exportCSV() {
+  let csv = 'الطالب,المادة,الفصل,الدرجة,من,الحالة\n';
+  DB.students.forEach(s => {
+    DB.grades.filter(g => g.student_id === s.id).forEach(g => {
+      const sub = DB.subjects.find(x => x.id === g.subject_id);
+      csv += `"${s.name}","${sub.name}","${g.semester}",${g.grade},${sub.max},${g.grade >= sub.pass ? 'ناجح' : 'راسب'}\n`;
+    });
+  });
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'تقرير_الدرجات.csv';
+  a.click();
+  toast('تم التصدير ✅');
+}
+
+renderStudents();
+renderSubjects();
+refreshGradeSelects();
+renderReports();
+</script>
+</body>
+</html>
