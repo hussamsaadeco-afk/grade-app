@@ -6,7 +6,7 @@
 <title>نظام إدارة المدرسة</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-:root {--p:#1e40af;--d:#1e3a8a;--bg:#f1f5f9;--s:#10b981;--e:#ef4444;--w:#f59e0b;}
+:root{--p:#1e40af;--d:#1e3a8a;--bg:#f1f5f9;--s:#10b981;--e:#ef4444;--w:#f59e0b;}
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,sans-serif;}
 body{background:var(--bg);color:#334155;padding-bottom:70px;}
 #login,#st-portal{position:fixed;inset:0;background:var(--d);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;}
@@ -31,7 +31,7 @@ main{padding:15px;max-width:900px;margin:0 auto;}
 .nb span{font-size:10px;margin-top:4px;}.nb.active{color:var(--p);background:#eff6ff;border-radius:8px;}
 table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px;background:#fff;display:block;overflow-x:auto;}
 th,td{border:1px solid #e2e8f0;padding:8px;text-align:center;white-space:nowrap;}th{background:#f8fafc;color:var(--d);}
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--d);color:#fff;padding:12px 24px;border-radius:25px;font-size:14px;opacity:0;transition:all .3s;z-index:10000;}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--d);color:#fff;padding:12px 24px;border-radius:25px;font-size:14px;opacity:0;transition:all .3s;z-index:10000;text-align:center;}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}.toast.e{background:var(--e);}.toast.s{background:var(--s);}
 </style>
 </head>
@@ -43,13 +43,14 @@ th,td{border:1px solid #e2e8f0;padding:8px;text-align:center;white-space:nowrap;
     <input type="password" id="lp" placeholder="كلمة المرور (123456)">
     <button class="b1" onclick="adminLogin()">دخول</button>
     <button class="b1 o" onclick="showSt()">🎓 دخول الطالب</button>
+    <button style="background:#cbd5e1; color:#000; margin-top:10px; font-size:12px;" onclick="adminLogin(true)">(دخول بدون كلمة مرور للتجربة)</button>
   </div>
 </div>
 
 <div id="st-portal" style="display:none;">
   <div class="box">
     <h2>🎓 بوابة الطالب</h2>
-    <input type="text" id="sc" placeholder="أدخل كود الطالب (مثال: أ-1001)">
+    <input type="text" id="sc" placeholder="أدخل كود الطالب">
     <button class="b1" onclick="stLogin()">عرض درجاتي</button>
     <button class="b1 o" onclick="hideSt()">🔙 رجوع</button>
   </div>
@@ -88,9 +89,24 @@ th,td{border:1px solid #e2e8f0;padding:8px;text-align:center;white-space:nowrap;
     <section id="rep" class="tab"><div class="card"><h2>📄 الكشوف</h2><select id="rs" onchange="genRep('rep-box')"></select><div id="rep-box" style="margin-top:15px;"></div><button class="b1" onclick="window.print()" style="margin-top:15px;">🖨️ طباعة</button></div></section>
     
     <section id="set" class="tab">
-      <div class="card"><h2>📥 استيراد إكسل</h2><select id="is" style="margin-bottom:10px;"><option value="">-- الشعبة --</option></select><input type="file" id="ef" accept=".xlsx,.xls,.csv" style="border:1px dashed #cbd5e1;padding:10px;"><button class="b1" onclick="impEx()">استيراد</button></div>
-      <div class="card"><h2>🏫 الشعب</h2><div class="row"><input id="sn" placeholder="اسم الشعبة"><button class="b2" onclick="addS()" style="width:80px;margin:0;">إضافة</button></div><div id="sl" style="margin-top:10px;"></div></div>
-      <div class="card"><h2>📚 المواد</h2><input id="sub" placeholder="اسم المادة"><div class="row"><input id="sm" type="number" placeholder="العظمى" value="100"><input id="sp" type="number" placeholder="النجاح" value="50"></div><button class="b2" onclick="addSub()">إضافة</button><div id="subl" style="margin-top:10px;"></div></div>
+      <div class="card"><h2>📥 استيراد إكسل</h2>
+        <div class="row">
+          <select id="is" style="margin-bottom:10px;"><option value="">-- الشعبة --</option></select>
+          <button class="b4" onclick="ref()" style="width:60px; margin:0 0 10px 0;">تحديث</button>
+        </div>
+        <input type="file" id="ef" accept=".xlsx,.xls,.csv" style="border:1px dashed #cbd5e1;padding:10px;">
+        <button class="b1" onclick="impEx()">استيراد</button>
+      </div>
+      <div class="card"><h2>🏫 الشعب</h2>
+        <div class="row"><input id="sn" placeholder="اسم الشعبة"><button class="b2" onclick="addS()" style="width:80px;margin:0;">إضافة</button></div>
+        <div id="sl" style="margin-top:10px;"></div>
+      </div>
+      <div class="card"><h2>📚 المواد</h2>
+        <input id="sub" placeholder="اسم المادة">
+        <div class="row"><input id="sm" type="number" placeholder="العظمى" value="100"><input id="sp" type="number" placeholder="النجاح" value="50"></div>
+        <button class="b2" onclick="addSub()">إضافة</button>
+        <div id="subl" style="margin-top:10px;"></div>
+      </div>
       <div class="card"><h2>🔐 كلمة المرور</h2><input type="password" id="np" placeholder="الجديدة"><button class="b4" onclick="chPass()">تحديث</button></div>
       <div class="card"><h2>⚠️ الخطر</h2><button class="b3" onclick="clearAll()">🗑️ حذف الكل</button></div>
     </section>
@@ -104,7 +120,14 @@ function sv(){localStorage.setItem('schoolDB',JSON.stringify(DB));}
 function tst(m,t='s'){let e=document.getElementById('toast');e.textContent=m;e.className='toast show '+t;setTimeout(()=>e.className='toast '+t,2500);}
 function nid(a){return a.length?Math.max(...a.map(x=>x.id))+1:1;}
 
-function adminLogin(){if(document.getElementById('lp').value===DB.adminPass){document.getElementById('login').style.display='none';document.getElementById('admin').style.display='block';init();}else tst('خطأ','e');}
+function adminLogin(bypass=false){
+  let p=document.getElementById('lp').value;
+  if(bypass || p===DB.adminPass){
+    document.getElementById('login').style.display='none';
+    document.getElementById('admin').style.display='block';
+    init();
+  }else tst('كلمة المرور خاطئة','e');
+}
 function logout(){document.getElementById('admin').style.display='none';document.getElementById('login').style.display='flex';document.getElementById('lp').value='';}
 function showSt(){document.getElementById('login').style.display='none';document.getElementById('st-portal').style.display='flex';}
 function hideSt(){document.getElementById('st-portal').style.display='none';document.getElementById('login').style.display='flex';}
@@ -115,7 +138,7 @@ document.querySelectorAll('.nb').forEach(b=>{b.addEventListener('click',()=>{doc
 
 function impEx(){
   let f=document.getElementById('ef').files[0],sec=document.getElementById('is').value;
-  if(!sec)return tst('اختر الشعبة','e');if(!f)return tst('اختر الملف','e');
+  if(!sec)return tst('اختر الشعبة أولاً','e');if(!f)return tst('اختر الملف','e');
   let r=new FileReader();
   r.onload=e=>{
     try{
@@ -136,9 +159,9 @@ function impEx(){
   };r.readAsArrayBuffer(f);
 }
 
-function addS(){let n=document.getElementById('sn').value.trim();if(n&&!DB.sections.includes(n)){DB.sections.push(n);sv();init();document.getElementById('sn').value='';}}
+function addS(){let n=document.getElementById('sn').value.trim();if(n){if(!DB.sections.includes(n))DB.sections.push(n);sv();ref();document.getElementById('sn').value='';tst('تمت إضافة الشعبة');}}
 function delS(n){if(confirm('حذف الشعبة؟')){DB.sections=DB.sections.filter(x=>x!==n);DB.students=DB.students.filter(x=>x.section!==n);sv();init();}}
-function addSub(){let n=document.getElementById('sub').value.trim();if(n){DB.subjects.push({id:nid(DB.subjects),name:n,max:+document.getElementById('sm').value,pass:+document.getElementById('sp').value});sv();init();document.getElementById('sub').value='';}}
+function addSub(){let n=document.getElementById('sub').value.trim();if(n){DB.subjects.push({id:nid(DB.subjects),name:n,max:+document.getElementById('sm').value,pass:+document.getElementById('sp').value});sv();ref();document.getElementById('sub').value='';tst('تمت إضافة المادة');}}
 function delSub(id){if(confirm('حذف المادة؟')){DB.subjects=DB.subjects.filter(x=>x.id!==id);sv();init();}}
 function delSt(id){if(confirm('حذف الطالب؟')){DB.students=DB.students.filter(x=>x.id!==id);sv();renderSt();}}
 function clearAll(){if(confirm('تأكيد مسح الكل؟')){if(prompt('اكتب "حذف":')==='حذف'){DB={"students":[],"sections":[],"subjects":[],"grades":[],"attendance":{},"activity":{},"adminPass":"123456"};sv();init();tst('تم المسح');}}}
@@ -152,6 +175,11 @@ function renderSt(){
 }
 
 function init(){
+  ref();
+  renderSt();
+}
+
+function ref(){
   let so=DB.sections.map(x=>`<option value="${x}">${x}</option>`).join(''),suo=DB.subjects.map(x=>`<option value="${x.id}">${x.name}</option>`).join('');
   document.getElementById('is').innerHTML='<option value="">-- الشعبة --</option>'+so;
   document.getElementById('gs').innerHTML='<option value="">-- الشعبة --</option>'+so;
@@ -161,7 +189,6 @@ function init(){
   document.getElementById('rs').innerHTML='<option value="">-- طالب --</option>'+DB.students.map(x=>`<option value="${x.id}">${x.name} (${x.section})</option>`).join('');
   document.getElementById('sl').innerHTML=DB.sections.map(x=>`<div class="li"><div><b>${x}</b></div><button class="ib" onclick="delS('${x}')">🗑️</button></div>`).join('');
   document.getElementById('subl').innerHTML=DB.subjects.map(x=>`<div class="li"><div><b>${x.name}</b><small>عظمى:${x.max} | نجاح:${x.pass}</small></div><button class="ib" onclick="delSub(${x.id})">🗑️</button></div>`).join('');
-  renderSt();
 }
 
 function renderGt(){
