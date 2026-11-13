@@ -111,7 +111,7 @@ th,td{border:1px solid #e2e8f0;padding:8px;text-align:center;white-space:nowrap;
     <section id="grades" class="tab">
       <div class="card">
         <h2>📝 إدخال الدرجات (حفظ تلقائي)</h2>
-        <p style="font-size:12px;color:var(--s);margin-bottom:10px;">* بمجرد الخروج من خانة الدرجة، سيتم حفظها تلقائياً.</p>
+        <p style="font-size:12px;color:var(--s);margin-bottom:10px;">* بمجرد الخروج من خانة الدرجة، سيتم حفظها تلقائياً وتحديث الحسابات.</p>
         <div class="row">
           <select id="g-level" onchange="updateGradeSections()"><option value="">-- الصف --</option></select>
           <select id="gs" onchange="renderGt()"><option value="">-- الشعبة --</option></select>
@@ -169,7 +169,6 @@ th,td{border:1px solid #e2e8f0;padding:8px;text-align:center;white-space:nowrap;
           <button class="b2" onclick="addLevel()" style="width:80px;margin:0;">إضافة صف</button>
         </div>
         <div id="levels-list" style="margin-top:10px;"></div>
-        
         <div class="row" style="margin-top:15px;">
           <select id="set-level" onchange="updateSetSections()"><option value="">-- اختر الصف --</option></select>
           <input id="new-sec" placeholder="اسم الشعبة (أ، ب)">
@@ -208,7 +207,11 @@ th,td{border:1px solid #e2e8f0;padding:8px;text-align:center;white-space:nowrap;
 </div>
 <div id="toast" class="toast"></div>
 <script>
-let defaultSubs = [{id:1,name:'اسلامية',max:100,pass:50},{id:2,name:'عربي',max:100,pass:50},{id:3,name:'انكليزي',max:100,pass:50},{id:4,name:'رياضيات',max:100,pass:50},{id:5,name:'احياء',max:100,pass:50},{id:6,name:'فيزياء',max:100,pass:50},{id:7,name:'كيمياء',max:100,pass:50},{id:8,name:'اجتماعيات',max:100,pass:50},{id:9,name:'اخلاقيه',max:100,pass:50}];
+let defaultSubs = [
+  {id:1,name:'اسلامية',max:100,pass:50},{id:2,name:'عربي',max:100,pass:50},{id:3,name:'انكليزي',max:100,pass:50},
+  {id:4,name:'رياضيات',max:100,pass:50},{id:5,name:'احياء',max:100,pass:50},{id:6,name:'فيزياء',max:100,pass:50},
+  {id:7,name:'كيمياء',max:100,pass:50},{id:8,name:'اجتماعيات',max:100,pass:50},{id:9,name:'اخلاقيه',max:100,pass:50}
+];
 let DB = JSON.parse(localStorage.getItem('schoolDB_pro') || `{"students":[],"levels":[],"sections":[],"subjects":[],"grades":[],"attendance":{},"activity":{},"adminPass":"123456"}`);
 if(!DB.subjects || DB.subjects.length===0) { DB.subjects = defaultSubs; localStorage.setItem('schoolDB_pro',JSON.stringify(DB)); }
 if(!DB.levels) { DB.levels = []; DB.sections = []; }
@@ -457,21 +460,67 @@ function renderGt(){
   let lv=document.getElementById('g-level').value;
   let st=DB.students.filter(x=>x.section===s && x.level===lv);
   if(!st.length){ c.innerHTML='<p style="text-align:center;">لا يوجد طلاب</p>'; return; }
-  let h='<table><thead><tr><th>الطالب</th><th colspan="2">الفصل الأول - الشهر الأول</th><th colspan="2">الفصل الأول - الشهر الثاني</th><th>نصف السنة</th><th colspan="2">الفصل الثاني - الشهر الأول</th><th colspan="2">الفصل الثاني - الشهر الثاني</th><th>نهائي</th></tr><tr><th></th><th>شفوي (100)</th><th>تحريري (100)</th><th>شفوي (100)</th><th>تحريري (100)</th><th></th><th>شفوي (100)</th><th>تحريري (100)</th><th>شفوي (100)</th><th>تحريري (100)</th><th></th></tr></thead><tbody>';
+  
+  let h='<table><thead><tr>'+
+  '<th>الطالب</th>'+
+  '<th colspan="2">الفصل الأول - الشهر الأول</th><th>معدل ش1</th>'+
+  '<th colspan="2">الفصل الأول - الشهر الثاني</th><th>معدل ش2</th>'+
+  '<th>معدل الفصل الأول</th><th>نصف السنة</th>'+
+  '<th colspan="2">الفصل الثاني - الشهر الأول</th><th>معدل ش3</th>'+
+  '<th colspan="2">الفصل الثاني - الشهر الثاني</th><th>معدل ش4</th>'+
+  '<th>معدل الفصل الثاني</th><th>السعي السنوي</th><th>نهاية السنة</th><th>الدرجة النهائية</th>'+
+  '</tr><tr><th></th><th>شفوي</th><th>تحريري</th><th></th><th>شفوي</th><th>تحريري</th><th></th><th></th><th></th><th>شفوي</th><th>تحريري</th><th></th><th>شفوي</th><th>تحريري</th><th></th><th></th><th></th><th></th></tr></thead><tbody>';
+  
   st.forEach(x=>{
     let g=DB.grades.find(y=>y.student_id===x.id&&y.subject_id===sid)||{};
     let v=k=>g[k]!==undefined && g[k]!==null ? g[k] : '';
-    h+=`<tr><td style="text-align:right;font-weight:bold;">${x.name}</td>
-    <td><input type="number" id="a1-${x.id}" value="${v('m1_o')}" onchange="autoSave(${sid},'m1_o',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td>
-    <td><input type="number" id="a2-${x.id}" value="${v('m1_w')}" onchange="autoSave(${sid},'m1_w',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td>
-    <td><input type="number" id="a3-${x.id}" value="${v('m2_o')}" onchange="autoSave(${sid},'m2_o',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td>
-    <td><input type="number" id="a4-${x.id}" value="${v('m2_w')}" onchange="autoSave(${sid},'m2_w',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td>
-    <td><input type="number" id="a5-${x.id}" value="${v('mid')}" onchange="autoSave(${sid},'mid',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td>
-    <td><input type="number" id="a6-${x.id}" value="${v('m3_o')}" onchange="autoSave(${sid},'m3_o',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td>
-    <td><input type="number" id="a7-${x.id}" value="${v('m3_w')}" onchange="autoSave(${sid},'m3_w',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td>
-    <td><input type="number" id="a8-${x.id}" value="${v('m4_o')}" onchange="autoSave(${sid},'m4_o',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td>
-    <td><input type="number" id="a9-${x.id}" value="${v('m4_w')}" onchange="autoSave(${sid},'m4_w',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td>
-    <td><input type="number" id="a10-${x.id}" value="${v('final')}" onchange="autoSave(${sid},'final',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td>
+    
+    let m1_o = +g.m1_o||0, m1_w = +g.m1_w||0;
+    let m2_o = +g.m2_o||0, m2_w = +g.m2_w||0;
+    let m3_o = +g.m3_o||0, m3_w = +g.m3_w||0;
+    let m4_o = +g.m4_o||0, m4_w = +g.m4_w||0;
+    let mid = +g.mid||0;
+    let final = +g.final||0;
+    
+    let m1 = m1_o + (m1_w/2);
+    let m2 = m2_o + (m2_w/2);
+    let f1 = (m1+m2)/2;
+    
+    let m3 = m3_o + (m3_w/2);
+    let m4 = m4_o + (m4_w/2);
+    let f2 = (m3+m4)/2;
+    
+    let annual = (f1 + f2 + mid) / 3;
+    let finalGrade = (annual + final) / 2;
+    
+    h+=`<tr>
+    <td style="text-align:right;font-weight:bold;">${x.name}</td>
+    <td><input type="number" id="a1-${x.id}" value="${v('m1_o')}" onchange="autoSave(${sid},'m1_o',this.value,${x.id});renderGt()" style="width:45px;padding:4px;margin:0;"></td>
+    <td><input type="number" id="a2-${x.id}" value="${v('m1_w')}" onchange="autoSave(${sid},'m1_w',this.value,${x.id});renderGt()" style="width:45px;padding:4px;margin:0;"></td>
+    <td style="background:#f1f5f9; font-weight:bold;">${m1.toFixed(1)}</td>
+    
+    <td><input type="number" id="a3-${x.id}" value="${v('m2_o')}" onchange="autoSave(${sid},'m2_o',this.value,${x.id});renderGt()" style="width:45px;padding:4px;margin:0;"></td>
+    <td><input type="number" id="a4-${x.id}" value="${v('m2_w')}" onchange="autoSave(${sid},'m2_w',this.value,${x.id});renderGt()" style="width:45px;padding:4px;margin:0;"></td>
+    <td style="background:#f1f5f9; font-weight:bold;">${m2.toFixed(1)}</td>
+    
+    <td style="background:#e0f2fe; font-weight:bold; color:blue;">${f1.toFixed(1)}</td>
+    
+    <td><input type="number" id="a5-${x.id}" value="${v('mid')}" onchange="autoSave(${sid},'mid',this.value,${x.id});renderGt()" style="width:45px;padding:4px;margin:0;"></td>
+    
+    <td><input type="number" id="a6-${x.id}" value="${v('m3_o')}" onchange="autoSave(${sid},'m3_o',this.value,${x.id});renderGt()" style="width:45px;padding:4px;margin:0;"></td>
+    <td><input type="number" id="a7-${x.id}" value="${v('m3_w')}" onchange="autoSave(${sid},'m3_w',this.value,${x.id});renderGt()" style="width:45px;padding:4px;margin:0;"></td>
+    <td style="background:#f1f5f9; font-weight:bold;">${m3.toFixed(1)}</td>
+    
+    <td><input type="number" id="a8-${x.id}" value="${v('m4_o')}" onchange="autoSave(${sid},'m4_o',this.value,${x.id});renderGt()" style="width:45px;padding:4px;margin:0;"></td>
+    <td><input type="number" id="a9-${x.id}" value="${v('m4_w')}" onchange="autoSave(${sid},'m4_w',this.value,${x.id});renderGt()" style="width:45px;padding:4px;margin:0;"></td>
+    <td style="background:#f1f5f9; font-weight:bold;">${m4.toFixed(1)}</td>
+    
+    <td style="background:#e0f2fe; font-weight:bold; color:blue;">${f2.toFixed(1)}</td>
+    <td style="background:#fef08a; font-weight:bold; color:#854d0e;">${annual.toFixed(1)}</td>
+    
+    <td><input type="number" id="a10-${x.id}" value="${v('final')}" onchange="autoSave(${sid},'final',this.value,${x.id});renderGt()" style="width:45px;padding:4px;margin:0;"></td>
+    
+    <td style="background:#dcfce7; font-weight:bold; color:green; font-size:14px;">${finalGrade.toFixed(1)}</td>
     </tr>`;
   });
   c.innerHTML=h+'</tbody></table>';
