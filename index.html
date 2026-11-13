@@ -6,44 +6,40 @@
 <title>النظام المدرسي الاحترافي</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-:root{--p:#1e40af;--d:#1e3a8a;--bg:#f1f5f9;--s:#10b981;--e:#ef4444;--w:#f59e0b;--g:#64748b;}
+:root{--p:#1e40af;--d:#1e3a8a;--bg:#f1f5f9;--s:#10b981;--e:#ef4444;--w:#f59e0b;--g:#64748b;--border:#e2e8f0;}
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,sans-serif;}
 body{background:var(--bg);color:#334155;padding-bottom:70px;}
 #login,#st-portal{position:fixed;inset:0;background:var(--d);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;}
-.box{background:#fff;padding:25px;border-radius:16px;width:100%;max-width:350px;text-align:center;}
+.box{background:#fff;padding:25px;border-radius:16px;width:100%;max-width:350px;text-align:center;box-shadow:0 10px 25px rgba(0,0,0,0.2);}
 .box h2{margin-bottom:20px;color:var(--p);}
-input,select,button{width:100%;padding:12px;margin-bottom:10px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;font-family:inherit;}
+input,select,button{width:100%;padding:12px;margin-bottom:10px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:#fff;}
 button{cursor:pointer;font-weight:bold;border:none;transition:0.2s;}
 button:active{transform:scale(0.98);}
 .b1{background:var(--p);color:#fff;}.b2{background:var(--s);color:#fff;}.b3{background:var(--e);color:#fff;}.b4{background:var(--w);color:#fff;}
 .b1.o{background:transparent;color:var(--p);border:2px solid var(--p);}
-header{background:var(--p);color:#fff;padding:15px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;}
-header h1{font-size:16px;}
+header{background:var(--p);color:#fff;padding:15px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 5px rgba(0,0,0,0.1);}
+header h1{font-size:16px; font-weight:bold;}
 main{padding:15px;max-width:1000px;margin:0 auto;}
 .tab{display:none;}.tab.active{display:block;animation:fadeIn 0.3s;}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
-.card{background:#fff;border-radius:12px;padding:20px;margin-bottom:15px;box-shadow:0 2px 5px rgba(0,0,0,.05);}
-.card h2{font-size:15px;color:var(--d);margin-bottom:15px;border-bottom:2px solid #f1f5f9;padding-bottom:10px;}
+.card{background:#fff;border-radius:12px;padding:20px;margin-bottom:15px;box-shadow:0 2px 5px rgba(0,0,0,.05); border:1px solid var(--border);}
+.card h2{font-size:16px;color:var(--d);margin-bottom:15px;border-bottom:2px solid #f1f5f9;padding-bottom:10px;}
 .row{display:flex;gap:10px;}.row>*{flex:1;}
-.li{background:#fff;border:1px solid #e2e8f0;padding:12px;margin-bottom:8px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;}
-.li b{display:block;font-size:15px;color:var(--d);}.li small{color:var(--g);font-size:12px;}
+.li{background:#fff;border:1px solid var(--border);padding:12px;margin-bottom:8px;border-radius:8px;display:flex;justify-content:space-between;align-items:center; transition:0.2s;}
+.li:hover{border-color:var(--p);}
+.li b{display:block;font-size:15px;color:var(--d);}.li small{color:var(--g);font-size:12px;margin-top:3px;display:block;}
 .ib{width:auto;padding:6px 10px;margin:0;background:#fee2e2;color:var(--e);border-radius:6px;border:none;}
-.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;justify-content:space-around;padding:8px 0;border-top:1px solid #e2e8f0;z-index:100;overflow-x:auto;}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;justify-content:space-around;padding:8px 0;border-top:1px solid var(--border);z-index:100;overflow-x:auto;}
 .nb{background:none;display:flex;flex-direction:column;align-items:center;color:#94a3b8;font-size:18px;width:auto;padding:5px 8px;margin:0;white-space:nowrap;transition:0.2s;}
-.nb span{font-size:10px;margin-top:4px;}.nb.active{color:var(--p);background:#eff6ff;border-radius:8px;}
-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px;background:#fff;display:block;overflow-x:auto;}
-th,td{border:1px solid #e2e8f0;padding:8px;text-align:center;white-space:nowrap;}th{background:#f8fafc;color:var(--d);}
+.nb span{font-size:10px;margin-top:4px;font-weight:bold;}.nb.active{color:var(--p);background:#eff6ff;border-radius:8px;}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px;background:#fff;}
+th,td{border:1px solid var(--border);padding:10px;text-align:center;}th{background:#f8fafc;color:var(--d); font-weight:bold;}
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--d);color:#fff;padding:12px 24px;border-radius:25px;font-size:14px;opacity:0;transition:all .3s;z-index:10000;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.2);}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}.toast.e{background:var(--e);}.toast.s{background:var(--s);}
-.log-box{max-height:250px;overflow-y:auto;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px;margin-top:10px;}
-.dash-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:15px;text-align:center;}
+.log-box{max-height:300px;overflow-y:auto;margin-top:15px;}
+.dash-card{background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:15px;text-align:center;}
 .dash-card h3{font-size:24px;color:var(--p);margin-bottom:5px;}
-
-/* تحسينات لعرض الجدول على الموبايل */
-#gt table { border-collapse: separate; border-spacing: 0; }
-#gt td:first-child, #gt th:first-child { position: sticky; right: 0; background: #f8fafc; z-index: 10; box-shadow: -2px 0 5px rgba(0,0,0,0.1); }
-#gt th:first-child { background: #e2e8f0; }
-#gt td.calc-cell { background-color: #f1f5f9; font-weight: bold; color: #1e40af; }
+.table-responsive { overflow-x: auto; display: block; width: 100%; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -52,7 +48,7 @@ th,td{border:1px solid #e2e8f0;padding:8px;text-align:center;white-space:nowrap;
   <div class="box">
     <h2>🔐 دخول الإدارة</h2>
     <input type="text" id="lp" placeholder="أدخل كلمة المرور">
-    <div id="login-err" style="color:red;font-size:12px;margin-bottom:10px;display:none;">كلمة المرور غير صحيحة!</div>
+    <div id="login-err" style="color:var(--e);font-size:12px;margin-bottom:10px;display:none;">كلمة المرور غير صحيحة!</div>
     <button class="b1" onclick="adminLogin()">دخول</button>
     <button class="b1 o" onclick="showSt()">🎓 دخول الطالب</button>
   </div>
@@ -96,8 +92,6 @@ th,td{border:1px solid #e2e8f0;padding:8px;text-align:center;white-space:nowrap;
         </div>
         <button class="b1" onclick="calcGlobalStats()">📈 حساب نسبة النجاح العامة</button>
         <div id="global-stats-box" style="margin-top:15px;"></div>
-        <h3 style="margin-top:20px; font-size:15px; color:var(--d);">🏆 الأوائل (أعلى معدل)</h3>
-        <div id="top-students-list" style="margin-top:10px;"></div>
       </div>
     </section>
 
@@ -116,14 +110,14 @@ th,td{border:1px solid #e2e8f0;padding:8px;text-align:center;white-space:nowrap;
     
     <section id="grades" class="tab">
       <div class="card">
-        <h2>📝 إدخال الدرجات (حفظ تلقائي)</h2>
+        <h2>📝 إدخال الدرجات</h2>
         <p style="font-size:12px;color:var(--s);margin-bottom:10px;">* بمجرد الخروج من خانة الدرجة، سيتم حفظها وتحديث الحسابات.</p>
         <div class="row">
           <select id="g-level" onchange="updateGradeSections()"><option value="">-- الصف --</option></select>
           <select id="gs" onchange="renderGt()"><option value="">-- الشعبة --</option></select>
         </div>
         <select id="gsub" onchange="renderGt()"><option value="">-- المادة --</option></select>
-        <div id="gt" style="overflow-x:auto;margin-top:15px;"></div>
+        <div id="gt" class="table-responsive" style="margin-top:15px;"></div>
       </div>
     </section>
     
@@ -163,7 +157,7 @@ th,td{border:1px solid #e2e8f0;padding:8px;text-align:center;white-space:nowrap;
       <div class="card">
         <h2>📝 سجل غياب ونشاط طالب</h2>
         <select id="log-st" onchange="showLog()"></select>
-        <div id="log-box" class="log-box" style="display:none;"></div>
+        <div id="log-box" class="log-box"></div>
       </div>
     </section>
     
@@ -188,7 +182,7 @@ th,td{border:1px solid #e2e8f0;padding:8px;text-align:center;white-space:nowrap;
           <select id="is-level" onchange="updateImportSections()"><option value="">-- الصف --</option></select>
           <select id="is-sec" style="margin-bottom:10px;"><option value="">-- الشعبة --</option></select>
         </div>
-        <input type="file" id="ef" accept=".xlsx,.xls,.csv" style="border:1px dashed #cbd5e1;padding:10px;">
+        <input type="file" id="ef" accept=".xlsx,.xls,.csv" style="border:1px dashed var(--border);padding:10px;">
         <button class="b1" onclick="impEx()">استيراد</button>
       </div>
       <div class="card">
@@ -270,30 +264,6 @@ function updateDash(){
     if(k.includes(today)) { absCount += Object.keys(DB.attendance[k]).length; }
   }
   document.getElementById('dash-abs-count').innerText = absCount;
-  
-  let top = [];
-  DB.students.forEach(st => {
-    let gs = DB.grades.filter(g => g.student_id === st.id);
-    let total = 0, subCount = 0;
-    gs.forEach(g => {
-      let s = DB.subjects.find(x => x.id === g.subject_id);
-      if(s) {
-        let m1 = ((g.m1_o||0) + (g.m1_w||0))/2;
-        let m2 = ((g.m2_o||0) + (g.m2_w||0))/2;
-        let f1 = (m1+m2)/2;
-        let m3 = ((g.m3_o||0) + (g.m3_w||0))/2;
-        let m4 = ((g.m4_o||0) + (g.m4_w||0))/2;
-        let f2 = (m3+m4)/2;
-        let an = (f1 + f2 + (g.mid||0)) / 3;
-        let fg = (an + (g.final||0)) / 2;
-        total += fg; subCount++;
-      }
-    });
-    if(subCount>0) top.push({name: st.name, avg: (total/subCount).toFixed(1)});
-  });
-  top.sort((a,b) => b.avg - a.avg);
-  top = top.slice(0, 3);
-  document.getElementById('top-students-list').innerHTML = top.map((t,i)=>`<div class="li" style="border-right-color:var(--w);"><div><b>${i+1}. ${t.name}</b></div><strong style="color:var(--s)">${t.avg}%</strong></div>`).join('');
 }
 
 function addLevel(){
@@ -484,7 +454,7 @@ function renderGt(){
     let mid = +g.mid||0;
     let final = +g.final||0;
     
-    // المعادلات الجديدة (الشفوي + التحريري) / 2
+    // المعادلات (الشفوي + التحريري) / 2
     let m1 = (m1_o + m1_w) / 2;
     let m2 = (m2_o + m2_w) / 2;
     let f1 = (m1+m2)/2;
@@ -497,31 +467,31 @@ function renderGt(){
     let finalGrade = (annual + final) / 2;
     
     h+=`<tr>
-    <td style="text-align:right;font-weight:bold;">${x.name}</td>
-    <td><input type="number" id="a1-${x.id}" value="${v('m1_o')}" onchange="autoSave(${sid},'m1_o',this.value,${x.id});renderGt()" style="width:45px;padding:4px;margin:0;"></td>
-    <td><input type="number" id="a2-${x.id}" value="${v('m1_w')}" onchange="autoSave(${sid},'m1_w',this.value,${x.id});renderGt()" style="width:45px;padding:4px;margin:0;"></td>
+    <td style="text-align:right;font-weight:bold; position:sticky; right:0; background:#fff; border-left:2px solid #cbd5e1;">${x.name}</td>
+    <td><input type="number" id="a1-${x.id}" value="${v('m1_o')}" onchange="autoSave(${sid},'m1_o',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
+    <td><input type="number" id="a2-${x.id}" value="${v('m1_w')}" onchange="autoSave(${sid},'m1_w',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
     <td style="background:#f1f5f9; font-weight:bold;">${m1.toFixed(1)}</td>
     
-    <td><input type="number" id="a3-${x.id}" value="${v('m2_o')}" onchange="autoSave(${sid},'m2_o',this.value,${x.id});renderGt()" style="width:45px;padding:4px;margin:0;"></td>
-    <td><input type="number" id="a4-${x.id}" value="${v('m2_w')}" onchange="autoSave(${sid},'m2_w',this.value,${x.id});renderGt()" style="width:45px;padding:4px;margin:0;"></td>
+    <td><input type="number" id="a3-${x.id}" value="${v('m2_o')}" onchange="autoSave(${sid},'m2_o',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
+    <td><input type="number" id="a4-${x.id}" value="${v('m2_w')}" onchange="autoSave(${sid},'m2_w',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
     <td style="background:#f1f5f9; font-weight:bold;">${m2.toFixed(1)}</td>
     
     <td style="background:#e0f2fe; font-weight:bold; color:blue;">${f1.toFixed(1)}</td>
     
-    <td><input type="number" id="a5-${x.id}" value="${v('mid')}" onchange="autoSave(${sid},'mid',this.value,${x.id});renderGt()" style="width:45px;padding:4px;margin:0;"></td>
+    <td><input type="number" id="a5-${x.id}" value="${v('mid')}" onchange="autoSave(${sid},'mid',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
     
-    <td><input type="number" id="a6-${x.id}" value="${v('m3_o')}" onchange="autoSave(${sid},'m3_o',this.value,${x.id});renderGt()" style="width:45px;padding:4px;margin:0;"></td>
-    <td><input type="number" id="a7-${x.id}" value="${v('m3_w')}" onchange="autoSave(${sid},'m3_w',this.value,${x.id});renderGt()" style="width:45px;padding:4px;margin:0;"></td>
+    <td><input type="number" id="a6-${x.id}" value="${v('m3_o')}" onchange="autoSave(${sid},'m3_o',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
+    <td><input type="number" id="a7-${x.id}" value="${v('m3_w')}" onchange="autoSave(${sid},'m3_w',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
     <td style="background:#f1f5f9; font-weight:bold;">${m3.toFixed(1)}</td>
     
-    <td><input type="number" id="a8-${x.id}" value="${v('m4_o')}" onchange="autoSave(${sid},'m4_o',this.value,${x.id});renderGt()" style="width:45px;padding:4px;margin:0;"></td>
-    <td><input type="number" id="a9-${x.id}" value="${v('m4_w')}" onchange="autoSave(${sid},'m4_w',this.value,${x.id});renderGt()" style="width:45px;padding:4px;margin:0;"></td>
+    <td><input type="number" id="a8-${x.id}" value="${v('m4_o')}" onchange="autoSave(${sid},'m4_o',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
+    <td><input type="number" id="a9-${x.id}" value="${v('m4_w')}" onchange="autoSave(${sid},'m4_w',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
     <td style="background:#f1f5f9; font-weight:bold;">${m4.toFixed(1)}</td>
     
     <td style="background:#e0f2fe; font-weight:bold; color:blue;">${f2.toFixed(1)}</td>
     <td style="background:#fef08a; font-weight:bold; color:#854d0e;">${annual.toFixed(1)}</td>
     
-    <td><input type="number" id="a10-${x.id}" value="${v('final')}" onchange="autoSave(${sid},'final',this.value,${x.id});renderGt()" style="width:45px;padding:4px;margin:0;"></td>
+    <td><input type="number" id="a10-${x.id}" value="${v('final')}" onchange="autoSave(${sid},'final',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
     
     <td style="background:#dcfce7; font-weight:bold; color:green; font-size:14px;">${finalGrade.toFixed(1)}</td>
     </tr>`;
@@ -543,8 +513,8 @@ function renderAtt(){
     return `<div class="li">
       <div><b>${x.name}</b><br><small style="color:var(--e)">${isAbsent?'غائب ('+reason+')':'حاضر'}</small></div>
       <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;">
-        <label><input type="checkbox" ${isAbsent?'checked':''} onchange="toggleAtt('${k}',${x.id},this.checked,'true')"> غياب</label>
-        <select onchange="toggleAtt('${k}',${x.id},this.value!=='',this.value)" style="padding:5px;font-size:12px;width:100px;display:${isAbsent?'block':'none'};">
+        <label><input type="checkbox" style="width:20px;height:20px;" ${isAbsent?'checked':''} onchange="toggleAtt('${k}',${x.id},this.checked,'true')"> غياب</label>
+        <select onchange="toggleAtt('${k}',${x.id},this.value!=='',this.value)" style="padding:5px;font-size:12px;width:120px;display:${isAbsent?'block':'none'};">
           <option value="true" ${stat===true?'selected':''}>بدون عذر</option>
           <option value="مريض" ${stat==='مريض'?'selected':''}>مريض</option>
           <option value="عمل" ${stat==='عمل'?'selected':''}>عمل</option>
@@ -592,26 +562,43 @@ function calcAbsences(sid){
 function showLog(){
   let sid=+document.getElementById('log-st').value; if(!sid) return;
   let logs=[];
+  let abs=calcAbsences(sid);
+  let stName=DB.students.find(x=>x.id===sid).name;
+  
   for(let k in DB.attendance){
     let stat=DB.attendance[k][sid];
     if(stat){
-      let d=k.split('_')[1];
-      let reason=stat===true?'بدون عذر':stat;
-      let deduct=stat===true?5:0;
-      logs.push({date:d, type:'غياب', reason:reason, val:deduct});
+      let parts=k.split('_'); let dateStr=parts[1];
+      let dateObj=new Date(dateStr);
+      let dayName = isNaN(dateObj) ? '' : dateObj.toLocaleDateString('ar-EG', {weekday: 'long'});
+      
+      let reason = stat===true?'بدون عذر':stat;
+      let deduct = stat===true?5:0;
+      logs.push({date:dateStr, day:dayName, type:'غياب', reason:reason, val:deduct});
     }
   }
-  let act = DB.activity[sid]||0;
-  if(act > 0) logs.push({date:'مستمر', type:'نشاط', reason:'-', val:-act});
   
-  let h = '<table><thead><tr><th>التاريخ</th><th>الحدث</th><th>السبب</th><th>التأثير</th></tr></thead><tbody>';
-  logs.forEach(l=>{
-    h += `<tr><td>${l.date}</td><td style="color:${l.type==='غياب'?'red':'green'}">${l.type}</td><td>${l.reason}</td><td>${l.val!==0?(l.val>0?'خصم '+l.val+' شفوي':'إضافة '+Math.abs(l.val)+' شفوي'):'لا يوجد'}</td></tr>`;
-  });
+  logs.sort((a,b)=> new Date(b.date) - new Date(a.date));
+  
+  let h = `<div style="margin-bottom:10px; padding:10px; background:#fee2e2; color:#991b1b; border-radius:8px; font-weight:bold; text-align:center;">مجموع غياب الطالب: ${abs.total + abs.justified} يوم (بدون عذر: ${abs.total})</div>`;
+  h += '<table><thead><tr><th>التاريخ</th><th>اليوم</th><th>الحدث</th><th>سبب الغياب</th><th>التأثير</th></tr></thead><tbody>';
+  
+  if(logs.length===0) {
+     h += '<tr><td colspan="5" style="text-align:center;">لا يوجد سجل</td></tr>';
+  } else {
+    logs.forEach(l=>{
+      h += `<tr>
+        <td>${l.date}</td>
+        <td>${l.day}</td>
+        <td style="color:${l.type==='غياب'?'red':'green'}; font-weight:bold;">${l.type}</td>
+        <td>${l.reason}</td>
+        <td>${l.val!==0?(l.val>0?'خصم '+l.val+' شفوي':'لا يوجد'):'لا يوجد'}</td>
+      </tr>`;
+    });
+  }
+  
   h += '</tbody></table>';
-  if(logs.length===0) h = '<p style="text-align:center;">لا يوجد سجل</p>';
   document.getElementById('log-box').innerHTML = h;
-  document.getElementById('log-box').style.display = 'block';
 }
 
 function calcGlobalStats(){
