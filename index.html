@@ -206,6 +206,7 @@ th,td{border:1px solid var(--border);padding:10px;text-align:center;}th{backgrou
   </main>
 </div>
 <div id="toast" class="toast"></div>
+
 <script>
 let defaultSubs = [{id:1,name:'اسلامية',max:100,pass:50},{id:2,name:'عربي',max:100,pass:50},{id:3,name:'انكليزي',max:100,pass:50},{id:4,name:'رياضيات',max:100,pass:50},{id:5,name:'احياء',max:100,pass:50},{id:6,name:'فيزياء',max:100,pass:50},{id:7,name:'كيمياء',max:100,pass:50},{id:8,name:'اجتماعيات',max:100,pass:50},{id:9,name:'اخلاقيه',max:100,pass:50}];
 let DB = JSON.parse(localStorage.getItem('schoolDB_pro') || `{"students":[],"levels":[],"sections":[],"subjects":[],"grades":[],"attendance":{},"activity":{},"adminPass":"123456"}`);
@@ -454,7 +455,6 @@ function renderGt(){
     let mid = +g.mid||0;
     let final = +g.final||0;
     
-    // المعادلات (الشفوي + التحريري) / 2
     let m1 = (m1_o + m1_w) / 2;
     let m2 = (m2_o + m2_w) / 2;
     let f1 = (m1+m2)/2;
@@ -509,25 +509,32 @@ function renderAtt(){
   document.getElementById('al').innerHTML=st.map(x=>{
     let stat=DB.attendance[k][x.id];
     let isAbsent=stat===true||stat==='مريض'||stat==='عمل'||stat==='أخرى';
-    let reason=stat===true?'بدون عذر':(stat==='مريض'?'مريض':(stat==='عمل'?'عمل':(stat==='أخرى'?'أخرى':'بدون عذر')));
-    return `<div class="li">
-      <div><b>${x.name}</b><br><small style="color:var(--e)">${isAbsent?'غائب ('+reason+')':'حاضر'}</small></div>
-      <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;">
-        <label><input type="checkbox" style="width:20px;height:20px;" ${isAbsent?'checked':''} onchange="toggleAtt('${k}',${x.id},this.checked,'true')"> غياب</label>
-        <select onchange="toggleAtt('${k}',${x.id},this.value!=='',this.value)" style="padding:5px;font-size:12px;width:120px;display:${isAbsent?'block':'none'};">
-          <option value="true" ${stat===true?'selected':''}>بدون عذر</option>
-          <option value="مريض" ${stat==='مريض'?'selected':''}>مريض</option>
-          <option value="عمل" ${stat==='عمل'?'selected':''}>عمل</option>
-          <option value="أخرى" ${stat==='أخرى'?'selected':''}>أخرى</option>
+    let reasonText = stat===true ? 'غياب بدون عذر (خصم 5)' : (stat==='مريض'?'غياب بعذر (مريض)':(stat==='عمل'?'غياب بعذر (عمل)':(stat==='أخرى'?'غياب بعذر (أخرى)':'حاضر')));
+    
+    return `<div class="li" style="flex-direction:column; align-items:flex-start;">
+      <div style="margin-bottom:8px; display:flex; justify-content:space-between; width:100%;">
+        <b>${x.name}</b>
+        <span style="color:${isAbsent?'var(--e)':'var(--s)'}; font-weight:bold; font-size:13px;">${reasonText}</span>
+      </div>
+      <div style="display:flex; width:100%; gap:10px; align-items:center;">
+        <label style="display:flex; align-items:center; gap:5px; font-size:13px;"><input type="checkbox" style="width:18px;height:18px;margin:0;" ${isAbsent?'checked':''} onchange="toggleAtt('${k}',${x.id},this.checked)"> تسجيل غياب</label>
+        <select onchange="changeAttReason('${k}',${x.id},this.value)" style="padding:6px; font-size:12px; width:auto; flex:1; margin:0; display:${isAbsent?'block':'none'};">
+          <option value="true" ${stat===true?'selected':''}>بدون عذر (خصم 5)</option>
+          <option value="مريض" ${stat==='مريض'?'selected':''}>بعذر: مريض</option>
+          <option value="عمل" ${stat==='عمل'?'selected':''}>بعذر: عمل</option>
+          <option value="أخرى" ${stat==='أخرى'?'selected':''}>بعذر: أخرى</option>
         </select>
       </div>
     </div>`;
   }).join('');
 }
 
-function toggleAtt(k,sid,isChecked,reason){
-  if(!isChecked){ delete DB.attendance[k][sid]; } else { DB.attendance[k][sid]=reason; }
+function toggleAtt(k,sid,isChecked){
+  if(!isChecked){ delete DB.attendance[k][sid]; } else { DB.attendance[k][sid]='true'; }
   sv(); tst('تم التحديث','s'); renderAtt(); updateDash();
+}
+function changeAttReason(k,sid,val){
+  DB.attendance[k][sid]=val; sv(); tst('تم تحديث السبب','s'); renderAtt();
 }
 
 function renderAct(){
@@ -552,7 +559,7 @@ function calcAbsences(sid){
   for(let k in DB.attendance){
     let stat=DB.attendance[k][sid];
     if(stat){
-      if(stat===true) total++;
+      if(stat===true || stat==='true') total++;
       else justified++;
     }
   }
@@ -563,7 +570,6 @@ function showLog(){
   let sid=+document.getElementById('log-st').value; if(!sid) return;
   let logs=[];
   let abs=calcAbsences(sid);
-  let stName=DB.students.find(x=>x.id===sid).name;
   
   for(let k in DB.attendance){
     let stat=DB.attendance[k][sid];
@@ -572,8 +578,8 @@ function showLog(){
       let dateObj=new Date(dateStr);
       let dayName = isNaN(dateObj) ? '' : dateObj.toLocaleDateString('ar-EG', {weekday: 'long'});
       
-      let reason = stat===true?'بدون عذر':stat;
-      let deduct = stat===true?5:0;
+      let reason = (stat===true||stat==='true') ? 'بدون عذر' : stat;
+      let deduct = (stat===true||stat==='true') ? 5 : 0;
       logs.push({date:dateStr, day:dayName, type:'غياب', reason:reason, val:deduct});
     }
   }
