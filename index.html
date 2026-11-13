@@ -3,87 +3,106 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>نظام إدارة المدرسة الثانوية</title>
+<title>نظام إدارة المدرسة الاحترافي</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-:root{--primary:#1e40af;--dark:#1e3a8a;--bg:#f1f5f9;--success:#10b981;--danger:#ef4444;--warning:#f59e0b;--text:#334155;--border:#cbd5e1;--card:#ffffff;}
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,sans-serif;}
-body{background:var(--bg);color:var(--text);padding-bottom:70px;}
-#login,#st-portal{position:fixed;inset:0;background:var(--dark);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;}
-.box{background:#fff;padding:30px 25px;border-radius:16px;width:100%;max-width:380px;text-align:center;box-shadow:0 10px 25px rgba(0,0,0,0.2);}
-.box h2{margin-bottom:25px;color:var(--primary);font-size:22px;}
-input,select,button{width:100%;padding:12px;margin-bottom:12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:#fff;outline:none;transition:0.2s;}
-input:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(30,64,175,0.1);}
-button{cursor:pointer;font-weight:bold;border:none;}
-.btn-p{background:var(--primary);color:#fff;}.btn-s{background:var(--success);color:#fff;}.btn-d{background:var(--danger);color:#fff;}.btn-w{background:var(--warning);color:#fff;}
-.btn-o{background:transparent;color:var(--primary);border:2px solid var(--primary);}
-header{background:var(--primary);color:#fff;padding:15px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,0.1);}
-header h1{font-size:17px;font-weight:700;}
-main{padding:15px;max-width:1100px;margin:0 auto;}
-.tab{display:none;}.tab.active{display:block;animation:fadeIn 0.3s;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
-.card{background:var(--card);border-radius:12px;padding:20px;margin-bottom:15px;box-shadow:0 2px 8px rgba(0,0,0,0.04);border:1px solid var(--border);}
-.card h2{font-size:16px;color:var(--dark);margin-bottom:15px;border-bottom:2px solid #f1f5f9;padding-bottom:10px;}
-.row{display:flex;gap:10px;flex-wrap:wrap;}.row>*{flex:1;min-width:150px;}
-.list-item{background:#fff;border:1px solid var(--border);padding:12px 15px;margin-bottom:10px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;transition:0.2s;}
-.list-item:hover{border-color:var(--primary);box-shadow:0 2px 5px rgba(0,0,0,0.05);}
-.item-info b{display:block;font-size:15px;color:var(--dark);}.item-info small{color:#64748b;font-size:12px;margin-top:3px;display:block;}
-.icon-btn{width:auto;padding:8px 12px;margin:0;background:#fee2e2;color:var(--danger);border-radius:8px;font-size:14px;}
-.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;justify-content:space-around;padding:8px 0;border-top:1px solid var(--border);z-index:100;overflow-x:auto;box-shadow:0 -2px 10px rgba(0,0,0,0.05);}
-.nav-btn{background:none;display:flex;flex-direction:column;align-items:center;color:#94a3b8;font-size:18px;width:auto;padding:5px 10px;margin:0;white-space:nowrap;transition:0.2s;border-radius:8px;}
-.nav-btn span{font-size:10px;margin-top:4px;font-weight:700;}.nav-btn.active{color:var(--primary);background:#eff6ff;}
-.table-wrapper{overflow-x:auto;width:100%;display:block;white-space:nowrap;border-radius:8px;border:1px solid var(--border);}
-table{width:100%;border-collapse:collapse;font-size:13px;background:#fff;}
-th,td{border:1px solid var(--border);padding:10px;text-align:center;}
-th{background:#f8fafc;color:var(--dark);font-weight:bold;}
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--dark);color:#fff;padding:12px 24px;border-radius:25px;font-size:14px;opacity:0;transition:all .3s;z-index:10000;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.2);}
-.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}.toast.error{background:var(--danger);}.toast.success{background:var(--success);}
-.dash-card{background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;}
-.dash-card h3{font-size:28px;color:var(--primary);margin-bottom:5px;}
+:root { --bg: #f1f5f9; --card: #ffffff; --text: #1e293b; --primary: #3b82f6; --dark: #1e3a8a; --success: #10b981; --danger: #ef4444; --warning: #f59e0b; --border: #e2e8f0; --nav-bg: #ffffff; }
+[data-theme="dark"] { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --primary: #60a5fa; --dark: #3b82f6; --border: #334155; --nav-bg: #1e293b; }
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; transition: background 0.3s, color 0.3s; }
+body { background: var(--bg); color: var(--text); padding-bottom: 80px; }
+#login-screen, #student-portal { position: fixed; inset: 0; background: var(--dark); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
+.login-box { background: var(--card); padding: 30px 25px; border-radius: 16px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+.login-box h2 { margin-bottom: 25px; color: var(--primary); }
+input, select, button { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; background: var(--card); color: var(--text); outline: none; }
+input:focus, select:focus { border-color: var(--primary); }
+button { cursor: pointer; font-weight: bold; border: none; transition: 0.2s; }
+button:active { transform: scale(0.97); }
+.btn-p { background: var(--primary); color: #fff; } .btn-s { background: var(--success); color: #fff; } .btn-d { background: var(--danger); color: #fff; } .btn-w { background: var(--warning); color: #fff; }
+.btn-o { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+header { background: var(--dark); color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+header h1 { font-size: 17px; font-weight: 700; }
+.header-btns { display: flex; gap: 10px; }
+main { padding: 15px; max-width: 1100px; margin: 0 auto; }
+.tab { display: none; } .tab.active { display: block; animation: fadeIn 0.3s; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+.card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid var(--border); }
+.card h2 { font-size: 16px; color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; } .row > * { flex: 1; min-width: 150px; }
+.list-item { background: var(--card); border: 1px solid var(--border); padding: 12px 15px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+.item-info b { display: block; font-size: 15px; color: var(--primary); } .item-info small { color: var(--text); opacity: 0.7; font-size: 12px; margin-top: 3px; display: block; }
+.icon-btn { width: auto; padding: 8px 12px; margin: 0; background: var(--danger); color: #fff; border-radius: 8px; font-size: 14px; }
+.nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--nav-bg); display: flex; justify-content: space-around; padding: 8px 0; border-top: 1px solid var(--border); z-index: 100; overflow-x: auto; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+.nav-btn { background: none; display: flex; flex-direction: column; align-items: center; color: var(--text); opacity: 0.6; font-size: 18px; width: auto; padding: 5px 10px; margin: 0; white-space: nowrap; border-radius: 8px; }
+.nav-btn span { font-size: 10px; margin-top: 4px; font-weight: 700; } .nav-btn.active { color: var(--primary); opacity: 1; background: var(--bg); }
+.table-wrapper { overflow-x: auto; width: 100%; display: block; white-space: nowrap; border-radius: 8px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--card); }
+th, td { border: 1px solid var(--border); padding: 10px; text-align: center; }
+th { background: var(--bg); color: var(--primary); font-weight: bold; }
+.dash-card { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; flex: 1; }
+.dash-card h3 { font-size: 28px; color: var(--primary); margin-bottom: 5px; }
+.toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--dark); color: #fff; padding: 12px 24px; border-radius: 25px; font-size: 14px; opacity: 0; transition: all .3s; z-index: 10000; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; } .toast.error { background: var(--danger); } .toast.success { background: var(--success); }
+/* كشف الدرجات الاحترافي */
+.report-card { background: var(--card); border-radius: 12px; padding: 20px; border: 1px solid var(--border); margin-top: 15px; }
+.report-header { border-bottom: 2px dashed var(--border); padding-bottom: 15px; margin-bottom: 15px; text-align: center; }
+.report-header h3 { color: var(--primary); margin-bottom: 10px; }
+.student-info { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 10px; font-size: 14px; font-weight: bold; }
+.grades-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-top: 15px; }
+.subject-card { border: 1px solid var(--border); border-radius: 8px; padding: 12px; background: var(--bg); }
+.subject-title { font-weight: bold; color: var(--primary); font-size: 15px; border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 5px; text-align: center; }
+.grade-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text); opacity: 0.9; margin-bottom: 3px; }
+.grade-row span { font-weight: bold; color: var(--primary); }
+.final-badge { background: var(--success); color: white; text-align: center; padding: 8px; border-radius: 6px; font-weight: bold; margin-top: 8px; font-size: 15px; }
+.final-badge.fail { background: var(--danger); }
 </style>
 </head>
 <body>
 
-<div id="login">
-  <div class="box">
-    <h2>🔐 بوابة الإدارة</h2>
-    <input type="text" id="lp" placeholder="كلمة المرور">
+<div id="login-screen">
+  <div class="login-box">
+    <h2>🔐 دخول الإدارة</h2>
+    <input type="text" id="login-pass" placeholder="كلمة المرور (admin)">
     <div id="login-err" style="color:var(--danger);font-size:12px;margin-bottom:10px;display:none;font-weight:bold;">كلمة المرور غير صحيحة!</div>
-    <button class="btn-p" onclick="adminLogin()">دخول للنظام</button>
-    <button class="btn-o" onclick="showSt()">🎓 دخول الطالب</button>
+    <button class="btn-p" onclick="loginAdmin()">دخول</button>
+    <button class="btn-o" onclick="showStudentPortal()">🎓 دخول الطالب</button>
   </div>
 </div>
 
-<div id="st-portal" style="display:none;">
-  <div class="box">
+<div id="student-portal" style="display:none;">
+  <div class="login-box">
     <h2>🎓 بوابة الطالب</h2>
-    <input type="text" id="sc" placeholder="أدخل كود الطالب">
-    <button class="btn-p" onclick="stLogin()">عرض النتائج</button>
-    <button class="btn-o" onclick="hideSt()">🔙 رجوع</button>
+    <input type="text" id="student-code-input" placeholder="أدخل كود الطالب (مثال: أ-1001)">
+    <button class="btn-p" onclick="loginStudent()">عرض النتائج</button>
+    <button class="btn-o" onclick="hideStudentPortal()">🔙 رجوع</button>
   </div>
 </div>
 
-<div id="st-view" style="display:none;padding:20px;">
-  <div class="card">
-    <h2 id="st-name" style="text-align:center;">مرحباً</h2>
-    <div id="st-grades"></div>
-    <button class="btn-d" onclick="document.getElementById('st-view').style.display='none';showSt();" style="margin-top:15px;">خروج</button>
-  </div>
+<div id="student-view" style="display:none; padding: 20px; max-width: 1000px; margin: 0 auto;">
+  <div id="st-name-display" style="font-size: 22px; font-weight: bold; color: var(--primary); text-align: center; margin-bottom: 15px;">مرحباً</div>
+  <div id="st-grades-box"></div>
+  <button class="btn-d" onclick="document.getElementById('student-view').style.display='none';showStudentPortal();" style="margin-top:15px;">خروج</button>
 </div>
 
-<div id="admin" style="display:none;">
-  <header><h1>🏫 إدارة المدرسة الثانوية</h1><button class="icon-btn" style="background:rgba(255,255,255,.2);color:#fff;" onclick="logout()">خروج</button></header>
+<div id="admin-view" style="display:none;">
+  <header>
+    <h1>🏫 إدارة المدرسة</h1>
+    <div class="header-btns">
+      <button class="icon-btn" style="background:rgba(255,255,255,.2);" onclick="toggleTheme()">🌓</button>
+      <button class="icon-btn" style="background:rgba(255,255,255,.2);" onclick="logoutAdmin()">خروج</button>
+    </div>
+  </header>
+  
   <nav class="nav">
     <button class="nav-btn active" data-tab="dashboard">📊<span>الرئيسية</span></button>
     <button class="nav-btn" data-tab="students">👨‍🎓<span>الطلاب</span></button>
     <button class="nav-btn" data-tab="grades">📝<span>الدرجات</span></button>
     <button class="nav-btn" data-tab="att">📅<span>الغياب</span></button>
-    <button class="nav-btn" data-tab="act">🏅<span>النشاط</span></button>
-    <button class="nav-btn" data-tab="rep">📈<span>التقارير</span></button>
+    <button class="nav-btn" data-tab="rep">📄<span>الكشوف</span></button>
     <button class="nav-btn" data-tab="set">⚙️<span>الإدارة</span></button>
   </nav>
   
   <main>
+    <!-- لوحة القيادة -->
     <section id="dashboard" class="tab active">
       <div class="card">
         <h2>📊 لوحة القيادة</h2>
@@ -91,11 +110,12 @@ th{background:#f8fafc;color:var(--dark);font-weight:bold;}
           <div class="dash-card"><h3 id="dash-st-count">0</h3><p>إجمالي الطلاب</p></div>
           <div class="dash-card"><h3 id="dash-abs-count">0</h3><p>غياب اليوم</p></div>
         </div>
-        <button class="btn-p" onclick="calcGlobalStats()">📈 حساب نسبة النجاح العامة</button>
-        <div id="global-stats-box" style="margin-top:15px;"></div>
+        <h3 style="font-size:15px; margin-bottom:10px; color:var(--primary);">🏆 الأوائل (أعلى معدل)</h3>
+        <div id="top-students-list"></div>
       </div>
     </section>
 
+    <!-- الطلاب -->
     <section id="students" class="tab">
       <div class="card">
         <h2>👨‍🎓 إدارة الطلاب</h2>
@@ -103,12 +123,13 @@ th{background:#f8fafc;color:var(--dark);font-weight:bold;}
           <select id="st-filter-level" onchange="updateSectionFilter()"><option value="">-- كل الصفوف --</option></select>
           <select id="st-filter-sec" onchange="renderSt()"><option value="">-- كل الشعب --</option></select>
         </div>
-        <input id="search" placeholder="🔍 بحث بالاسم أو الكود..." oninput="renderSt()">
+        <input id="search-st" placeholder="🔍 بحث بالاسم أو الكود..." oninput="renderSt()">
         <div id="st-list" style="margin-top:10px;"></div>
         <button class="btn-s" onclick="printClassList()" style="margin-top:15px;">🖨️ طباعة كشف أسماء الشعبة</button>
       </div>
     </section>
     
+    <!-- الدرجات -->
     <section id="grades" class="tab">
       <div class="card">
         <h2>📝 إدخال الدرجات</h2>
@@ -122,6 +143,7 @@ th{background:#f8fafc;color:var(--dark);font-weight:bold;}
       </div>
     </section>
     
+    <!-- الغياب -->
     <section id="att" class="tab">
       <div class="card">
         <h2>📅 تسجيل الغياب</h2>
@@ -135,33 +157,24 @@ th{background:#f8fafc;color:var(--dark);font-weight:bold;}
       </div>
     </section>
     
-    <section id="act" class="tab">
-      <div class="card">
-        <h2>🏅 تقييم النشاط</h2>
-        <div class="row">
-          <select id="act-level" onchange="updateActSections()"><option value="">-- الصف --</option></select>
-          <select id="acs" onchange="renderAct()"><option value="">-- الشعبة --</option></select>
-        </div>
-        <input id="search-act" placeholder="🔍 ابحث عن طالب..." oninput="renderAct()">
-        <div id="acl" style="margin-top:15px;"></div>
-        <button class="btn-s" id="sa" style="display:none;margin-top:15px;" onclick="saveAct()">💾 حفظ النشاط</button>
-      </div>
-    </section>
-    
+    <!-- الكشوف -->
     <section id="rep" class="tab">
       <div class="card">
-        <h2>📄 كشف درجات طالب</h2>
-        <select id="rs" onchange="genRep('rep-box')"></select>
-        <div id="rep-box" style="margin-top:15px;"></div>
-        <button class="btn-p" onclick="window.print()" style="margin-top:10px;">🖨️ طباعة الكشف</button>
+        <h2>📄 كشف درجات طالب (بحث ذكي)</h2>
+        <input type="text" id="search-rep" placeholder="🔍 ابحث باسم الطالب..." oninput="searchReportStudent()">
+        <div id="rs-results"></div>
+        <div id="rep-box"></div>
+        <button class="btn-p" onclick="window.print()" style="margin-top:10px; display:none;" id="print-btn">🖨️ طباعة الكشف</button>
       </div>
       <div class="card">
         <h2>📝 سجل غياب ونشاط طالب</h2>
-        <select id="log-st" onchange="showLog()"></select>
-        <div id="log-box" style="margin-top:15px;"></div>
+        <input type="text" id="search-log" placeholder="🔍 ابحث باسم الطالب..." oninput="searchLogStudent()">
+        <div id="log-results"></div>
+        <div id="log-box"></div>
       </div>
     </section>
     
+    <!-- الإدارة -->
     <section id="set" class="tab">
       <div class="card">
         <h2>🏫 إدارة الصفوف والشعب</h2>
@@ -196,10 +209,6 @@ th{background:#f8fafc;color:var(--dark);font-weight:bold;}
         <button class="btn-w" onclick="exportCSV()">📤 تصدير جميع الدرجات إلى Excel</button>
       </div>
       <div class="card">
-        <h2>🔐 كلمة المرور</h2>
-        <input type="password" id="np" placeholder="الجديدة"><button class="btn-w" onclick="chPass()">تحديث</button>
-      </div>
-      <div class="card">
         <h2>⚠️ الخطر</h2>
         <button class="btn-d" onclick="clearAll()">🗑️ حذف كل البيانات</button>
       </div>
@@ -207,43 +216,51 @@ th{background:#f8fafc;color:var(--dark);font-weight:bold;}
   </main>
 </div>
 <div id="toast" class="toast"></div>
+
 <script>
 let defaultSubs = [{id:1,name:'اسلامية'},{id:2,name:'عربي'},{id:3,name:'انكليزي'},{id:4,name:'رياضيات'},{id:5,name:'احياء'},{id:6,name:'فيزياء'},{id:7,name:'كيمياء'},{id:8,name:'اجتماعيات'},{id:9,name:'اخلاقيه'}];
-let DB = JSON.parse(localStorage.getItem('schoolDB_v6') || `{"students":[],"levels":[],"sections":[],"subjects":[],"grades":[],"attendance":{},"activity":{},"adminPass":"admin123"}`);
-if(!DB.subjects || DB.subjects.length===0) { DB.subjects = defaultSubs; localStorage.setItem('schoolDB_v6',JSON.stringify(DB)); }
+let DB = JSON.parse(localStorage.getItem('schoolDB_final_pro') || `{"students":[],"levels":[],"sections":[],"subjects":[],"grades":[],"attendance":{},"activity":{},"adminPass":"admin"}`);
+if(!DB.subjects || DB.subjects.length===0) { DB.subjects = defaultSubs; localStorage.setItem('schoolDB_final_pro',JSON.stringify(DB)); }
 if(!DB.levels) { DB.levels = []; DB.sections = []; }
 
-function sv(){ localStorage.setItem('schoolDB_v6',JSON.stringify(DB)); }
+function sv(){ localStorage.setItem('schoolDB_final_pro',JSON.stringify(DB)); }
 function tst(m,t='success'){ let e=document.getElementById('toast'); e.textContent=m; e.className='toast show '+t; setTimeout(()=>e.className='toast '+t,2500); }
 function nid(a){ return a.length?Math.max(...a.map(x=>x.id))+1:1; }
 
+// الوضع الليلي
+function toggleTheme() {
+  let body = document.body;
+  if(body.getAttribute('data-theme') === 'dark') { body.removeAttribute('data-theme'); localStorage.setItem('theme', 'light'); }
+  else { body.setAttribute('data-theme', 'dark'); localStorage.setItem('theme', 'dark'); }
+}
+if(localStorage.getItem('theme') === 'dark') document.body.setAttribute('data-theme', 'dark');
+
+// الجلسة
 let isLogged = localStorage.getItem('isLogged') === 'true';
 if(isLogged) {
-  document.getElementById('login').style.display='none';
-  document.getElementById('admin').style.display='block';
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('admin-view').style.display='block';
   setTimeout(init, 100);
 }
-
-function adminLogin(){
-  let p=document.getElementById('lp').value;
+function loginAdmin(){
+  let p=document.getElementById('login-pass').value;
   if(p===DB.adminPass){
     localStorage.setItem('isLogged', 'true');
-    document.getElementById('login').style.display='none';
-    document.getElementById('admin').style.display='block';
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('admin-view').style.display='block';
     init();
   } else { document.getElementById('login-err').style.display='block'; }
 }
-function logout(){
+function logoutAdmin(){
   localStorage.setItem('isLogged', 'false');
-  document.getElementById('admin').style.display='none';
-  document.getElementById('login').style.display='flex';
-  document.getElementById('lp').value='';
+  document.getElementById('admin-view').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('login-pass').value='';
   document.getElementById('login-err').style.display='none';
 }
-function showSt(){ document.getElementById('login').style.display='none'; document.getElementById('st-portal').style.display='flex'; }
-function hideSt(){ document.getElementById('st-portal').style.display='none'; document.getElementById('login').style.display='flex'; }
-function stLogin(){ let c=document.getElementById('sc').value.trim(); let s=DB.students.find(x=>x.code===c); if(s){ document.getElementById('st-portal').style.display='none'; document.getElementById('st-view').style.display='block'; document.getElementById('st-name').innerText='مرحباً، '+s.name; genRep('st-grades',s.id); } else tst('كود خطأ','error'); }
-function chPass(){ let p=document.getElementById('np').value; if(p.length>3){ DB.adminPass=p; sv(); tst('تم التحديث'); document.getElementById('np').value=''; } else tst('كلمة المرور قصيرة','error'); }
+function showStudentPortal(){ document.getElementById('login-screen').style.display='none'; document.getElementById('student-portal').style.display='flex'; }
+function hideStudentPortal(){ document.getElementById('student-portal').style.display='none'; document.getElementById('login-screen').style.display='flex'; }
+function loginStudent(){ let c=document.getElementById('student-code-input').value.trim(); let s=DB.students.find(x=>x.code===c); if(s){ document.getElementById('student-portal').style.display='none'; document.getElementById('student-view').style.display='block'; document.getElementById('st-name-display').innerText='مرحباً، '+s.name; genRep('st-grades-box',s.id); } else tst('كود خطأ','error'); }
 
 document.querySelectorAll('.nav-btn').forEach(b=>{
   b.addEventListener('click',()=>{
@@ -253,6 +270,7 @@ document.querySelectorAll('.nav-btn').forEach(b=>{
     document.getElementById(b.dataset.tab).classList.add('active');
     if(b.dataset.tab==='att') document.getElementById('ad').valueAsDate=new Date();
     if(b.dataset.tab==='dashboard') updateDash();
+    if(b.dataset.tab==='rep') { document.getElementById('search-rep').value=''; document.getElementById('rs-results').innerHTML=''; document.getElementById('rep-box').innerHTML=''; document.getElementById('print-btn').style.display='none'; document.getElementById('search-log').value=''; document.getElementById('log-results').innerHTML=''; document.getElementById('log-box').innerHTML=''; }
     ref();
   });
 });
@@ -261,64 +279,38 @@ function updateDash(){
   document.getElementById('dash-st-count').innerText = DB.students.length;
   let today = new Date().toISOString().split('T')[0];
   let absCount = 0;
-  for(let k in DB.attendance){
-    if(k.includes(today)) { absCount += Object.keys(DB.attendance[k]).length; }
-  }
+  for(let k in DB.attendance){ if(k.includes(today)) { absCount += Object.keys(DB.attendance[k]).length; } }
   document.getElementById('dash-abs-count').innerText = absCount;
+  
+  let top = [];
+  DB.students.forEach(st => {
+    let gs = DB.grades.filter(g => g.student_id === st.id);
+    let total = 0, subCount = 0;
+    gs.forEach(g => {
+      let s = DB.subjects.find(x => x.id === g.subject_id);
+      if(s) {
+        let m1 = ((g.m1_o||0) + (g.m1_w||0))/2, m2 = ((g.m2_o||0) + (g.m2_w||0))/2, f1 = (m1+m2)/2;
+        let m3 = ((g.m3_o||0) + (g.m3_w||0))/2, m4 = ((g.m4_o||0) + (g.m4_w||0))/2, f2 = (m3+m4)/2;
+        let an = (f1 + f2 + (g.mid||0)) / 3, fg = (an + (g.final||0)) / 2;
+        total += fg; subCount++;
+      }
+    });
+    if(subCount>0) top.push({name: st.name, avg: (total/subCount).toFixed(1)});
+  });
+  top.sort((a,b) => b.avg - a.avg); top = top.slice(0, 3);
+  document.getElementById('top-students-list').innerHTML = top.map((t,i)=>`<div class="list-item"><div class="item-info"><b>${i+1}. ${t.name}</b></div><strong style="color:var(--success); font-size:18px;">${t.avg}%</strong></div>`).join('');
 }
-  <script>
-function addLevel(){
-  let n = document.getElementById('new-level').value.trim();
-  if(n && !DB.levels.includes(n)) { DB.levels.push(n); sv(); ref(); document.getElementById('new-level').value=''; tst('تمت إضافة الصف'); } else { tst('موجود أو فارغ','error'); }
-}
-function delLevel(n){
-  if(confirm('حذف الصف؟ سيتم حذف طلاب شعبه أيضاً')){ DB.levels = DB.levels.filter(x=>x!==n); DB.sections = DB.sections.filter(s=>s.level!==n); DB.students = DB.students.filter(st=>st.level!==n); sv(); init(); }
-}
-function addSection(){
-  let level = document.getElementById('set-level').value;
-  let name = document.getElementById('new-sec').value.trim();
-  if(!level) return tst('اختر الصف','error');
-  if(name) {
-    if(!DB.sections.some(s=>s.level===level && s.name===name)) { DB.sections.push({level: level, name: name}); sv(); ref(); document.getElementById('new-sec').value=''; tst('تمت إضافة الشعبة'); } else { tst('موجودة','error'); }
-  }
-}
-function delSection(level, name){
-  if(confirm('حذف الشعبة؟ سيتم حذف طلابها!')){ DB.sections = DB.sections.filter(s=>!(s.level===level && s.name===name)); DB.students = DB.students.filter(st=>!(st.level===level && st.section===name)); sv(); init(); }
-}
-function updateSetSections(){
-  let lv = document.getElementById('set-level').value;
-  let filtered = DB.sections.filter(s=>s.level===lv);
-  document.getElementById('sections-list').innerHTML = filtered.map(s=>`<div class="list-item"><div class="item-info"><b>${s.name}</b></div><button class="icon-btn" onclick="delSection('${s.level}','${s.name}')">🗑️</button></div>`).join('');
-}
-function updateSectionFilter() {
-  let lv = document.getElementById('st-filter-level').value;
-  let filtered = DB.sections.filter(s=>s.level===lv);
-  document.getElementById('st-filter-sec').innerHTML = '<option value="">-- كل الشعب --</option>' + filtered.map(s=>`<option value="${s.name}">${s.name}</option>`).join('');
-  renderSt();
-}
-function updateGradeSections() {
-  let lv = document.getElementById('g-level').value;
-  let filtered = DB.sections.filter(s=>s.level===lv);
-  document.getElementById('gs').innerHTML = '<option value="">-- الشعبة --</option>' + filtered.map(s=>`<option value="${s.name}">${s.name}</option>`).join('');
-  document.getElementById('gt').innerHTML = '';
-}
-function updateAttSections() {
-  let lv = document.getElementById('att-level').value;
-  let filtered = DB.sections.filter(s=>s.level===lv);
-  document.getElementById('as').innerHTML = '<option value="">-- الشعبة --</option>' + filtered.map(s=>`<option value="${s.name}">${s.name}</option>`).join('');
-  document.getElementById('al').innerHTML = '';
-}
-function updateActSections() {
-  let lv = document.getElementById('act-level').value;
-  let filtered = DB.sections.filter(s=>s.level===lv);
-  document.getElementById('acs').innerHTML = '<option value="">-- الشعبة --</option>' + filtered.map(s=>`<option value="${s.name}">${s.name}</option>`).join('');
-  document.getElementById('acl').innerHTML = '';
-}
-function updateImportSections() {
-  let lv = document.getElementById('is-level').value;
-  let filtered = DB.sections.filter(s=>s.level===lv);
-  document.getElementById('is-sec').innerHTML = '<option value="">-- الشعبة --</option>' + filtered.map(s=>`<option value="${s.name}">${s.name}</option>`).join('');
-}
+
+function addLevel(){ let n = document.getElementById('new-level').value.trim(); if(n && !DB.levels.includes(n)) { DB.levels.push(n); sv(); ref(); document.getElementById('new-level').value=''; tst('تمت إضافة الصف'); } else { tst('موجود أو فارغ','error'); } }
+function delLevel(n){ if(confirm('حذف الصف؟ سيتم حذف طلاب شعبه أيضاً')){ DB.levels = DB.levels.filter(x=>x!==n); DB.sections = DB.sections.filter(s=>s.level!==n); DB.students = DB.students.filter(st=>st.level!==n); sv(); init(); } }
+function addSection(){ let level = document.getElementById('set-level').value; let name = document.getElementById('new-sec').value.trim(); if(!level) return tst('اختر الصف','error'); if(name) { if(!DB.sections.some(s=>s.level===level && s.name===name)) { DB.sections.push({level: level, name: name}); sv(); ref(); document.getElementById('new-sec').value=''; tst('تمت إضافة الشعبة'); } else { tst('موجودة','error'); } } }
+function delSection(level, name){ if(confirm('حذف الشعبة؟ سيتم حذف طلابها!')){ DB.sections = DB.sections.filter(s=>!(s.level===level && s.name===name)); DB.students = DB.students.filter(st=>!(st.level===level && st.section===name)); sv(); init(); } }
+function updateSetSections(){ let lv = document.getElementById('set-level').value; let filtered = DB.sections.filter(s=>s.level===lv); document.getElementById('sections-list').innerHTML = filtered.map(s=>`<div class="list-item"><div class="item-info"><b>${s.name}</b></div><button class="icon-btn" onclick="delSection('${s.level}','${s.name}')">🗑️</button></div>`).join(''); }
+function updateSectionFilter() { let lv = document.getElementById('st-filter-level').value; let filtered = DB.sections.filter(s=>s.level===lv); document.getElementById('st-filter-sec').innerHTML = '<option value="">-- كل الشعب --</option>' + filtered.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); renderSt(); }
+function updateGradeSections() { let lv = document.getElementById('g-level').value; let filtered = DB.sections.filter(s=>s.level===lv); document.getElementById('gs').innerHTML = '<option value="">-- الشعبة --</option>' + filtered.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); document.getElementById('gt').innerHTML = ''; }
+function updateAttSections() { let lv = document.getElementById('att-level').value; let filtered = DB.sections.filter(s=>s.level===lv); document.getElementById('as').innerHTML = '<option value="">-- الشعبة --</option>' + filtered.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); document.getElementById('al').innerHTML = ''; }
+function updateImportSections() { let lv = document.getElementById('is-level').value; let filtered = DB.sections.filter(s=>s.level===lv); document.getElementById('is-sec').innerHTML = '<option value="">-- الشعبة --</option>' + filtered.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); }
+
 function impEx(){
   let f=document.getElementById('ef').files[0], lv=document.getElementById('is-level').value, sec=document.getElementById('is-sec').value;
   if(!lv || !sec) return tst('اختر الصف والشعبة','error'); if(!f) return tst('اختر الملف','error');
@@ -327,8 +319,7 @@ function impEx(){
     try{
       let w=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
       let rows=XLSX.utils.sheet_to_json(w.Sheets[w.SheetNames[0]],{header:1});
-      let ci=0;
-      for(let i=0;i<rows[0].length;i++){ if(String(rows[0][i]).includes('اسم')||String(rows[0][i]).toLowerCase().includes('name')){ ci=i; break; } }
+      let ci=0; for(let i=0;i<rows[0].length;i++){ if(String(rows[0][i]).includes('اسم')||String(rows[0][i]).toLowerCase().includes('name')){ ci=i; break; } }
       let imp=0, skp=0;
       for(let i=1;i<rows.length;i++){
         let rw=rows[i];
@@ -345,10 +336,10 @@ function impEx(){
 function addSub(){ let n=document.getElementById('sub').value.trim(); if(n){ DB.subjects.push({id:nid(DB.subjects),name:n}); sv(); ref(); document.getElementById('sub').value=''; tst('تمت الإضافة'); } }
 function delSub(id){ if(confirm('حذف المادة؟')){ DB.subjects=DB.subjects.filter(x=>x.id!==id); sv(); init(); } }
 function delSt(id){ if(confirm('حذف الطالب؟')){ DB.students=DB.students.filter(x=>x.id!==id); sv(); renderSt(); } }
-function clearAll(){ if(confirm('تأكيد مسح الكل؟')){ if(prompt('اكتب "حذف":')==='حذف'){ DB={"students":[],"levels":[],"sections":[],"subjects":defaultSubs,"grades":[],"attendance":{},"activity":{},"adminPass":"admin123"}; sv(); init(); tst('تم المسح'); } } }
+function clearAll(){ if(confirm('تأكيد مسح الكل؟')){ if(prompt('اكتب "حذف":')==='حذف'){ DB={"students":[],"levels":[],"sections":[],"subjects":defaultSubs,"grades":[],"attendance":{},"activity":{},"adminPass":"admin"}; sv(); init(); tst('تم المسح'); } } }
 
 function renderSt(){
-  let q=document.getElementById('search').value, lv=document.getElementById('st-filter-level').value, sec=document.getElementById('st-filter-sec').value;
+  let q=document.getElementById('search-st').value, lv=document.getElementById('st-filter-level').value, sec=document.getElementById('st-filter-sec').value;
   let f=DB.students.filter(x=> (x.name.includes(q)||x.code.includes(q)) && (lv===''||x.level===lv) && (sec===''||x.section===sec) );
   let h=document.getElementById('st-list');
   if(!f.length) return h.innerHTML='<p style="text-align:center;padding:20px;">لا يوجد طلاب</p>';
@@ -364,6 +355,7 @@ function printClassList(){
   st.forEach((x,i)=>w.document.write(`<tr><td>${i+1}</td><td>${x.name}</td><td>${x.code}</td></tr>`));
   w.document.write('</table></div>'); w.document.close(); w.print();
 }
+
 function init(){ ref(); renderSt(); updateDash(); }
 function ref(){
   let lo=DB.levels.map(x=>`<option value="${x}">${x}</option>`).join('');
@@ -372,59 +364,66 @@ function ref(){
   document.getElementById('set-level').innerHTML='<option value="">-- اختر الصف --</option>'+lo;
   document.getElementById('g-level').innerHTML='<option value="">-- الصف --</option>'+lo;
   document.getElementById('att-level').innerHTML='<option value="">-- الصف --</option>'+lo;
-  document.getElementById('act-level').innerHTML='<option value="">-- الصف --</option>'+lo;
   document.getElementById('is-level').innerHTML='<option value="">-- الصف --</option>'+lo;
   document.getElementById('gsub').innerHTML='<option value="">-- المادة --</option>'+suo;
-  let sto=DB.students.map(x=>`<option value="${x.id}">${x.name} (${x.level} - ${x.section})</option>`).join('');
-  document.getElementById('rs').innerHTML='<option value="">-- طالب --</option>'+sto;
-  document.getElementById('log-st').innerHTML='<option value="">-- طالب --</option>'+sto;
   document.getElementById('levels-list').innerHTML=DB.levels.map(x=>`<div class="list-item"><div class="item-info"><b>${x}</b></div><button class="icon-btn" onclick="delLevel('${x}')">🗑️</button></div>`).join('');
   document.getElementById('subl').innerHTML=DB.subjects.map(x=>`<div class="list-item"><div class="item-info"><b>${x.name}</b></div><button class="icon-btn" onclick="delSub(${x.id})">🗑️</button></div>`).join('');
 }
+
 function autoSave(subId, field, val, studentId) {
   let existing = DB.grades.find(y => y.student_id === studentId && y.subject_id === subId);
   if(!existing) { existing = { id: nid(DB.grades), student_id: studentId, subject_id: subId }; DB.grades.push(existing); }
   existing[field] = val !== '' ? +val : null;
   sv(); tst('تم الحفظ', 'success');
 }
+
 function renderGt(){
   let s=document.getElementById('gs').value, sid=+document.getElementById('gsub').value, c=document.getElementById('gt');
   if(!s||!sid){ c.innerHTML=''; return; }
   let lv=document.getElementById('g-level').value;
   let st=DB.students.filter(x=>x.section===s && x.level===lv);
   if(!st.length){ c.innerHTML='<p style="text-align:center;">لا يوجد طلاب</p>'; return; }
+  
   let h='<table><thead><tr><th>الطالب</th><th colspan="2">الشهر الأول</th><th>معدل ش1</th><th colspan="2">الشهر الثاني</th><th>معدل ش2</th><th>معدل الفصل الأول</th><th>نصف السنة</th><th colspan="2">الشهر الثالث</th><th>معدل ش3</th><th colspan="2">الشهر الرابع</th><th>معدل ش4</th><th>معدل الفصل الثاني</th><th>السعي السنوي</th><th>نهاية السنة</th><th>الدرجة النهائية</th></tr><tr><th></th><th>شفوي</th><th>تحريري</th><th></th><th>شفوي</th><th>تحريري</th><th></th><th></th><th></th><th>شفوي</th><th>تحريري</th><th></th><th>شفوي</th><th>تحريري</th><th></th><th></th><th></th><th></th><th></th></tr></thead><tbody>';
+  
   st.forEach(x=>{
     let g=DB.grades.find(y=>y.student_id===x.id&&y.subject_id===sid)||{};
     let v=k=>g[k]!==undefined && g[k]!==null ? g[k] : '';
-    let m1_o = +g.m1_o||0, m1_w = +g.m1_w||0, m2_o = +g.m2_o||0, m2_w = +g.m2_w||0;
-    let m3_o = +g.m3_o||0, m3_w = +g.m3_w||0, m4_o = +g.m4_o||0, m4_w = +g.m4_w||0;
-    let mid = +g.mid||0, final = +g.final||0;
-    let m1 = (m1_o + m1_w) / 2, m2 = (m2_o + m2_w) / 2, f1 = (m1+m2)/2;
-    let m3 = (m3_o + m3_w) / 2, m4 = (m4_o + m4_w) / 2, f2 = (m3+m4)/2;
-    let annual = (f1 + f2 + mid) / 3, finalGrade = (annual + final) / 2;
-    h+=`<tr><td style="text-align:right;font-weight:bold; position:sticky; right:0; background:#fff; border-left:2px solid #cbd5e1;">${x.name}</td>
+    
+    let m1 = ((+g.m1_o||0) + (+g.m1_w||0)) / 2;
+    let m2 = ((+g.m2_o||0) + (+g.m2_w||0)) / 2;
+    let f1 = (m1+m2)/2;
+    let m3 = ((+g.m3_o||0) + (+g.m3_w||0)) / 2;
+    let m4 = ((+g.m4_o||0) + (+g.m4_w||0)) / 2;
+    let f2 = (m3+m4)/2;
+    let annual = (f1 + f2 + (+g.mid||0)) / 3;
+    let finalGrade = (annual + (+g.final||0)) / 2;
+    
+    h+=`<tr>
+    <td style="text-align:right;font-weight:bold; position:sticky; right:0; background:var(--card); border-left:2px solid var(--border);">${x.name}</td>
     <td><input type="number" id="a1-${x.id}" value="${v('m1_o')}" onchange="autoSave(${sid},'m1_o',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
     <td><input type="number" id="a2-${x.id}" value="${v('m1_w')}" onchange="autoSave(${sid},'m1_w',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
-    <td style="background:#f1f5f9; font-weight:bold;">${m1.toFixed(1)}</td>
+    <td style="background:var(--bg); font-weight:bold;">${m1.toFixed(1)}</td>
     <td><input type="number" id="a3-${x.id}" value="${v('m2_o')}" onchange="autoSave(${sid},'m2_o',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
     <td><input type="number" id="a4-${x.id}" value="${v('m2_w')}" onchange="autoSave(${sid},'m2_w',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
-    <td style="background:#f1f5f9; font-weight:bold;">${m2.toFixed(1)}</td>
+    <td style="background:var(--bg); font-weight:bold;">${m2.toFixed(1)}</td>
     <td style="background:#e0f2fe; font-weight:bold; color:blue;">${f1.toFixed(1)}</td>
     <td><input type="number" id="a5-${x.id}" value="${v('mid')}" onchange="autoSave(${sid},'mid',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
     <td><input type="number" id="a6-${x.id}" value="${v('m3_o')}" onchange="autoSave(${sid},'m3_o',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
     <td><input type="number" id="a7-${x.id}" value="${v('m3_w')}" onchange="autoSave(${sid},'m3_w',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
-    <td style="background:#f1f5f9; font-weight:bold;">${m3.toFixed(1)}</td>
+    <td style="background:var(--bg); font-weight:bold;">${m3.toFixed(1)}</td>
     <td><input type="number" id="a8-${x.id}" value="${v('m4_o')}" onchange="autoSave(${sid},'m4_o',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
     <td><input type="number" id="a9-${x.id}" value="${v('m4_w')}" onchange="autoSave(${sid},'m4_w',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
-    <td style="background:#f1f5f9; font-weight:bold;">${m4.toFixed(1)}</td>
+    <td style="background:var(--bg); font-weight:bold;">${m4.toFixed(1)}</td>
     <td style="background:#e0f2fe; font-weight:bold; color:blue;">${f2.toFixed(1)}</td>
     <td style="background:#fef08a; font-weight:bold; color:#854d0e;">${annual.toFixed(1)}</td>
     <td><input type="number" id="a10-${x.id}" value="${v('final')}" onchange="autoSave(${sid},'final',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
-    <td style="background:#dcfce7; font-weight:bold; color:green; font-size:14px;">${finalGrade.toFixed(1)}</td></tr>`;
+    <td style="background:#dcfce7; font-weight:bold; color:green; font-size:14px;">${finalGrade.toFixed(1)}</td>
+    </tr>`;
   });
   c.innerHTML=h+'</tbody></table>';
 }
+
 function renderAtt(){
   let s=document.getElementById('as').value, d=document.getElementById('ad').value, q=document.getElementById('search-att').value, lv=document.getElementById('att-level').value;
   if(!s||!d||!lv) return;
@@ -451,41 +450,55 @@ function renderAtt(){
 }
 function toggleAtt(k,sid,isChecked){ if(!isChecked){ delete DB.attendance[k][sid]; } else { DB.attendance[k][sid]='true'; } sv(); tst('تم التحديث'); renderAtt(); updateDash(); }
 function changeAttReason(k,sid,val){ DB.attendance[k][sid]=val; sv(); tst('تم تحديث السبب'); renderAtt(); }
-function renderAct(){
-  let s=document.getElementById('acs').value, q=document.getElementById('search-act').value, lv=document.getElementById('act-level').value;
-  if(!s||!lv) return;
-  let st=DB.students.filter(x=>x.section===s && x.level===lv && x.name.includes(q));
-  document.getElementById('acl').innerHTML=st.map(x=>`<div class="list-item"><div class="item-info"><b>${x.name}</b></div><input type="number" id="ac-${x.id}" value="${DB.activity[x.id]||''}" style="width:80px;margin:0;padding:8px;text-align:center;"></div>`).join('');
-  document.getElementById('sa').style.display='block';
-}
-function saveAct(){ let s=document.getElementById('acs').value; DB.students.filter(x=>x.section===s).forEach(x=>{ let v=document.getElementById(`ac-${x.id}`).value; if(v) DB.activity[x.id]=+v; else delete DB.activity[x.id]; }); sv(); tst('تم الحفظ ✅'); }
 function calcAbsences(sid){ let total=0, justified=0; for(let k in DB.attendance){ let stat=DB.attendance[k][sid]; if(stat){ if(stat===true||stat==='true') total++; else justified++; } } return {total, justified}; }
-function showLog(){
-  let sid=+document.getElementById('log-st').value; if(!sid) return;
+function showLog(sid){
+  if(!sid) return;
   let logs=[]; let abs=calcAbsences(sid);
   for(let k in DB.attendance){ let stat=DB.attendance[k][sid]; if(stat){ let parts=k.split('_'); let dateStr=parts[1]; let dateObj=new Date(dateStr); let dayName = isNaN(dateObj) ? '' : dateObj.toLocaleDateString('ar-EG', {weekday: 'long'}); let reason = (stat===true||stat==='true') ? 'بدون عذر' : stat; let deduct = (stat===true||stat==='true') ? 5 : 0; logs.push({date:dateStr, day:dayName, type:'غياب', reason:reason, val:deduct}); } }
   logs.sort((a,b)=> new Date(b.date) - new Date(a.date));
   let h = `<div style="margin-bottom:10px; padding:10px; background:#fee2e2; color:#991b1b; border-radius:8px; font-weight:bold; text-align:center;">مجموع غياب الطالب: ${abs.total + abs.justified} يوم (بدون عذر: ${abs.total})</div>`;
-  h += '<table style="width:100%;border-collapse:collapse;"><thead><tr><th>التاريخ</th><th>اليوم</th><th>الحدث</th><th>سبب الغياب</th><th>التأثير</th></tr></thead><tbody>';
+  h += '<div class="table-wrapper"><table><thead><tr><th>التاريخ</th><th>اليوم</th><th>الحدث</th><th>سبب الغياب</th><th>التأثير</th></tr></thead><tbody>';
   if(logs.length===0) { h += '<tr><td colspan="5" style="text-align:center;padding:10px;">لا يوجد سجل</td></tr>'; } else { logs.forEach(l=>{ h += `<tr><td>${l.date}</td><td>${l.day}</td><td style="color:${l.type==='غياب'?'red':'green'}; font-weight:bold;">${l.type}</td><td>${l.reason}</td><td>${l.val!==0?(l.val>0?'خصم '+l.val+' شفوي':'لا يوجد'):'لا يوجد'}</td></tr>`; }); }
-  h += '</tbody></table>'; document.getElementById('log-box').innerHTML = h;
+  h += '</tbody></table></div>'; document.getElementById('log-box').innerHTML = h;
 }
-function calcGlobalStats(){
-  let st = DB.students; if(!st.length) return tst('لا يوجد طلاب', 'error');
-  let passed=0, failed=0;
-  st.forEach(student=>{
-    let gs=DB.grades.filter(g=>g.student_id===student.id); let total=0, subCount=0;
-    gs.forEach(g=>{ let s=DB.subjects.find(x=>x.id===g.subject_id); if(s){ let m1=(g.m1_o||0)+(g.m1_w||0); m1=m1/2; let m2=(g.m2_o||0)+(g.m2_w||0); m2=m2/2; let f1=(m1+m2)/2; let m3=(g.m3_o||0)+(g.m3_w||0); m3=m3/2; let m4=(g.m4_o||0)+(g.m4_w||0); m4=m4/2; let f2=(m3+m4)/2; let an=(f1+f2+(g.mid||0))/3; let fg=(an+(g.final||0))/2; total+=fg; subCount++; } });
-    if(subCount>0 && (total/subCount)>=50) passed++; else failed++;
-  });
-  let rate=((passed/st.length)*100).toFixed(1);
-  document.getElementById('global-stats-box').innerHTML=`<div style="text-align:center;padding:15px;background:#f8fafc;border-radius:8px;"><h3>نسبة النجاح: <span style="color:green;font-size:20px;">${rate}%</span></h3><p>عدد الطلاب: ${st.length} | الناجحون: <span style="color:green">${passed}</span> | الراسبون: <span style="color:red">${failed}</span></p></div>`;
+function searchReportStudent(){
+  let q = document.getElementById('search-rep').value.trim(); let res = document.getElementById('rs-results');
+  if(q.length < 2) { res.innerHTML=''; return; }
+  let matches = DB.students.filter(s => s.name.includes(q) || s.code.includes(q));
+  if(matches.length === 0) { res.innerHTML = '<p style="font-size:12px; color:red; margin-top:5px;">لا يوجد طالب بهذا الاسم</p>'; return; }
+  res.innerHTML = matches.map(s => `<div class="list-item" style="cursor:pointer;" onclick="selectReportStudent(${s.id})"><div class="item-info"><b>${s.name}</b><small>${s.level} - ${s.section} | ${s.code}</small></div></div>`).join('');
 }
-function genRep(box,forceId=null){
-  let sid=forceId||+document.getElementById('rs').value; if(!sid) return;
+function selectReportStudent(id){ document.getElementById('rs-results').innerHTML = ''; document.getElementById('search-rep').value = ''; genRep('rep-box', id); document.getElementById('print-btn').style.display = 'block'; }
+function searchLogStudent(){
+  let q = document.getElementById('search-log').value.trim(); let res = document.getElementById('log-results');
+  if(q.length < 2) { res.innerHTML=''; return; }
+  let matches = DB.students.filter(s => s.name.includes(q) || s.code.includes(q));
+  if(matches.length === 0) { res.innerHTML = '<p style="font-size:12px; color:red; margin-top:5px;">لا يوجد طالب بهذا الاسم</p>'; return; }
+  res.innerHTML = matches.map(s => `<div class="list-item" style="cursor:pointer;" onclick="selectLogStudent(${s.id})"><div class="item-info"><b>${s.name}</b><small>${s.level} - ${s.section} | ${s.code}</small></div></div>`).join('');
+}
+function selectLogStudent(id){ document.getElementById('log-results').innerHTML = ''; document.getElementById('search-log').value = ''; showLog(id); }
+
+function genRep(box, sid){
   let st=DB.students.find(x=>x.id===sid), gs=DB.grades.filter(x=>x.student_id===sid);
-  let abs=calcAbsences(sid), activity=DB.activity[sid]||0;
-  let h=`<div style="border:1px solid #cbd5e1;padding:15px;background:#fff;border-radius:8px;overflow-x:auto;"><h3 style="text-align:center;margin-bottom:15px;color:var(--dark);">كشف درجات الطالب</h3><div style="margin-bottom:15px;border-bottom:1px solid #eee;padding-bottom:10px;"><p><strong>الاسم:</strong> ${st.name}</p><p><strong>الصف:</strong> ${st.level} | <strong>الشعبة:</strong> ${st.section} | <strong>الكود:</strong> ${st.code}</p><p><strong>الغياب:</strong> ${abs.total} بدون عذر (خصم ${abs.total*5}) | ${abs.justified} مجاز | <strong>النشاط:</strong> ${activity} درجة</p></div><table style="width:100%;border-collapse:collapse;"><thead><tr><th>المادة</th><th>معدل ش1</th><th>معدل ش2</th><th>معدل ف1</th><th>نصف السنة</th><th>معدل ش3</th><th>معدل ش4</th><th>معدل ف2</th><th>السعي</th><th>النهائي</th><th>النتيجة</th></tr></thead><tbody>`;
+  let abs=calcAbsences(sid), activity=DB.activity ? (DB.activity[sid]||0) : 0;
+  
+  let h=`<div class="report-card">
+    <div class="report-header">
+      <h3>كشف درجات الطالب</h3>
+      <div class="student-info">
+        <div><strong>الاسم:</strong> ${st.name}</div>
+        <div><strong>الصف:</strong> ${st.level}</div>
+        <div><strong>الشعبة:</strong> ${st.section}</div>
+        <div><strong>الكود:</strong> ${st.code}</div>
+      </div>
+      <div style="margin-top:10px; font-size:13px; color:var(--danger); font-weight:bold;">
+        ${abs.total} غياب بدون عذر (خصم ${abs.total*5} درجات) | ${abs.justified} غياب بعذر | النشاط: ${activity} درجة
+      </div>
+    </div>
+    <div class="grades-grid">`;
+    
+  if(gs.length === 0) { h += '<p style="text-align:center; width:100%;">لا توجد درجات مسجلة</p>'; }
+
   gs.forEach(g=>{
     let s=DB.subjects.find(x=>x.id===g.subject_id);
     if(s){
@@ -494,11 +507,26 @@ function genRep(box,forceId=null){
       let m1 = (m1o_final + (g.m1_w||0))/2; let m2 = (m2o_final + (g.m2_w||0))/2; let f1 = (m1+m2)/2;
       let m3 = (m3o_final + (g.m3_w||0))/2; let m4 = (m4o_final + (g.m4_w||0))/2; let f2 = (m3+m4)/2;
       let mid = g.mid||0; let an = (f1+f2+mid)/3; let fe = g.final||0; let fg = (an+fe)/2; let stat = fg >= 50 ? 'ناجح' : 'راسب';
-      h+=`<tr><td>${s.name}</td><td>${m1.toFixed(1)}</td><td>${m2.toFixed(1)}</td><td>${f1.toFixed(1)}</td><td>${mid}</td><td>${m3.toFixed(1)}</td><td>${m4.toFixed(1)}</td><td>${f2.toFixed(1)}</td><td><strong>${an.toFixed(1)}</strong></td><td>${fe}</td><td style="background:#e0f2fe;font-weight:bold;color:${stat==='ناجح'?'green':'red'}">${fg.toFixed(1)} (${stat})</td></tr>`;
+      
+      h+=`<div class="subject-card">
+        <div class="subject-title">${s.name}</div>
+        <div class="grade-row">معدل الشهر الأول: <span>${m1.toFixed(1)}</span></div>
+        <div class="grade-row">معدل الشهر الثاني: <span>${m2.toFixed(1)}</span></div>
+        <div class="grade-row" style="color:var(--primary); font-weight:bold;">معدل الفصل الأول: <span>${f1.toFixed(1)}</span></div>
+        <div class="grade-row">نصف السنة: <span>${mid}</span></div>
+        <div class="grade-row">معدل الشهر الثالث: <span>${m3.toFixed(1)}</span></div>
+        <div class="grade-row">معدل الشهر الرابع: <span>${m4.toFixed(1)}</span></div>
+        <div class="grade-row" style="color:var(--primary); font-weight:bold;">معدل الفصل الثاني: <span>${f2.toFixed(1)}</span></div>
+        <div class="grade-row" style="color:var(--warning); font-weight:bold;">السعي السنوي: <span>${an.toFixed(1)}</span></div>
+        <div class="grade-row">نهاية السنة: <span>${fe}</span></div>
+        <div class="final-badge ${stat==='راسب'?'fail':''}">النتيجة: ${fg.toFixed(1)} (${stat})</div>
+      </div>`;
     }
   });
-  h+=`</tbody></table></div>`; document.getElementById(box).innerHTML=h;
+  h+=`</div></div>`;
+  document.getElementById(box).innerHTML=h;
 }
+
 function exportCSV(){
   let csv = '\uFEFFالاسم,الصف,الشعبة,المادة,معدل ش1,معدل ش2,معدل ف1,نصف السنة,معدل ش3,معدل ش4,معدل ف2,السعي,النهائي,النتيجة\n';
   DB.students.forEach(st=>{ let gs=DB.grades.filter(g=>g.student_id===st.id); gs.forEach(g=>{ let s=DB.subjects.find(x=>x.id===g.subject_id); if(s){ let abs=calcAbsences(st.id), activity=DB.activity[st.id]||0; let m1o=g.m1_o||0, m2o=g.m2_o||0, m3o=g.m3_o||0, m4o=g.m4_o||0; let deduction = abs.total*5; let m1o_final = Math.min(100, Math.max(0, m1o-deduction)+activity); let m2o_final = Math.min(100, Math.max(0, m2o-deduction)+activity); let m3o_final = Math.min(100, Math.max(0, m3o-deduction)+activity); let m4o_final = Math.min(100, Math.max(0, m4o-deduction)+activity); let m1 = (m1o_final + (g.m1_w||0))/2, m2 = (m2o_final + (g.m2_w||0))/2, f1=(m1+m2)/2; let m3 = (m3o_final + (g.m3_w||0))/2, m4 = (m4o_final + (g.m4_w||0))/2, f2=(m3+m4)/2; let an = (f1+f2+(g.mid||0))/3, fg = (an+(g.final||0))/2; let stat = fg >= 50 ? 'ناجح' : 'راسب'; csv += `"${st.name}","${st.level}","${st.section}","${s.name}",${m1.toFixed(1)},${m2.toFixed(1)},${f1.toFixed(1)},${g.mid||0},${m3.toFixed(1)},${m4.toFixed(1)},${f2.toFixed(1)},${an.toFixed(1)},${g.final||0},"${stat}"\n`; } }); });
