@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>نظام إدارة المدرسة المعتمد</title>
+<title>النظام المدرسي الاحترافي</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{--p:#1e40af;--d:#1e3a8a;--bg:#f1f5f9;--s:#10b981;--e:#ef4444;--w:#f59e0b;}
@@ -33,6 +33,7 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px;backgro
 th,td{border:1px solid #e2e8f0;padding:8px;text-align:center;white-space:nowrap;}th{background:#f8fafc;color:var(--d);}
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--d);color:#fff;padding:12px 24px;border-radius:25px;font-size:14px;opacity:0;transition:all .3s;z-index:10000;text-align:center;}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}.toast.e{background:var(--e);}.toast.s{background:var(--s);}
+.log-box{max-height:250px;overflow-y:auto;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px;margin-top:10px;}
 </style>
 </head>
 <body>
@@ -71,7 +72,7 @@ th,td{border:1px solid #e2e8f0;padding:8px;text-align:center;white-space:nowrap;
     <button class="nb" data-tab="grades">📝<span>الدرجات</span></button>
     <button class="nb" data-tab="att">📅<span>الغياب</span></button>
     <button class="nb" data-tab="act">🏅<span>النشاط</span></button>
-    <button class="nb" data-tab="rep">📄<span>الكشوف</span></button>
+    <button class="nb" data-tab="rep">📈<span>التقارير</span></button>
     <button class="nb" data-tab="set">⚙️<span>الإدارة</span></button>
   </nav>
   
@@ -79,21 +80,41 @@ th,td{border:1px solid #e2e8f0;padding:8px;text-align:center;white-space:nowrap;
     <section id="students" class="tab active"><div class="card"><h2>👨‍🎓 الطلاب</h2><input id="search" placeholder="🔍 بحث..." oninput="renderSt()"><div id="st-list"></div></div></section>
     
     <section id="grades" class="tab"><div class="card"><h2>📝 إدخال الدرجات (حفظ تلقائي)</h2>
-      <p style="font-size:12px; color:var(--s); margin-bottom:10px;">* بمجرد كتابة الدرجة سيتم حفظها تلقائياً.</p>
+      <p style="font-size:12px; color:var(--s); margin-bottom:10px;">* بمجرد الخروج من خانة الدرجة، سيتم حفظها تلقائياً.</p>
       <div class="row"><select id="gs" onchange="renderGt()"><option value="">-- الشعبة --</option></select><select id="gsub" onchange="renderGt()"><option value="">-- المادة --</option></select></div>
       <div id="gt" style="overflow-x:auto;margin-top:15px;"></div>
     </div></section>
     
-    <section id="att" class="tab"><div class="card"><h2>📅 الغياب (خصم 5 درجات)</h2><input type="date" id="ad" onchange="renderAtt()"><select id="as" onchange="renderAtt()"><option value="">-- الشعبة --</option></select><div id="al" style="margin-top:15px;"></div></div></section>
+    <section id="att" class="tab"><div class="card"><h2>📅 تسجيل الغياب (خصم 5 درجات)</h2>
+      <input type="date" id="ad" onchange="renderAtt()">
+      <select id="as" onchange="renderAtt()"><option value="">-- الشعبة --</option></select>
+      <input id="search-att" placeholder="🔍 ابحث عن طالب..." oninput="renderAtt()">
+      <div id="al" style="margin-top:15px;"></div>
+    </div></section>
     
-    <section id="act" class="tab"><div class="card"><h2>🏅 النشاط (إضافة 10 درجات)</h2><select id="acs" onchange="renderAct()"><option value="">-- الشعبة --</option></select><div id="acl" style="margin-top:15px;"></div><button class="b2" id="sa" style="display:none;margin-top:15px;" onclick="saveAct()">💾 حفظ النشاط</button></div></section>
+    <section id="act" class="tab"><div class="card"><h2>🏅 تقييم النشاط (إضافة 10 درجات)</h2>
+      <select id="acs" onchange="renderAct()"><option value="">-- الشعبة --</option></select>
+      <input id="search-act" placeholder="🔍 ابحث عن طالب..." oninput="renderAct()">
+      <div id="acl" style="margin-top:15px;"></div>
+      <button class="b2" id="sa" style="display:none;margin-top:15px;" onclick="saveAct()">💾 حفظ النشاط</button>
+    </div></section>
     
     <section id="rep" class="tab">
       <div class="card">
-        <h2>📄 الكشوف</h2>
+        <h2>📈 إحصائيات النجاح</h2>
+        <button class="b1" onclick="calcStats()">📊 عرض نسب النجاح للشعبة</button>
+        <div id="stats-box" style="margin-top:15px;"></div>
+      </div>
+      <div class="card">
+        <h2>📄 كشف درجات الطالب</h2>
         <select id="rs" onchange="genRep('rep-box')"></select>
-        <div class="row" style="margin-top:10px;"><button class="b1" onclick="window.print()">🖨️ طباعة الكشف</button><button class="b4" onclick="printAttAct()">🖨️ طباعة غياب ونشاط</button></div>
         <div id="rep-box" style="margin-top:15px;"></div>
+        <button class="b1" onclick="window.print()" style="margin-top:10px;">🖨️ طباعة الكشف</button>
+      </div>
+      <div class="card">
+        <h2>📝 سجل طالب (غياب ونشاط)</h2>
+        <select id="log-st" onchange="showLog()"></select>
+        <div id="log-box" class="log-box" style="display:none;"></div>
       </div>
     </section>
     
@@ -102,7 +123,6 @@ th,td{border:1px solid #e2e8f0;padding:8px;text-align:center;white-space:nowrap;
         <div class="row"><select id="is" style="margin-bottom:10px;"><option value="">-- الشعبة --</option></select><button class="b4" onclick="ref()" style="width:60px; margin:0 0 10px 0;">تحديث</button></div>
         <input type="file" id="ef" accept=".xlsx,.xls,.csv" style="border:1px dashed #cbd5e1;padding:10px;"><button class="b1" onclick="impEx()">استيراد</button>
       </div>
-      
       <div class="card"><h2>🏫 الشعب</h2>
         <div style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px;">
           <button class="b2" onclick="quickAdd('أ')" style="width:auto; padding:8px 15px; margin:0;">أ</button><button class="b2" onclick="quickAdd('ب')" style="width:auto; padding:8px 15px; margin:0;">ب</button><button class="b2" onclick="quickAdd('ج')" style="width:auto; padding:8px 15px; margin:0;">ج</button><button class="b2" onclick="quickAdd('د')" style="width:auto; padding:8px 15px; margin:0;">د</button><button class="b2" onclick="quickAdd('هـ')" style="width:auto; padding:8px 15px; margin:0;">هـ</button>
@@ -110,12 +130,10 @@ th,td{border:1px solid #e2e8f0;padding:8px;text-align:center;white-space:nowrap;
         <div class="row"><input id="sn" placeholder="شعبة مخصصة"><button class="b2" onclick="addS()" style="width:80px;margin:0;">إضافة</button></div>
         <div id="sl" style="margin-top:10px;"></div>
       </div>
-      
       <div class="card"><h2>📚 المواد</h2>
         <div class="row"><input id="sub" placeholder="اسم المادة"><button class="b2" onclick="addSub()" style="width:80px;margin:0;">إضافة</button></div>
         <div id="subl" style="margin-top:10px;"></div>
       </div>
-      
       <div class="card"><h2>🔐 كلمة المرور</h2><input type="password" id="np" placeholder="الجديدة"><button class="b4" onclick="chPass()">تحديث</button></div>
       <div class="card"><h2>⚠️ الخطر</h2><button class="b3" onclick="clearAll()">🗑️ حذف كل البيانات</button></div>
     </section>
@@ -146,104 +164,102 @@ function delSt(id){if(confirm('حذف الطالب؟')){DB.students=DB.students.
 function clearAll(){if(confirm('تأكيد مسح الكل؟')){if(prompt('اكتب "حذف":')==='حذف'){DB={"students":[],"sections":[],"subjects":defaultSubs,"grades":[],"attendance":{},"activity":{},"adminPass":"123456"};sv();init();tst('تم المسح');}}}
 function renderSt(){let q=document.getElementById('search').value;let f=DB.students.filter(x=>x.name.includes(q)||x.code.includes(q));let h=document.getElementById('st-list');if(!f.length)return h.innerHTML='<p style="text-align:center;padding:20px;">لا يوجد</p>';h.innerHTML=f.map(x=>`<div class="li"><div><b>${x.name}</b><small>الشعبة: ${x.section} | الكود: ${x.code}</small></div><button class="ib" onclick="delSt(${x.id})">🗑️</button></div>`).join('');}
 function init(){ref();renderSt();}
-function ref(){let so=DB.sections.map(x=>`<option value="${x}">${x}</option>`).join(''),suo=DB.subjects.map(x=>`<option value="${x.id}">${x.name}</option>`).join('');document.getElementById('is').innerHTML='<option value="">-- الشعبة --</option>'+so;document.getElementById('gs').innerHTML='<option value="">-- الشعبة --</option>'+so;document.getElementById('as').innerHTML='<option value="">-- الشعبة --</option>'+so;document.getElementById('acs').innerHTML='<option value="">-- الشعبة --</option>'+so;document.getElementById('gsub').innerHTML='<option value="">-- المادة --</option>'+suo;document.getElementById('rs').innerHTML='<option value="">-- طالب --</option>'+DB.students.map(x=>`<option value="${x.id}">${x.name} (${x.section})</option>`).join('');document.getElementById('sl').innerHTML=DB.sections.map(x=>`<div class="li"><div><b>${x}</b></div><button class="ib" onclick="delS('${x}')">🗑️</button></div>`).join('');document.getElementById('subl').innerHTML=DB.subjects.map(x=>`<div class="li"><div><b>${x.name}</b></div><button class="ib" onclick="delSub(${x.id})">🗑️</button></div>`).join('');}
-
-function autoSave(sid, subId, field, val, studentId) {
-  let existing = DB.grades.find(y => y.student_id === studentId && y.subject_id === subId);
-  if(!existing) {
-    existing = { id: nid(DB.grades), student_id: studentId, subject_id: subId };
-    DB.grades.push(existing);
-  }
-  existing[field] = val !== '' ? +val : null;
-  sv();
+function ref(){let so=DB.sections.map(x=>`<option value="${x}">${x}</option>`).join(''),suo=DB.subjects.map(x=>`<option value="${x.id}">${x.name}</option>`).join('');document.getElementById('is').innerHTML='<option value="">-- الشعبة --</option>'+so;document.getElementById('gs').innerHTML='<option value="">-- الشعبة --</option>'+so;document.getElementById('as').innerHTML='<option value="">-- الشعبة --</option>'+so;document.getElementById('acs').innerHTML='<option value="">-- الشعبة --</option>'+so;document.getElementById('gsub').innerHTML='<option value="">-- المادة --</option>'+suo;document.getElementById('rs').innerHTML='<option value="">-- طالب --</option>'+DB.students.map(x=>`<option value="${x.id}">${x.name} (${x.section})</option>`).join('');document.getElementById('log-st').innerHTML='<option value="">-- طالب --</option>'+DB.students.map(x=>`<option value="${x.id}">${x.name} (${x.section})</option>`).join('');document.getElementById('sl').innerHTML=DB.sections.map(x=>`<div class="li"><div><b>${x}</b></div><button class="ib" onclick="delS('${x}')">🗑️</button></div>`).join('');document.getElementById('subl').innerHTML=DB.subjects.map(x=>`<div class="li"><div><b>${x.name}</b></div><button class="ib" onclick="delSub(${x.id})">🗑️</button></div>`).join('');}
+function autoSave(subId, field, val, studentId) { let existing = DB.grades.find(y => y.student_id === studentId && y.subject_id === subId); if(!existing) { existing = { id: nid(DB.grades), student_id: studentId, subject_id: subId }; DB.grades.push(existing); } existing[field] = val !== '' ? +val : null; sv(); tst('تم الحفظ التلقائي', 's'); }
+function renderGt(){let s=document.getElementById('gs').value,sid=+document.getElementById('gsub').value,c=document.getElementById('gt');if(!s||!sid){c.innerHTML='';return;}let st=DB.students.filter(x=>x.section===s);if(!st.length){c.innerHTML='<p style="text-align:center;">لا يوجد طلاب</p>';return;}let h='<table><thead><tr><th>الطالب</th><th colspan="2">الفصل الأول - الشهر الأول</th><th colspan="2">الفصل الأول - الشهر الثاني</th><th>نصف السنة</th><th colspan="2">الفصل الثاني - الشهر الأول</th><th colspan="2">الفصل الثاني - الشهر الثاني</th><th>نهائي</th></tr><tr><th></th><th>شفوي (100)</th><th>تحريري (100)</th><th>شفوي (100)</th><th>تحريري (100)</th><th></th><th>شفوي (100)</th><th>تحريري (100)</th><th>شفوي (100)</th><th>تحريري (100)</th><th></th></tr></thead><tbody>';st.forEach(x=>{let g=DB.grades.find(y=>y.student_id===x.id&&y.subject_id===sid)||{};let v=k=>g[k]!==undefined && g[k]!==null ? g[k] : '';h+=`<tr><td style="text-align:right;font-weight:bold;">${x.name}</td><td><input type="number" id="a1-${x.id}" value="${v('m1_o')}" onchange="autoSave(${sid},'m1_o',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td><td><input type="number" id="a2-${x.id}" value="${v('m1_w')}" onchange="autoSave(${sid},'m1_w',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td><td><input type="number" id="a3-${x.id}" value="${v('m2_o')}" onchange="autoSave(${sid},'m2_o',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td><td><input type="number" id="a4-${x.id}" value="${v('m2_w')}" onchange="autoSave(${sid},'m2_w',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td><td><input type="number" id="a5-${x.id}" value="${v('mid')}" onchange="autoSave(${sid},'mid',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td><td><input type="number" id="a6-${x.id}" value="${v('m3_o')}" onchange="autoSave(${sid},'m3_o',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td><td><input type="number" id="a7-${x.id}" value="${v('m3_w')}" onchange="autoSave(${sid},'m3_w',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td><td><input type="number" id="a8-${x.id}" value="${v('m4_o')}" onchange="autoSave(${sid},'m4_o',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td><td><input type="number" id="a9-${x.id}" value="${v('m4_w')}" onchange="autoSave(${sid},'m4_w',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td><td><input type="number" id="a10-${x.id}" value="${v('final')}" onchange="autoSave(${sid},'final',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td></tr>`;});c.innerHTML=h+'</tbody></table>';}
+  <script>
+function renderAtt(){
+  let s=document.getElementById('as').value,d=document.getElementById('ad').value,q=document.getElementById('search-att').value;
+  if(!s||!d)return;let k=s+'_'+d;if(!DB.attendance[k])DB.attendance[k]={};
+  let st=DB.students.filter(x=>x.section===s && x.name.includes(q));
+  document.getElementById('al').innerHTML=st.map(x=>{
+    let stat = DB.attendance[k][x.id];
+    let isAbsent = stat === true || stat === 'مريض' || stat === 'عمل' || stat === 'أخرى';
+    let reason = stat === true ? 'بدون عذر' : (stat === 'مريض' ? 'مريض' : (stat === 'عمل' ? 'عمل' : (stat === 'أخرى' ? 'أخرى' : 'بدون عذر')));
+    return `<div class="li"><div><b>${x.name}</b><br><small style="color:var(--e)">${isAbsent?'غائب ('+reason+')':'حاضر'}</small></div>
+    <div style="display:flex; flex-direction:column; gap:5px; align-items:flex-end;">
+      <label><input type="checkbox" ${isAbsent?'checked':''} onchange="toggleAtt('${k}',${x.id},this.checked,'true')"> غياب</label>
+      <select onchange="toggleAtt('${k}',${x.id},this.value!=='',this.value)" style="padding:5px; font-size:12px; width:100px; display:${isAbsent?'block':'none'};">
+        <option value="true" ${stat===true?'selected':''}>بدون عذر</option>
+        <option value="مريض" ${stat==='مريض'?'selected':''}>مريض</option>
+        <option value="عمل" ${stat==='عمل'?'selected':''}>عمل</option>
+        <option value="أخرى" ${stat==='أخرى'?'selected':''}>أخرى</option>
+      </select>
+    </div></div>`;
+  }).join('');
+}
+function toggleAtt(k, sid, isChecked, reason){
+  if(!isChecked){ delete DB.attendance[k][sid]; } else { DB.attendance[k][sid] = reason; }
+  sv(); tst('تم التحديث', 's'); renderAtt();
 }
 
-function renderGt(){
-  let s=document.getElementById('gs').value,sid=+document.getElementById('gsub').value,c=document.getElementById('gt');
-  if(!s||!sid){c.innerHTML='';return;}
-  let st=DB.students.filter(x=>x.section===s);
-  if(!st.length){c.innerHTML='<p style="text-align:center;">لا يوجد طلاب</p>';return;}
-  let h='<table><thead><tr><th>الطالب</th><th colspan="2">الشهر الأول</th><th colspan="2">الشهر الثاني</th><th>نصف السنة</th><th colspan="2">الشهر الثالث</th><th colspan="2">الشهر الرابع</th><th>نهائي</th></tr><tr><th></th><th>شفوي (50)</th><th>تحريري (100)</th><th>شفوي (50)</th><th>تحريري (100)</th><th></th><th>شفوي (50)</th><th>تحريري (100)</th><th>شفوي (50)</th><th>تحريري (100)</th><th></th></tr></thead><tbody>';
-  st.forEach(x=>{
-    let g=DB.grades.find(y=>y.student_id===x.id&&y.subject_id===sid)||{};
-    let v=k=>g[k]!==undefined && g[k]!==null ? g[k] : '';
-    h+=`<tr><td style="text-align:right;font-weight:bold;">${x.name}</td>
-    <td><input type="number" id="a1-${x.id}" value="${v('m1_o')}" onchange="autoSave('${sid}','${sid}','m1_o',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td>
-    <td><input type="number" id="a2-${x.id}" value="${v('m1_w')}" onchange="autoSave('${sid}','${sid}','m1_w',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td>
-    <td><input type="number" id="a3-${x.id}" value="${v('m2_o')}" onchange="autoSave('${sid}','${sid}','m2_o',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td>
-    <td><input type="number" id="a4-${x.id}" value="${v('m2_w')}" onchange="autoSave('${sid}','${sid}','m2_w',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td>
-    <td><input type="number" id="a5-${x.id}" value="${v('mid')}" onchange="autoSave('${sid}','${sid}','mid',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td>
-    <td><input type="number" id="a6-${x.id}" value="${v('m3_o')}" onchange="autoSave('${sid}','${sid}','m3_o',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td>
-    <td><input type="number" id="a7-${x.id}" value="${v('m3_w')}" onchange="autoSave('${sid}','${sid}','m3_w',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td>
-    <td><input type="number" id="a8-${x.id}" value="${v('m4_o')}" onchange="autoSave('${sid}','${sid}','m4_o',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td>
-    <td><input type="number" id="a9-${x.id}" value="${v('m4_w')}" onchange="autoSave('${sid}','${sid}','m4_w',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td>
-    <td><input type="number" id="a10-${x.id}" value="${v('final')}" onchange="autoSave('${sid}','${sid}','final',this.value,${x.id})" style="width:40px;padding:4px;margin:0;"></td></tr>`;
-  });
-  c.innerHTML=h+'</tbody></table>';
+function renderAct(){
+  let s=document.getElementById('acs').value,q=document.getElementById('search-act').value;if(!s)return;
+  let st=DB.students.filter(x=>x.section===s && x.name.includes(q));
+  document.getElementById('acl').innerHTML=st.map(x=>`<div class="li"><div><b>${x.name}</b></div><input type="number" id="ac-${x.id}" value="${DB.activity[x.id]||''}" style="width:80px;margin:0;padding:8px;text-align:center;"></div>`).join('');
+  document.getElementById('sa').style.display='block';
 }
-
-function renderAtt(){let s=document.getElementById('as').value,d=document.getElementById('ad').value;if(!s||!d)return;let k=s+'_'+d;if(!DB.attendance[k])DB.attendance[k]={};document.getElementById('al').innerHTML=DB.students.filter(x=>x.section===s).map(x=>`<div class="li"><div><b>${x.name}</b></div><label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" style="width:20px;margin:0;" ${DB.attendance[k][x.id]?'checked':''} onchange="DB.attendance['${k}'][${x.id}]=this.checked;sv();"><span style="font-size:13px;color:red;">غائب</span></label></div>`).join('');}
-function renderAct(){let s=document.getElementById('acs').value;if(!s)return;document.getElementById('acl').innerHTML=DB.students.filter(x=>x.section===s).map(x=>`<div class="li"><div><b>${x.name}</b></div><input type="number" id="ac-${x.id}" value="${DB.activity[x.id]||''}" style="width:80px;margin:0;padding:8px;text-align:center;"></div>`).join('');document.getElementById('sa').style.display='block';}
 function saveAct(){let s=document.getElementById('acs').value;DB.students.filter(x=>x.section===s).forEach(x=>{let v=document.getElementById(`ac-${x.id}`).value;if(v)DB.activity[x.id]=+v;else delete DB.activity[x.id];});sv();tst('تم الحفظ ✅');}
-function calcAbsences(sid){let count=0;for(let k in DB.attendance){if(DB.attendance[k][sid])count++;}return count;}
 
-function genRep(box,forceId=null){
-  let sid=forceId||+document.getElementById('rs').value;if(!sid)return;
-  let st=DB.students.find(x=>x.id===sid),gs=DB.grades.filter(x=>x.student_id===sid);
-  let absences=calcAbsences(sid),activity=DB.activity[sid]||0;
-  let h=`<div style="border:1px solid #cbd5e1;padding:15px;background:#fff;border-radius:8px;overflow-x:auto;">
-  <h3 style="text-align:center;margin-bottom:15px;color:var(--d);">كشف درجات الطالب</h3>
-  <div style="margin-bottom:15px;border-bottom:1px solid #eee;padding-bottom:10px;">
-  <p><strong>الاسم:</strong> ${st.name}</p>
-  <p><strong>الشعبة:</strong> ${st.section} | <strong>الكود:</strong> ${st.code}</p>
-  <p><strong>الغياب:</strong> ${absences} أيام (خصم ${absences*5} درجات) | <strong>النشاط:</strong> ${activity} درجة</p>
-  </div>
-  <table><thead><tr><th>المادة</th><th>الشفوي (بعد الخصم والإضافة)</th><th>معدل ش1</th><th>معدل ش2</th><th>معدل ف1</th><th>نصف السنة</th><th>معدل ش3</th><th>معدل ش4</th><th>معدل ف2</th><th>السعي</th><th>النهائي</th><th>النتيجة</th></tr></thead><tbody>`;
-  
-  gs.forEach(g=>{
-    let s=DB.subjects.find(x=>x.id===g.subject_id);
-    if(s){
-      let m1o=g.m1_o||0,m2o=g.m2_o||0,m3o=g.m3_o||0,m4o=g.m4_o||0;
-      let deduction=absences*5;
-      let m1o_final=Math.min(50,Math.max(0,m1o-deduction)+activity);
-      let m2o_final=Math.min(50,Math.max(0,m2o-deduction)+activity);
-      let m3o_final=Math.min(50,Math.max(0,m3o-deduction)+activity);
-      let m4o_final=Math.min(50,Math.max(0,m4o-deduction)+activity);
-      
-      let m1=m1o_final+((g.m1_w||0)/2);
-      let m2=m2o_final+((g.m2_w||0)/2);
-      let f1=(m1+m2)/2;
-      let m3=m3o_final+((g.m3_w||0)/2);
-      let m4=m4o_final+((g.m4_w||0)/2);
-      let f2=(m3+m4)/2;
-      
-      let mid=g.mid||0;
-      let an=(f1+f2+mid)/3;
-      let fe=g.final||0;
-      let fg=(an+fe)/2;
-      let stat=fg>=s.pass?'ناجح':'راسب';
-      
-      h+=`<tr>
-        <td>${s.name}</td>
-        <td style="color:var(--w);font-weight:bold;">${m1o_final} / ${m2o_final} / ${m3o_final} / ${m4o_final}</td>
-        <td>${m1.toFixed(1)}</td><td>${m2.toFixed(1)}</td><td>${f1.toFixed(1)}</td>
-        <td>${mid}</td>
-        <td>${m3.toFixed(1)}</td><td>${m4.toFixed(1)}</td><td>${f2.toFixed(1)}</td>
-        <td><strong>${an.toFixed(1)}</strong></td><td>${fe}</td>
-        <td style="background:#e0f2fe;font-weight:bold;color:${stat==='ناجح'?'green':'red'}">${fg.toFixed(1)} (${stat})</td>
-      </tr>`;
+function calcAbsences(sid){
+  let total=0, justified=0;
+  for(let k in DB.attendance){
+    let stat=DB.attendance[k][sid];
+    if(stat){
+      if(stat===true) total++;
+      else justified++;
     }
-  });
-  h+=`</tbody></table></div>`;document.getElementById(box).innerHTML=h;
+  }
+  return {total, justified};
 }
 
-function printAttAct(){
-  let sid=+document.getElementById('rs').value;if(!sid)return tst('اختر طالباً','e');
-  let st=DB.students.find(x=>x.id===sid),ab=calcAbsences(sid),ac=DB.activity[sid]||0;
-  let w=window.open('','','width=600,height=400');
-  w.document.write(`<div style="text-align:center;font-family:Tahoma;padding:20px;"><h2>تقرير الغياب والنشاط</h2><p><strong>الاسم:</strong> ${st.name}</p><p><strong>الشعبة:</strong> ${st.section}</p><hr><p><strong>أيام الغياب:</strong> ${ab} (خصم ${ab*5} درجات)</p><p><strong>درجة النشاط:</strong> ${ac} (تضاف للشفوي)</p></div>`);
-  w.document.close();w.print();
+function showLog(){
+  let sid=+document.getElementById('log-st').value;if(!sid)return;
+  let logs=[];
+  for(let k in DB.attendance){
+    let stat=DB.attendance[k][sid];
+    if(stat){
+      let d=k.split('_')[1];
+      let reason = stat===true?'بدون عذر':stat;
+      let deduct = stat===true?5:0;
+      logs.push({date:d, type:'غياب', reason:reason, val:deduct});
+    }
+  }
+  let act = DB.activity[sid]||0;
+  if(act > 0) logs.push({date:'مستمر', type:'نشاط', reason:'-', val:-act});
+  
+  let h = '<table><thead><tr><th>التاريخ</th><th>الحدث</th><th>السبب</th><th>التأثير</th></tr></thead><tbody>';
+  logs.forEach(l=>{ h += `<tr><td>${l.date}</td><td style="color:${l.type==='غياب'?'red':'green'}">${l.type}</td><td>${l.reason}</td><td>${l.val!==0?(l.val>0?'خصم '+l.val+' شفوي':'إضافة '+Math.abs(l.val)+' شفوي'):'لا يوجد'}</td></tr>`; });
+  h += '</tbody></table>';
+  if(logs.length===0) h = '<p style="text-align:center;">لا يوجد سجل</p>';
+  document.getElementById('log-box').innerHTML = h;
+  document.getElementById('log-box').style.display = 'block';
 }
-</script>
-</body>
-</html>
+
+function calcStats(){
+  let sec = document.getElementById('gs').value;
+  if(!sec) return tst('اختر الشعبة من صفحة الدرجات أولاً لتحديدها', 'e');
+  let st = DB.students.filter(x=>x.section===sec);
+  if(!st.length) return tst('لا يوجد طلاب', 'e');
+  let passed = 0, failed = 0;
+  st.forEach(student => {
+    let gs = DB.grades.filter(g => g.student_id === student.id);
+    let total = 0, subCount = 0;
+    gs.forEach(g => {
+      let s = DB.subjects.find(x => x.id === g.subject_id);
+      if(s) {
+        let m1 = (g.m1_o||0) + ((g.m1_w||0)/2);
+        let m2 = (g.m2_o||0) + ((g.m2_w||0)/2);
+        let f1 = (m1+m2)/2;
+        let m3 = (g.m3_o||0) + ((g.m3_w||0)/2);
+        let m4 = (g.m4_o||0) + ((g.m4_w||0)/2);
+        let f2 = (m3+m4)/2;
+        let an = (f1 + f2 + (g.mid||0)) / 3;
+        let fg = (an + (g.final||0)) / 2;
+        total += fg;
+        subCount++;
+      }
+    });
+    if(subCount > 0 && (total/subCount) >= 50) passed++; else failed++;
+  });
+  let rate
