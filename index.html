@@ -236,27 +236,28 @@ th { background: var(--bg); color: var(--primary); font-weight: bold; }
   </main>
 </div>
 <div id="toast" class="toast"></div>
-<div class="desig<script>
+<div class="designer-footer">تم التصميم والتطوير بواسطة <strong>د. حسام الخالدي</strong> &copy; 2024</div>
+<script>
 let defaultSubs = [{id:1,name:'اسلامية'},{id:2,name:'عربي'},{id:3,name:'انكليزي'},{id:4,name:'رياضيات'},{id:5,name:'احياء'},{id:6,name:'فيزياء'},{id:7,name:'كيمياء'},{id:8,name:'اجتماعيات'},{id:9,name:'اخلاقيه'}];
 let DB;
 try {
-  let saved = localStorage.getItem('schoolDB_v22');
+  let saved = localStorage.getItem('schoolDB_v30');
   if (saved) { DB = JSON.parse(decodeURIComponent(atob(saved))); } 
   else { DB = {"students":[],"levels":[],"sections":[],"subjects":[],"grades":[],"attendance":{},"activity":{},"adminPass":"admin"}; }
 } catch(e) { DB = {"students":[],"levels":[],"sections":[],"subjects":[],"grades":[],"attendance":{},"activity":{},"adminPass":"admin"}; }
 if(!DB.subjects || DB.subjects.length===0) { DB.subjects = defaultSubs; }
 
-function sv(){ let data = JSON.stringify(DB); let encoded = btoa(encodeURIComponent(data)); localStorage.setItem('schoolDB_v22', encoded); }
+function sv(){ let data = JSON.stringify(DB); let encoded = btoa(encodeURIComponent(data)); localStorage.setItem('schoolDB_v30', encoded); }
 function tst(m,t='success'){ let e=document.getElementById('toast'); e.textContent=m; e.className='toast show '+t; setTimeout(()=>e.className='toast '+t,2500); }
 function nid(a){ return a.length?Math.max(...a.map(x=>x.id))+1:1; }
 
 function toggleTheme() { let body = document.body; if(body.getAttribute('data-theme') === 'dark') { body.removeAttribute('data-theme'); localStorage.setItem('theme', 'light'); } else { body.setAttribute('data-theme', 'dark'); localStorage.setItem('theme', 'dark'); } }
 if(localStorage.getItem('theme') === 'dark') document.body.setAttribute('data-theme', 'dark');
 
-let isLogged = localStorage.getItem('isLogged_v22') === 'true';
+let isLogged = localStorage.getItem('isLogged_v30') === 'true';
 if(isLogged) { document.getElementById('login-screen').style.display='none'; document.getElementById('admin-view').style.display='block'; setTimeout(init, 100); }
-function loginAdmin(bypass = false){ let p=document.getElementById('login-pass').value; if(bypass || p===DB.adminPass || p==="admin"){ localStorage.setItem('isLogged_v22', 'true'); document.getElementById('login-screen').style.display='none'; document.getElementById('admin-view').style.display='block'; init(); } else { document.getElementById('login-err').style.display='block'; } }
-function logoutAdmin(){ localStorage.setItem('isLogged_v22', 'false'); document.getElementById('admin-view').style.display='none'; document.getElementById('login-screen').style.display='flex'; document.getElementById('login-pass').value=''; document.getElementById('login-err').style.display='none'; }
+function loginAdmin(bypass = false){ let p=document.getElementById('login-pass').value; if(bypass || p===DB.adminPass || p==="admin"){ localStorage.setItem('isLogged_v30', 'true'); document.getElementById('login-screen').style.display='none'; document.getElementById('admin-view').style.display='block'; init(); } else { document.getElementById('login-err').style.display='block'; } }
+function logoutAdmin(){ localStorage.setItem('isLogged_v30', 'false'); document.getElementById('admin-view').style.display='none'; document.getElementById('login-screen').style.display='flex'; document.getElementById('login-pass').value=''; document.getElementById('login-err').style.display='none'; }
 function showStudentPortal(){ document.getElementById('login-screen').style.display='none'; document.getElementById('student-portal').style.display='flex'; }
 function hideStudentPortal(){ document.getElementById('student-portal').style.display='none'; document.getElementById('login-screen').style.display='flex'; }
 function loginStudent(){ let c=document.getElementById('student-code-input').value.trim(); let s=DB.students.find(x=>x.code===c); if(s){ document.getElementById('student-portal').style.display='none'; document.getElementById('student-view').style.display='block'; document.getElementById('st-name-display').innerText='مرحباً، '+s.name; genRep('st-grades-box',s.id); } else tst('كود خطأ','error'); }
@@ -441,7 +442,7 @@ function ref(){
   document.getElementById('levels-list').innerHTML=DB.levels.map(x=>`<div class="list-item"><div class="item-info"><b>${x}</b></div><button class="icon-btn" onclick="delLevel('${x}')">🗑️</button></div>`).join('');
   document.getElementById('subl').innerHTML=DB.subjects.map(x=>`<div class="list-item"><div class="item-info"><b>${x.name}</b></div><button class="icon-btn" onclick="delSub(${x.id})">🗑️</button></div>`).join('');
 }
-
+  <script>
 function autoSave(subId, field, val, studentId) {
   let existing = DB.grades.find(y => y.student_id === studentId && y.subject_id === subId);
   if(!existing) { existing = { id: nid(DB.grades), student_id: studentId, subject_id: subId }; DB.grades.push(existing); }
@@ -504,6 +505,7 @@ function renderAct() {
   document.getElementById('sa').style.display='block';
 }
 function saveAct(){ let s=document.getElementById('acs').value; DB.students.filter(x=>x.section===s).forEach(x=>{ let v=document.getElementById(`ac-${x.id}`).value; if(v) DB.activity[x.id]=+v; else delete DB.activity[x.id]; }); sv(); tst('تم الحفظ ✅'); }
+
 function renderLevels() {
   let lv = document.getElementById('lvl-level').value; let sec = document.getElementById('lvl-sec').value; let filter = document.getElementById('lvl-filter').value; let el = document.getElementById('lvl-list');
   if(!lv || !sec) { el.innerHTML = '<p style="text-align:center;">اختر الصف والشعبة</p>'; return; }
@@ -528,6 +530,7 @@ function renderLevels() {
   results.forEach((r, i) => { let color = ''; if(r.grade === 'ممتاز') color = 'var(--success)'; else if(r.grade === 'جيد جداً' || r.grade === 'جيد') color = 'var(--primary)'; else if(r.grade === 'متوسط' || r.grade === 'مقبول') color = 'var(--warning)'; else color = 'var(--danger)'; h += `<tr><td>${i+1}</td><td style="font-weight:bold;">${r.name}</td><td>${r.gender}</td><td>${r.avg}%</td><td style="color:${color}; font-weight:bold;">${r.grade}</td></tr>`; });
   h += '</tbody></table></div>'; el.innerHTML = h;
 }
+
 function searchReportStudent(){
   let q = document.getElementById('search-rep').value.trim(); let res = document.getElementById('rs-results');
   if(q.length < 2) { res.innerHTML=''; return; }
@@ -545,10 +548,13 @@ function selectReportStudent(id){
   gs.forEach(g=>{ let s=DB.subjects.find(x=>x.id===g.subject_id); if(s){ let m1o=g.m1_o||0, m2o=g.m2_o||0, m3o=g.m3_o||0, m4o=g.m4_o||0; let deduction = abs.total*5; let m1o_final = Math.min(100, Math.max(0, m1o-deduction)+activity); let m2o_final = Math.min(100, Math.max(0, m2o-deduction)+activity); let m3o_final = Math.min(100, Math.max(0, m3o-deduction)+activity); let m4o_final = Math.min(100, Math.max(0, m4o-deduction)+activity); let m1 = (m1o_final + (g.m1_w||0))/2; let m2 = (m2o_final + (g.m2_w||0))/2; let f1 = (m1+m2)/2; let m3 = (m3o_final + (g.m3_w||0))/2; let m4 = (m4o_final + (g.m4_w||0))/2; let f2 = (m3+m4)/2; let mid = g.mid||0; let an = (f1+f2+mid)/3; let fe = g.final||0; let fg = (an+fe)/2; let stat = fg >= 50 ? 'ناجح' : 'راسب'; h+=`<div class="subject-card"><div class="subject-title">${s.name}</div><div class="grade-row">معدل ش1: <span>${m1.toFixed(1)}</span></div><div class="grade-row">معدل ش2: <span>${m2.toFixed(1)}</span></div><div class="grade-row" style="color:var(--primary); font-weight:bold;">معدل ف1: <span>${f1.toFixed(1)}</span></div><div class="grade-row">نصف السنة: <span>${mid}</span></div><div class="grade-row">معدل ش3: <span>${m3.toFixed(1)}</span></div><div class="grade-row">معدل ش4: <span>${m4.toFixed(1)}</span></div><div class="grade-row" style="color:var(--primary); font-weight:bold;">معدل ف2: <span>${f2.toFixed(1)}</span></div><div class="grade-row" style="color:var(--warning); font-weight:bold;">السعي: <span>${an.toFixed(1)}</span></div><div class="grade-row">نهائي: <span>${fe}</span></div><div class="final-badge ${stat==='راسب'?'fail':''}">النتيجة: ${fg.toFixed(1)} (${stat})</div></div>`; } });
   h+=`</div></div>`; document.getElementById('rep-box').innerHTML = h; document.getElementById('print-btn').style.display = 'block';
 }
+
 function searchAttReport(){ let q = document.getElementById('search-att-report').value.trim(); let res = document.getElementById('att-rep-results'); if(q.length < 2) { res.innerHTML=''; return; } let matches = DB.students.filter(s => s.name.includes(q) || s.code.includes(q)); if(matches.length === 0) { res.innerHTML = '<p style="font-size:12px; color:red;">لا يوجد طالب</p>'; return; } res.innerHTML = matches.map(s => `<div class="list-item" style="cursor:pointer;" onclick="showAttReport(${s.id})"><div class="item-info"><b>${s.name}</b><small>${s.level} - ${s.section}</small></div></div>`).join(''); }
 function showAttReport(id){ document.getElementById('att-rep-results').innerHTML = ''; document.getElementById('search-att-report').value = ''; let st = DB.students.find(x=>x.id===id); let logs=[]; let abs=calcAbsences(id); for(let k in DB.attendance){ let stat=DB.attendance[k][id]; if(stat){ let parts=k.split('_'); let dateStr=parts[1]; let dateObj=new Date(dateStr); let dayName = isNaN(dateObj) ? '' : dateObj.toLocaleDateString('ar-EG', {weekday: 'long'}); let reason = (stat===true||stat==='true') ? 'بدون عذر' : stat; logs.push({date:dateStr, day:dayName, reason:reason}); } } logs.sort((a,b)=> new Date(b.date) - new Date(a.date)); let h = `<div class="report-card"><div class="report-header"><h3>كشف غياب الطالب: ${st.name}</h3><p>الصف: ${st.level} - ${st.section}</p><p>إجمالي الغياب: ${abs.total + abs.justified} (بدون عذر: ${abs.total})</p></div>`; h += '<div class="table-wrapper"><table><thead><tr><th>التاريخ</th><th>اليوم</th><th>سبب الغياب</th></tr></thead><tbody>'; if(logs.length===0) { h += '<tr><td colspan="3" style="text-align:center;">لا يوجد سجل</td></tr>'; } else { logs.forEach(l=>{ h += `<tr><td>${l.date}</td><td>${l.day}</td><td style="color:red;">${l.reason}</td></tr>`; }); } h += '</tbody></table></div></div>'; document.getElementById('att-rep-box').innerHTML = h; }
+
 function searchActReport(){ let q = document.getElementById('search-act-report').value.trim(); let res = document.getElementById('act-rep-results'); if(q.length < 2) { res.innerHTML=''; return; } let matches = DB.students.filter(s => s.name.includes(q) || s.code.includes(q)); if(matches.length === 0) { res.innerHTML = '<p style="font-size:12px; color:red;">لا يوجد طالب</p>'; return; } res.innerHTML = matches.map(s => `<div class="list-item" style="cursor:pointer;" onclick="showActReport(${s.id})"><div class="item-info"><b>${s.name}</b><small>${s.level} - ${s.section}</small></div></div>`).join(''); }
 function showActReport(id){ document.getElementById('act-rep-results').innerHTML = ''; document.getElementById('search-act-report').value = ''; let st = DB.students.find(x=>x.id===id); let act = DB.activity[id]||0; let h = `<div class="report-card"><div class="report-header"><h3>كشف نشاط الطالب: ${st.name}</h3><p>الصف: ${st.level} - ${st.section}</p></div>`; h += `<div style="text-align:center; padding:20px; background:var(--bg); border-radius:8px; margin-top:15px;"><h4 style="color:var(--primary); margin-bottom:10px;">درجة النشاط</h4><strong style="font-size:30px; color:var(--success);">${act}</strong> <span style="font-size:16px;">درجة</span></div></div>`; document.getElementById('act-rep-box').innerHTML = h; }
+
 function genRep(box, sid){
   let st=DB.students.find(x=>x.id===sid), gs=DB.grades.filter(x=>x.student_id===sid); let abs=calcAbsences(sid), activity = (DB.activity && DB.activity[sid]) ? DB.activity[sid] : 0;
   let h=`<div class="report-card"><div class="report-header"><h3>كشف درجات الطالب</h3><div class="student-info"><div><strong>الاسم:</strong> ${st.name}</div><div><strong>الصف:</strong> ${st.level}</div><div><strong>الشعبة:</strong> ${st.section}</div><div><strong>الكود:</strong> ${st.code}</div></div><div style="margin-top:10px; font-size:13px; color:var(--danger); font-weight:bold;">${abs.total} غياب بدون عذر (خصم ${abs.total*5} درجات) | ${abs.justified} غياب بعذر | النشاط: ${activity} درجة</div></div><div class="grades-grid">`;
@@ -556,6 +562,7 @@ function genRep(box, sid){
   gs.forEach(g=>{ let s=DB.subjects.find(x=>x.id===g.subject_id); if(s){ let m1o=g.m1_o||0, m2o=g.m2_o||0, m3o=g.m3_o||0, m4o=g.m4_o||0; let deduction = abs.total*5; let m1o_final = Math.min(100, Math.max(0, m1o-deduction)+activity); let m2o_final = Math.min(100, Math.max(0, m2o-deduction)+activity); let m3o_final = Math.min(100, Math.max(0, m3o-deduction)+activity); let m4o_final = Math.min(100, Math.max(0, m4o-deduction)+activity); let m1 = (m1o_final + (g.m1_w||0))/2; let m2 = (m2o_final + (g.m2_w||0))/2; let f1 = (m1+m2)/2; let m3 = (m3o_final + (g.m3_w||0))/2; let m4 = (m4o_final + (g.m4_w||0))/2; let f2 = (m3+m4)/2; let mid = g.mid||0; let an = (f1+f2+mid)/3; let fe = g.final||0; let fg = (an+fe)/2; let stat = fg >= 50 ? 'ناجح' : 'راسب'; h+=`<div class="subject-card"><div class="subject-title">${s.name}</div><div class="grade-row">معدل ش1: <span>${m1.toFixed(1)}</span></div><div class="grade-row">معدل ش2: <span>${m2.toFixed(1)}</span></div><div class="grade-row" style="color:var(--primary); font-weight:bold;">معدل ف1: <span>${f1.toFixed(1)}</span></div><div class="grade-row">نصف السنة: <span>${mid}</span></div><div class="grade-row">معدل ش3: <span>${m3.toFixed(1)}</span></div><div class="grade-row">معدل ش4: <span>${m4.toFixed(1)}</span></div><div class="grade-row" style="color:var(--primary); font-weight:bold;">معدل ف2: <span>${f2.toFixed(1)}</span></div><div class="grade-row" style="color:var(--warning); font-weight:bold;">السعي: <span>${an.toFixed(1)}</span></div><div class="grade-row">نهائي: <span>${fe}</span></div><div class="final-badge ${stat==='راسب'?'fail':''}">النتيجة: ${fg.toFixed(1)} (${stat})</div></div>`; } });
   h+=`</div></div>`; document.getElementById(box).innerHTML=h;
 }
+
 function exportCSV(){
   let csv = '\uFEFFالاسم,الجنس,الصف,الشعبة,المادة,معدل ش1,معدل ش2,معدل ف1,نصف السنة,معدل ش3,معدل ش4,معدل ف2,السعي,النهائي,النتيجة\n';
   DB.students.forEach(st=>{ let gs=DB.grades.filter(g=>g.student_id===st.id); gs.forEach(g=>{ let s=DB.subjects.find(x=>x.id===g.subject_id); if(s){ let abs=calcAbsences(st.id), activity=DB.activity[st.id]||0; let m1o=g.m1_o||0, m2o=g.m2_o||0, m3o=g.m3_o||0, m4o=g.m4_o||0; let deduction = abs.total*5; let m1o_final = Math.min(100, Math.max(0, m1o-deduction)+activity); let m2o_final = Math.min(100, Math.max(0, m2o-deduction)+activity); let m3o_final = Math.min(100, Math.max(0, m3o-deduction)+activity); let m4o_final = Math.min(100, Math.max(0, m4o-deduction)+activity); let m1 = (m1o_final + (g.m1_w||0))/2, m2 = (m2o_final + (g.m2_w||0))/2, f1=(m1+m2)/2; let m3 = (m3o_final + (g.m3_w||0))/2, m4 = (m4o_final + (g.m4_w||0))/2, f2=(m3+m4)/2; let an = (f1+f2+(g.mid||0))/3, fg = (an+(g.final||0))/2; let stat = fg >= 50 ? 'ناجح' : 'راسب'; csv += `"${st.name}","${st.gender||'-'}","${st.level}","${st.section}","${s.name}",${m1.toFixed(1)},${m2.toFixed(1)},${f1.toFixed(1)},${g.mid||0},${m3.toFixed(1)},${m4.toFixed(1)},${f2.toFixed(1)},${an.toFixed(1)},${g.final||0},"${stat}"\n`; } }); });
