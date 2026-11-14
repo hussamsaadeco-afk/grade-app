@@ -38,6 +38,7 @@ main { padding: 15px; max-width: 1100px; margin: 0 auto; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--card); }
 th, td { border: 1px solid var(--border); padding: 10px; text-align: center; }
 th { background: var(--bg); color: var(--primary); font-weight: bold; }
+.table-wrapper table th:first-child, .table-wrapper table td:first-child { position: sticky; right: 0; background: var(--card); z-index: 10; border-left: 2px solid var(--border); }
 .dash-card { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; flex: 1; }
 .dash-card h3 { font-size: 28px; color: var(--primary); margin-bottom: 5px; }
 .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--dark); color: #fff; padding: 12px 24px; border-radius: 25px; font-size: 14px; opacity: 0; transition: all .3s; z-index: 10000; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
@@ -63,7 +64,6 @@ th { background: var(--bg); color: var(--primary); font-weight: bold; }
     <input type="text" id="login-pass" placeholder="كلمة المرور (admin)">
     <div id="login-err" style="color:var(--danger);font-size:12px;margin-bottom:10px;display:none;font-weight:bold;">كلمة المرور غير صحيحة!</div>
     <button class="btn-p" onclick="loginAdmin()">دخول</button>
-    <button style="background:#cbd5e1; color:#1e293b; margin-top:10px; font-size:12px;" onclick="loginAdmin(true)">(دخول تجريبي سريع)</button>
     <button class="btn-o" onclick="showStudentPortal()">🎓 دخول الطالب</button>
   </div>
 </div>
@@ -130,9 +130,33 @@ th { background: var(--bg); color: var(--primary); font-weight: bold; }
           <select id="st-filter-level" onchange="updateSectionFilter()"><option value="">-- كل الصفوف --</option></select>
           <select id="st-filter-sec" onchange="renderSt()"><option value="">-- كل الشعب --</option></select>
         </div>
-        <input id="search-st" placeholder="🔍 بحث بالاسم أو الكود..." oninput="renderSt()">
+        <div class="row" style="margin-bottom:10px;">
+          <input id="search-st" placeholder="🔍 بحث بالاسم أو الكود..." oninput="renderSt()" style="margin-bottom:0;">
+          <select id="st-filter-gender" onchange="renderSt()" style="max-width:150px;">
+            <option value="">كل الجنسين</option>
+            <option value="ذكر">الذكور فقط</option>
+            <option value="أنثى">الإناث فقط</option>
+          </select>
+        </div>
         <div id="st-list" style="margin-top:10px;"></div>
         <button class="btn-s" onclick="printClassList()" style="margin-top:15px;">🖨️ طباعة كشف أسماء الشعبة</button>
+        <div class="card" style="margin-top:15px; background:#dcfce7; border:1px solid #10b981;">
+          <h3 style="font-size:14px; color:#065f46; margin-bottom:10px;">🎓 الترحيل الجماعي (نهاية السنة)</h3>
+          <p style="font-size:12px; margin-bottom:10px; color:#065f46;">يقوم النظام بترقية الطلاب الناجحين فقط إلى الصف التالي تلقائياً وأرشفة درجاتهم.</p>
+          <div class="row">
+            <select id="upgrade-from-level" style="margin-bottom:5px;"><option value="">-- من صف --</option></select>
+            <select id="upgrade-to-level" style="margin-bottom:5px;"><option value="">-- إلى صف --</option></select>
+          </div>
+          <button class="btn-s" onclick="upgradeStudents()">🎓 ترقية الطلاب الناجحين</button>
+        </div>
+        <div class="card" style="margin-top:15px; background:#fef08a; border:1px solid #f59e0b;">
+          <h3 style="font-size:14px; color:#854d0e; margin-bottom:10px;">🚚 نقل الطلاب (تحديد متعدد)</h3>
+          <div class="row">
+            <select id="move-to-level" style="margin-bottom:5px;"><option value="">-- الصف الجديد --</option></select>
+            <select id="move-to-sec" style="margin-bottom:5px;"><option value="">-- الشعبة الجديدة --</option></select>
+          </div>
+          <button class="btn-w" onclick="moveSelectedStudents()">🚚 نقل الطلاب المحددين</button>
+        </div>
       </div>
     </section>
     
@@ -145,7 +169,7 @@ th { background: var(--bg); color: var(--primary); font-weight: bold; }
           <select id="gs" onchange="renderGt()"><option value="">-- الشعبة --</option></select>
         </div>
         <select id="gsub" onchange="renderGt()"><option value="">-- المادة --</option></select>
-        <button class="btn-s" onclick="importGradesFromExcel()" style="margin-bottom:10px;">📥 استيراد الدرجات من إكسل (الاسم + ش1 شفوي + ش1 تحريري ...)</button>
+        <button class="btn-s" onclick="importGradesFromExcel()" style="margin-bottom:10px;">📥 استيراد الدرجات من إكسل</button>
         <input type="file" id="grade-excel" accept=".xlsx,.xls,.csv" style="display:none;" onchange="processGradeExcel(this)">
         <div id="gt" class="table-wrapper" style="margin-top:15px;"></div>
       </div>
@@ -179,7 +203,7 @@ th { background: var(--bg); color: var(--primary); font-weight: bold; }
     
     <section id="rep" class="tab">
       <div class="card">
-        <h2>📄 الملف الشامل للطالب (بحث ذكي)</h2>
+        <h2>📄 الملف الشامل للطالب</h2>
         <input type="text" id="search-rep" placeholder="🔍 ابحث باسم الطالب..." oninput="searchReportStudent()">
         <div id="rs-results"></div>
         <div id="rep-box"></div>
@@ -240,7 +264,7 @@ th { background: var(--bg); color: var(--primary); font-weight: bold; }
       </div>
       <div class="card">
         <h2>📥 استيراد إكسل للطلاب</h2>
-        <p style="font-size:12px; margin-bottom:5px;">ترتيب الأعمدة: (الاسم، الشعبة، الجنس [ذكر/أنثى]، رقم ولي الأمر)</p>
+        <p style="font-size:12px; margin-bottom:5px;">ترتيب الأعمدة: (الاسم، الشعبة، الجنس، رقم ولي الأمر)</p>
         <div class="row">
           <select id="is-level" onchange="updateImportSections()"><option value="">-- الصف --</option></select>
           <select id="is-sec" style="margin-bottom:10px;"><option value="">-- الشعبة --</option></select>
@@ -267,21 +291,31 @@ th { background: var(--bg); color: var(--primary); font-weight: bold; }
 <div id="toast" class="toast"></div>
 <script>
 let defaultSubs = [{id:1,name:'اسلامية'},{id:2,name:'عربي'},{id:3,name:'انكليزي'},{id:4,name:'رياضيات'},{id:5,name:'احياء'},{id:6,name:'فيزياء'},{id:7,name:'كيمياء'},{id:8,name:'اجتماعيات'},{id:9,name:'اخلاقيه'}];
-let DB = JSON.parse(localStorage.getItem('schoolDB_v12') || `{"students":[],"levels":[],"sections":[],"subjects":[],"grades":[],"attendance":{},"activity":{},"adminPass":"admin"}`);
-if(!DB.subjects || DB.subjects.length===0) { DB.subjects = defaultSubs; localStorage.setItem('schoolDB_v12',JSON.stringify(DB)); }
-if(!DB.levels) { DB.levels = []; DB.sections = []; }
+let DB;
+try {
+  let saved = localStorage.getItem('schoolDB_v14');
+  if (saved) { DB = JSON.parse(decodeURIComponent(atob(saved))); } 
+  else { DB = {"students":[],"levels":[],"sections":[],"subjects":[],"grades":[],"attendance":{},"activity":{},"adminPass":"admin"}; }
+} catch(e) {
+  DB = {"students":[],"levels":[],"sections":[],"subjects":[],"grades":[],"attendance":{},"activity":{},"adminPass":"admin"};
+}
+if(!DB.subjects || DB.subjects.length===0) { DB.subjects = defaultSubs; }
 
-function sv(){ localStorage.setItem('schoolDB_v12',JSON.stringify(DB)); }
+function sv(){ 
+  let data = JSON.stringify(DB); 
+  let encoded = btoa(encodeURIComponent(data));
+  localStorage.setItem('schoolDB_v14', encoded); 
+}
 function tst(m,t='success'){ let e=document.getElementById('toast'); e.textContent=m; e.className='toast show '+t; setTimeout(()=>e.className='toast '+t,2500); }
 function nid(a){ return a.length?Math.max(...a.map(x=>x.id))+1:1; }
 
 function toggleTheme() { let body = document.body; if(body.getAttribute('data-theme') === 'dark') { body.removeAttribute('data-theme'); localStorage.setItem('theme', 'light'); } else { body.setAttribute('data-theme', 'dark'); localStorage.setItem('theme', 'dark'); } }
 if(localStorage.getItem('theme') === 'dark') document.body.setAttribute('data-theme', 'dark');
 
-let isLogged = localStorage.getItem('isLogged_v12') === 'true';
+let isLogged = localStorage.getItem('isLogged_v14') === 'true';
 if(isLogged) { document.getElementById('login-screen').style.display='none'; document.getElementById('admin-view').style.display='block'; setTimeout(init, 100); }
-function loginAdmin(bypass = false){ let p=document.getElementById('login-pass').value; if(bypass || p===DB.adminPass){ localStorage.setItem('isLogged_v12', 'true'); document.getElementById('login-screen').style.display='none'; document.getElementById('admin-view').style.display='block'; init(); } else { document.getElementById('login-err').style.display='block'; } }
-function logoutAdmin(){ localStorage.setItem('isLogged_v12', 'false'); document.getElementById('admin-view').style.display='none'; document.getElementById('login-screen').style.display='flex'; document.getElementById('login-pass').value=''; document.getElementById('login-err').style.display='none'; }
+function loginAdmin(bypass = false){ let p=document.getElementById('login-pass').value; if(bypass || p===DB.adminPass){ localStorage.setItem('isLogged_v14', 'true'); document.getElementById('login-screen').style.display='none'; document.getElementById('admin-view').style.display='block'; init(); } else { document.getElementById('login-err').style.display='block'; } }
+function logoutAdmin(){ localStorage.setItem('isLogged_v14', 'false'); document.getElementById('admin-view').style.display='none'; document.getElementById('login-screen').style.display='flex'; document.getElementById('login-pass').value=''; document.getElementById('login-err').style.display='none'; }
 function showStudentPortal(){ document.getElementById('login-screen').style.display='none'; document.getElementById('student-portal').style.display='flex'; }
 function hideStudentPortal(){ document.getElementById('student-portal').style.display='none'; document.getElementById('login-screen').style.display='flex'; }
 function loginStudent(){ let c=document.getElementById('student-code-input').value.trim(); let s=DB.students.find(x=>x.code===c); if(s){ document.getElementById('student-portal').style.display='none'; document.getElementById('student-view').style.display='block'; document.getElementById('st-name-display').innerText='مرحباً، '+s.name; genRep('st-grades-box',s.id); } else tst('كود خطأ','error'); }
@@ -355,7 +389,7 @@ function updateAttSections() { let lv = document.getElementById('att-level').val
 function updateActSections() { let lv = document.getElementById('act-level').value; let filtered = DB.sections.filter(s=>s.level===lv); document.getElementById('acs').innerHTML = '<option value="">-- الشعبة --</option>' + filtered.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); document.getElementById('acl').innerHTML = ''; }
 function updateLvlSections() { let lv = document.getElementById('lvl-level').value; let filtered = DB.sections.filter(s=>s.level===lv); document.getElementById('lvl-sec').innerHTML = '<option value="">-- الشعبة --</option>' + filtered.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); document.getElementById('lvl-list').innerHTML = ''; }
 function updateImportSections() { let lv = document.getElementById('is-level').value; let filtered = DB.sections.filter(s=>s.level===lv); document.getElementById('is-sec').innerHTML = '<option value="">-- الشعبة --</option>' + filtered.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); }
-
+  <script>
 function impEx(){
   let f=document.getElementById('ef').files[0], lv=document.getElementById('is-level').value, sec=document.getElementById('is-sec').value;
   if(!lv || !sec) return tst('اختر الصف والشعبة','error'); if(!f) return tst('اختر الملف','error');
@@ -400,16 +434,36 @@ function delSt(id){ if(confirm('حذف الطالب؟')){ DB.students=DB.student
 function clearAll(){ if(confirm('تأكيد مسح الكل؟')){ if(prompt('اكتب "حذف":')==='حذف'){ DB={"students":[],"levels":[],"sections":[],"subjects":defaultSubs,"grades":[],"attendance":{},"activity":{},"adminPass":"admin"}; sv(); init(); tst('تم المسح'); } } }
 
 function renderSt(){
-  let q=document.getElementById('search-st').value, lv=document.getElementById('st-filter-level').value, sec=document.getElementById('st-filter-sec').value;
-  let f=DB.students.filter(x=> (x.name.includes(q)||x.code.includes(q)) && (lv===''||x.level===lv) && (sec===''||x.section===sec) );
+  let q=document.getElementById('search-st').value;
+  let lv=document.getElementById('st-filter-level').value;
+  let sec=document.getElementById('st-filter-sec').value;
+  let g=document.getElementById('st-filter-gender').value;
+  
+  let f=DB.students.filter(x=> 
+    (x.name.includes(q)||x.code.includes(q)) && 
+    (lv===''||x.level===lv) && 
+    (sec===''||x.section===sec) &&
+    (g===''||x.gender===g)
+  );
+  
   let h=document.getElementById('st-list');
-  if(!f.length) return h.innerHTML='<p style="text-align:center;padding:20px;">لا يوجد طلاب</p>';
-  h.innerHTML=f.map(x=>`<div class="list-item"><div class="item-info"><b>${x.name}</b><small>${x.level} - شعبة ${x.section} | الكود: ${x.code} | الجنس: ${x.gender||'-'}</small></div>
-  <div style="display:flex; gap:5px;">
-    <button class="icon-btn" style="background:var(--primary);" onclick="selectReportStudent(${x.id}); document.querySelector('[data-tab=\\'rep\\']').click();">عرض الملف</button>
-    <button class="icon-btn" onclick="delSt(${x.id})">🗑️</button>
-  </div></div>`).join('');
+  if(!f.length) return h.innerHTML='<p style="text-align:center;padding:20px;">لا يوجد طلاب مطابقون</p>';
+  
+  h.innerHTML=f.map(x=>`<div class="list-item">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <input type="checkbox" class="move-checkbox" value="${x.id}" style="width:20px; height:20px; margin:0;">
+      <div class="item-info" style="cursor:pointer;" onclick="selectReportStudent(${x.id}); document.querySelector('[data-tab=\\'rep\\']').click();">
+        <b style="text-decoration:underline; color:var(--primary);">${x.name}</b>
+        <small>${x.level} - شعبة ${x.section} | الكود: ${x.code} | الجنس: ${x.gender||'-'}</small>
+      </div>
+    </div>
+    <div style="display:flex; gap:5px;">
+      <button class="icon-btn" style="background:var(--warning);" onclick="editStudent(${x.id})">⚙️</button>
+      <button class="icon-btn" onclick="delSt(${x.id})">🗑️</button>
+    </div>
+  </div>`).join('');
 }
+
 function printClassList(){
   let lv=document.getElementById('st-filter-level').value, sec=document.getElementById('st-filter-sec').value;
   if(!lv||!sec) return tst('اختر الصف والشعبة','error');
@@ -420,6 +474,7 @@ function printClassList(){
   st.forEach((x,i)=>w.document.write(`<tr><td>${i+1}</td><td>${x.name}</td><td>${x.code}</td><td>${x.gender||'-'}</td></tr>`));
   w.document.write('</table></div>'); w.document.close(); w.print();
 }
+
 function init(){ ref(); renderSt(); updateDash(); }
 function ref(){
   let lo=DB.levels.map(x=>`<option value="${x}">${x}</option>`).join('');
@@ -431,6 +486,11 @@ function ref(){
   document.getElementById('act-level').innerHTML='<option value="">-- الصف --</option>'+lo;
   document.getElementById('lvl-level').innerHTML='<option value="">-- الصف --</option>'+lo;
   document.getElementById('is-level').innerHTML='<option value="">-- الصف --</option>'+lo;
+  document.getElementById('upgrade-from-level').innerHTML='<option value="">-- من صف --</option>'+lo;
+  document.getElementById('upgrade-to-level').innerHTML='<option value="">-- إلى صف --</option>'+lo;
+  document.getElementById('move-to-level').innerHTML='<option value="">-- الصف الجديد --</option>'+lo;
+  document.getElementById('move-to-level').onchange = updateMoveSections;
+  
   document.getElementById('gsub').innerHTML='<option value="">-- المادة --</option>'+suo;
   document.getElementById('levels-list').innerHTML=DB.levels.map(x=>`<div class="list-item"><div class="item-info"><b>${x}</b></div><button class="icon-btn" onclick="delLevel('${x}')">🗑️</button></div>`).join('');
   document.getElementById('subl').innerHTML=DB.subjects.map(x=>`<div class="list-item"><div class="item-info"><b>${x.name}</b></div><button class="icon-btn" onclick="delSub(${x.id})">🗑️</button></div>`).join('');
@@ -461,10 +521,7 @@ function renderGt(){
     let f2 = (m3+m4)/2;
     let annual = (f1 + f2 + (+g.mid||0)) / 3;
     let finalGrade = (annual + (+g.final||0)) / 2;
-    
-    // حساب المعدل فقط إذا اكتملت كل الحقول
     let allFieldsFilled = g.m1_o!=null && g.m1_w!=null && g.m2_o!=null && g.m2_w!=null && g.m3_o!=null && g.m3_w!=null && g.m4_o!=null && g.m4_w!=null && g.mid!=null && g.final!=null;
-
     h+=`<tr><td style="text-align:right;font-weight:bold; position:sticky; right:0; background:var(--card); border-left:2px solid var(--border);">${x.name}</td>
     <td><input type="number" id="a1-${x.id}" value="${v('m1_o')}" onchange="autoSave(${sid},'m1_o',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
     <td><input type="number" id="a2-${x.id}" value="${v('m1_w')}" onchange="autoSave(${sid},'m1_w',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
@@ -534,7 +591,6 @@ function renderLevels() {
   let st = DB.students.filter(x=>x.level===lv && x.section===sec);
   if(!st.length) { el.innerHTML = '<p style="text-align:center;">لا يوجد طلاب</p>'; return; }
   let results = [];
-  
   st.forEach(student => {
     let gs = DB.grades.filter(g => g.student_id === student.id);
     let total = 0, subCount = 0;
@@ -565,7 +621,6 @@ function renderLevels() {
       results.push({name: student.name, avg: avg.toFixed(1), grade: grade, gender: student.gender||'-'});
     }
   });
-  
   results.sort((a,b) => b.avg - a.avg);
   let h = '<div class="table-wrapper"><table><thead><tr><th>الترتيب</th><th>اسم الطالب</th><th>الجنس</th><th>المعدل</th><th>التقدير</th></tr></thead><tbody>';
   results.forEach((r, i) => {
@@ -595,8 +650,6 @@ function selectReportStudent(id){
   let gs = DB.grades.filter(x=>x.student_id===id);
   let abs = calcAbsences(id);
   let activity = DB.activity ? (DB.activity[id]||0) : 0;
-  
-  // صلة القرابة (البحث عن نفس رقم ولي الأمر)
   let relatives = DB.students.filter(s => s.parentId === st.parentId && s.id !== st.id && st.parentId);
   let relText = relatives.length ? relatives.map(r=>r.name).join('، ') : 'لا يوجد';
 
@@ -610,7 +663,7 @@ function selectReportStudent(id){
         <div><strong>الجنس:</strong> ${st.gender||'-'}</div>
         <div style="color:var(--danger);">الغياب بدون عذر: ${abs.total} | الغياب بعذر: ${abs.justified}</div>
         <div style="color:var(--success);">النشاط: ${activity} درجة</div>
-        <div style="width:100%; margin-top:5px; color:var(--primary);">👨‍👩‍👦 صلة القرابة (نفس ولي الأمر): ${relText}</div>
+        <div style="width:100%; margin-top:5px; color:var(--primary);">👨‍👩‍👦 صلة القرابة: ${relText}</div>
       </div>
     </div>
     <h4 style="margin: 15px 0 10px; color:var(--primary); border-bottom:1px solid var(--border); padding-bottom:5px;">📝 الدرجات</h4>
@@ -680,7 +733,7 @@ function showActReport(id){
 
 function genRep(box, sid){
   let st=DB.students.find(x=>x.id===sid), gs=DB.grades.filter(x=>x.student_id===sid);
-  let abs=calcAbsences(sid), activity=DB.activity ? (DB.activity[sid]||0) : 0;
+  let abs=calcAbsences(sid), activity = (DB.activity && DB.activity[sid]) ? DB.activity[sid] : 0;
   let h=`<div class="report-card">
     <div class="report-header"><h3>كشف درجات الطالب</h3>
       <div class="student-info">
