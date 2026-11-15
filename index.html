@@ -3,570 +3,491 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>نظام إدارة المدرسة الاحترافي</title>
+<title>نظام إدارة المدرسة</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-:root { --bg: #f1f5f9; --card: #ffffff; --text: #1e293b; --primary: #3b82f6; --dark: #1e3a8a; --success: #10b981; --danger: #ef4444; --warning: #f59e0b; --border: #e2e8f0; --nav-bg: #ffffff; }
-[data-theme="dark"] { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --primary: #60a5fa; --dark: #3b82f6; --border: #334155; --nav-bg: #1e293b; }
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; transition: background 0.3s, color 0.3s; }
-body { background: var(--bg); color: var(--text); padding-bottom: 100px; }
-#login-screen, #student-portal { position: fixed; inset: 0; background: var(--dark); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
-.login-box { background: var(--card); padding: 30px 25px; border-radius: 16px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-.login-box h2 { margin-bottom: 25px; color: var(--primary); }
-input, select, button { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; background: var(--card); color: var(--text); outline: none; }
-input:focus, select:focus { border-color: var(--primary); }
-button { cursor: pointer; font-weight: bold; border: none; transition: 0.2s; }
-button:active { transform: scale(0.97); }
-.btn-p { background: var(--primary); color: #fff; } .btn-s { background: var(--success); color: #fff; } .btn-d { background: var(--danger); color: #fff; } .btn-w { background: var(--warning); color: #fff; }
-.btn-o { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
-header { background: var(--dark); color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-header h1 { font-size: 17px; font-weight: 700; }
-.header-btns { display: flex; gap: 10px; }
-main { padding: 15px; max-width: 1100px; margin: 0 auto; }
-.tab { display: none; } .tab.active { display: block; animation: fadeIn 0.3s; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-.card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid var(--border); }
-.card h2 { font-size: 16px; color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
-.row { display: flex; gap: 10px; flex-wrap: wrap; } .row > * { flex: 1; min-width: 150px; }
-.list-item { background: var(--card); border: 1px solid var(--border); padding: 12px 15px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
-.item-info b { display: block; font-size: 15px; color: var(--primary); } .item-info small { color: var(--text); opacity: 0.7; font-size: 12px; margin-top: 3px; display: block; }
-.icon-btn { width: auto; padding: 8px 12px; margin: 0; background: var(--danger); color: #fff; border-radius: 8px; font-size: 14px; }
-.nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--nav-bg); display: flex; justify-content: space-around; padding: 8px 0; border-top: 1px solid var(--border); z-index: 100; overflow-x: auto; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
-.nav-btn { background: none; display: flex; flex-direction: column; align-items: center; color: var(--text); opacity: 0.6; font-size: 18px; width: auto; padding: 5px 8px; margin: 0; white-space: nowrap; border-radius: 8px; }
-.nav-btn span { font-size: 10px; margin-top: 4px; font-weight: 700; } .nav-btn.active { color: var(--primary); opacity: 1; background: var(--bg); }
-.table-wrapper { overflow-x: auto; width: 100%; display: block; white-space: nowrap; border-radius: 8px; border: 1px solid var(--border); }
-table { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--card); }
-th, td { border: 1px solid var(--border); padding: 10px; text-align: center; }
-th { background: var(--bg); color: var(--primary); font-weight: bold; }
-.table-wrapper table th:first-child, .table-wrapper table td:first-child { position: sticky; right: 0; background: var(--card); z-index: 10; border-left: 2px solid var(--border); }
-.dash-card { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; flex: 1; }
-.dash-card h3 { font-size: 28px; color: var(--primary); margin-bottom: 5px; }
-.toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--dark); color: #fff; padding: 12px 24px; border-radius: 25px; font-size: 14px; opacity: 0; transition: all .3s; z-index: 10000; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; } .toast.error { background: var(--danger); } .toast.success { background: var(--success); }
-.report-card { background: var(--card); border-radius: 12px; padding: 20px; border: 1px solid var(--border); margin-top: 15px; }
-.report-header { border-bottom: 2px dashed var(--border); padding-bottom: 15px; margin-bottom: 15px; text-align: center; }
-.report-header h3 { color: var(--primary); margin-bottom: 10px; }
-.student-info { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 10px; font-size: 14px; font-weight: bold; }
-.grades-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-top: 15px; }
-.subject-card { border: 1px solid var(--border); border-radius: 8px; padding: 12px; background: var(--bg); }
-.subject-title { font-weight: bold; color: var(--primary); font-size: 15px; border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 5px; text-align: center; }
-.grade-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text); opacity: 0.9; margin-bottom: 3px; }
-.grade-row span { font-weight: bold; color: var(--primary); }
-.final-badge { background: var(--success); color: white; text-align: center; padding: 8px; border-radius: 6px; font-weight: bold; margin-top: 8px; font-size: 15px; }
-.final-badge.fail { background: var(--danger); }
-.designer-footer { text-align: center; padding: 20px 10px; margin-top: 30px; color: #64748b; font-size: 13px; font-weight: 500; border-top: 1px solid var(--border); letter-spacing: 0.5px; }
-.designer-footer strong { color: var(--primary); font-weight: 700; }
+:root{--bg:#f1f5f9;--card:#fff;--text:#1e293b;--p:#3b82f6;--d:#1e3a8a;--s:#10b981;--e:#ef4444;--w:#f59e0b;--b:#e2e8f0;}
+[data-theme="dark"]{--bg:#0f172a;--card:#1e293b;--text:#f8fafc;--b:#334155;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,sans-serif;}
+body{background:var(--bg);color:var(--text);padding-bottom:80px;}
+#login,#st-portal{position:fixed;inset:0;background:var(--d);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;}
+.box{background:var(--card);padding:30px;border-radius:16px;width:100%;max-width:380px;text-align:center;box-shadow:0 10px 25px rgba(0,0,0,0.3);}
+.box h2{margin-bottom:25px;color:var(--p);}
+input,select,button{width:100%;padding:12px;margin-bottom:12px;border:1px solid var(--b);border-radius:8px;font-size:14px;font-family:inherit;background:var(--card);color:var(--text);outline:none;}
+button{cursor:pointer;font-weight:bold;border:none;background:var(--p);color:#fff;}
+button.o{background:transparent;color:var(--p);border:2px solid var(--p);}
+button.s{background:var(--s);}button.w{background:var(--w);}button.d{background:var(--e);}
+header{background:var(--d);color:#fff;padding:15px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;}
+header h1{font-size:17px;}
+.h-btns{display:flex;gap:10px;}
+main{padding:15px;max-width:1100px;margin:0 auto;}
+.tab{display:none;}.tab.active{display:block;}
+.card{background:var(--card);border-radius:12px;padding:20px;margin-bottom:15px;border:1px solid var(--b);}
+.card h2{font-size:16px;color:var(--p);margin-bottom:15px;border-bottom:2px solid var(--b);padding-bottom:10px;}
+.row{display:flex;gap:10px;flex-wrap:wrap;}.row>*{flex:1;min-width:150px;}
+.li{background:var(--card);border:1px solid var(--b);padding:12px;margin-bottom:8px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;}
+.li b{display:block;color:var(--p);}.li small{opacity:0.7;font-size:12px;}
+.ib{width:auto;padding:6px 10px;margin:0;border-radius:6px;font-size:14px;}
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);display:flex;justify-content:space-around;padding:8px 0;border-top:1px solid var(--b);z-index:100;overflow-x:auto;}
+.nb{background:none;display:flex;flex-direction:column;align-items:center;color:var(--text);opacity:0.6;font-size:18px;width:auto;padding:5px 8px;margin:0;white-space:nowrap;border-radius:8px;}
+.nb span{font-size:10px;margin-top:4px;font-weight:700;}.nb.active{color:var(--p);opacity:1;background:var(--bg);}
+table{width:100%;border-collapse:collapse;font-size:13px;display:block;overflow-x:auto;white-space:nowrap;background:var(--card);}
+th,td{border:1px solid var(--b);padding:8px;text-align:center;}
+th{background:var(--bg);color:var(--p);}
+th:first-child,td:first-child{position:sticky;right:0;background:var(--card);z-index:10;border-left:2px solid var(--b);}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--d);color:#fff;padding:12px 24px;border-radius:25px;font-size:14px;opacity:0;transition:all .3s;z-index:10000;}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}.toast.e{background:var(--e);}.toast.s{background:var(--s);}
+.dash{background:var(--bg);border:1px solid var(--b);border-radius:12px;padding:15px;text-align:center;flex:1;}
+.dash h3{font-size:24px;color:var(--p);}
+.rc{background:var(--card);border-radius:12px;padding:15px;border:1px solid var(--b);margin-top:15px;}
+.rh{border-bottom:2px dashed var(--b);padding-bottom:10px;margin-bottom:10px;text-align:center;}
+.si{display:flex;justify-content:space-around;flex-wrap:wrap;gap:8px;font-size:13px;font-weight:bold;}
+.gg{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-top:10px;}
+.sc{border:1px solid var(--b);border-radius:8px;padding:10px;background:var(--bg);}
+.st{font-weight:bold;color:var(--p);border-bottom:1px solid var(--b);padding-bottom:5px;margin-bottom:5px;text-align:center;}
+.gr{display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px;}
+.gr span{font-weight:bold;color:var(--p);}
+.fb{background:var(--s);color:#fff;text-align:center;padding:6px;border-radius:6px;font-weight:bold;margin-top:6px;}
+.fb.f{background:var(--e);}
+.footer{text-align:center;padding:20px;margin-top:30px;color:#64748b;font-size:13px;border-top:1px solid var(--b);}
+.footer strong{color:var(--p);}
 </style>
 </head>
 <body>
 
-<div id="login-screen">
-  <div class="login-box">
+<div id="login">
+  <div class="box">
     <h2>🔐 دخول الإدارة</h2>
-    <input type="text" id="login-pass" placeholder="كلمة المرور (admin)">
-    <div id="login-err" style="color:var(--danger);font-size:12px;margin-bottom:10px;display:none;font-weight:bold;">كلمة المرور غير صحيحة!</div>
-    <button class="btn-p" onclick="loginAdmin()">دخول</button>
-    <button style="background:#cbd5e1; color:#1e293b; margin-top:10px; font-size:12px;" onclick="loginAdmin(true)">(دخول تجريبي سريع)</button>
-    <button class="btn-o" onclick="showStudentPortal()">🎓 دخول الطالب</button>
+    <input type="text" id="lp" placeholder="كلمة المرور (admin)">
+    <div id="lerr" style="color:var(--e);font-size:12px;margin-bottom:10px;display:none;">كلمة المرور غير صحيحة!</div>
+    <button onclick="loginAdmin()">دخول</button>
+    <button class="o" style="margin-top:10px;font-size:12px;" onclick="loginAdmin(true)">(دخول تجريبي)</button>
+    <button class="o" onclick="showSP()">🎓 دخول الطالب</button>
   </div>
 </div>
 
-<div id="student-portal" style="display:none;">
-  <div class="login-box">
+<div id="st-portal" style="display:none;">
+  <div class="box">
     <h2>🎓 بوابة الطالب</h2>
-    <input type="text" id="student-code-input" placeholder="أدخل كود الطالب (مثال: أ-1001)">
-    <button class="btn-p" onclick="loginStudent()">عرض النتائج</button>
-    <button class="btn-o" onclick="hideStudentPortal()">🔙 رجوع</button>
+    <input type="text" id="sc" placeholder="أدخل كود الطالب">
+    <button onclick="loginSt()">عرض النتائج</button>
+    <button class="o" onclick="hideSP()">🔙 رجوع</button>
   </div>
 </div>
 
-<div id="student-view" style="display:none; padding: 20px; max-width: 1000px; margin: 0 auto;">
-  <div id="st-name-display" style="font-size: 22px; font-weight: bold; color: var(--primary); text-align: center; margin-bottom: 15px;">مرحباً</div>
-  <div id="st-grades-box"></div>
-  <button class="btn-d" onclick="document.getElementById('student-view').style.display='none';showStudentPortal();" style="margin-top:15px;">خروج</button>
+<div id="st-view" style="display:none;padding:15px;max-width:1000px;margin:0 auto;">
+  <div id="st-name" style="font-size:20px;font-weight:bold;color:var(--p);text-align:center;margin-bottom:15px;"></div>
+  <div id="st-grades"></div>
+  <button class="d" onclick="document.getElementById('st-view').style.display='none';showSP();" style="margin-top:15px;">خروج</button>
 </div>
 
-<div id="admin-view" style="display:none;">
+<div id="admin" style="display:none;">
   <header>
     <h1>🏫 إدارة المدرسة</h1>
-    <div class="header-btns">
-      <button class="icon-btn" style="background:rgba(255,255,255,.2);" onclick="location.reload()">🔄</button>
-      <button class="icon-btn" style="background:rgba(255,255,255,.2);" onclick="toggleTheme()">🌓</button>
-      <button class="icon-btn" style="background:rgba(255,255,255,.2);" onclick="logoutAdmin()">خروج</button>
+    <div class="h-btns">
+      <button class="ib" style="background:rgba(255,255,255,.2);" onclick="location.reload()">🔄</button>
+      <button class="ib" style="background:rgba(255,255,255,.2);" onclick="toggleTheme()">🌓</button>
+      <button class="ib" style="background:rgba(255,255,255,.2);" onclick="logout()">خروج</button>
     </div>
   </header>
   <nav class="nav">
-    <button class="nav-btn active" data-tab="dashboard">📊<span>الرئيسية</span></button>
-    <button class="nav-btn" data-tab="students">👨‍🎓<span>الطلاب</span></button>
-    <button class="nav-btn" data-tab="grades">📝<span>الدرجات</span></button>
-    <button class="nav-btn" data-tab="att">📅<span>الغياب</span></button>
-    <button class="nav-btn" data-tab="act">🏅<span>النشاط</span></button>
-    <button class="nav-btn" data-tab="rep">📄<span>الكشوف</span></button>
-    <button class="nav-btn" data-tab="att-report">📋<span>كشف الغياب</span></button>
-    <button class="nav-btn" data-tab="act-report">📋<span>كشف النشاط</span></button>
-    <button class="nav-btn" data-tab="levels">📈<span>المستوى</span></button>
-    <button class="nav-btn" data-tab="set">⚙️<span>الإدارة</span></button>
+    <button class="nb active" data-tab="dash">📊<span>الرئيسية</span></button>
+    <button class="nb" data-tab="students">👨‍🎓<span>الطلاب</span></button>
+    <button class="nb" data-tab="grades">📝<span>الدرجات</span></button>
+    <button class="nb" data-tab="att">📅<span>الغياب</span></button>
+    <button class="nb" data-tab="act">🏅<span>النشاط</span></button>
+    <button class="nb" data-tab="rep">📄<span>الكشوف</span></button>
+    <button class="nb" data-tab="levels">📈<span>المستوى</span></button>
+    <button class="nb" data-tab="set">⚙️<span>الإدارة</span></button>
   </nav>
   <main>
-    <section id="dashboard" class="tab active">
+    <section id="dash" class="tab active">
       <div class="card">
-        <h2>📊 لوحة القيادة والإحصائيات</h2>
-        <div class="row" style="margin-bottom:15px;"><div class="dash-card"><h3 id="dash-st-count">0</h3><p>إجمالي الطلاب</p></div><div class="dash-card"><h3 id="dash-abs-count">0</h3><p>غياب اليوم</p></div></div>
-        <h3 style="font-size:15px; margin-bottom:10px; color:var(--primary);">🏫 إحصائيات الصفوف</h3>
-        <div id="levels-stats" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:10px; margin-bottom:20px;"></div>
-        <h3 style="font-size:15px; margin-bottom:10px; color:var(--primary);">🏆 الأوائل (أعلى 3 معدلات)</h3>
-        <div id="top-students-list"></div>
-        <button class="btn-p" style="margin-top:15px;" onclick="showGenderStats()">📊 إحصائيات الذكور والإناث</button>
-        <div id="gender-stats-box" style="margin-top:15px;"></div>
+        <h2>📊 لوحة القيادة</h2>
+        <div class="row" style="margin-bottom:15px;"><div class="dash"><h3 id="ds">0</h3><p>الطلاب</p></div><div class="dash"><h3 id="da">0</h3><p>غياب اليوم</p></div></div>
+        <div id="lstats" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:15px;"></div>
+        <h3 style="font-size:14px;margin-bottom:8px;color:var(--p);">🏆 الأوائل</h3>
+        <div id="top"></div>
+        <button class="s" style="margin-top:10px;" onclick="showG()">📊 إحصائيات الجنسين</button>
+        <div id="gbox" style="margin-top:10px;"></div>
       </div>
     </section>
     <section id="students" class="tab">
       <div class="card">
-        <h2>👨‍🎓 إدارة الطلاب</h2>
-        <div class="row"><select id="st-filter-level" onchange="updateSectionFilter()"><option value="">-- كل الصفوف --</option></select><select id="st-filter-sec" onchange="renderSt()"><option value="">-- كل الشعب --</option></select></div>
-        <div class="row" style="margin-bottom:10px;"><input id="search-st" placeholder="🔍 بحث بالاسم أو الكود..." oninput="renderSt()" style="margin-bottom:0;"><select id="st-filter-gender" onchange="renderSt()" style="max-width:150px;"><option value="">كل الجنسين</option><option value="ذكر">الذكور فقط</option><option value="أنثى">الإناث فقط</option></select></div>
-        <div id="st-list" style="margin-top:10px;"></div>
-        <button class="btn-s" onclick="printClassList()" style="margin-top:15px;">🖨️ طباعة كشف أسماء الشعبة</button>
-        <div class="card" style="margin-top:15px; background:#dcfce7; border:1px solid #10b981;">
-          <h3 style="font-size:14px; color:#065f46; margin-bottom:10px;">🎓 الترحيل الجماعي (نهاية السنة)</h3>
-          <p style="font-size:12px; margin-bottom:10px; color:#065f46;">يقوم النظام بترقية الطلاب الناجحين فقط إلى الصف التالي تلقائياً وأرشفة درجاتهم.</p>
-          <div class="row"><select id="upgrade-from-level" style="margin-bottom:5px;"><option value="">-- من صف --</option></select><select id="upgrade-to-level" style="margin-bottom:5px;"><option value="">-- إلى صف --</option></select></div>
-          <button class="btn-s" onclick="upgradeStudents()">🎓 ترقية الطلاب الناجحين</button>
+        <h2>👨‍🎓 الطلاب</h2>
+        <div class="row"><select id="stl" onchange="uSF()"><option value="">-- كل الصفوف --</option></select><select id="sts" onchange="rS()"><option value="">-- كل الشعب --</option></select></div>
+        <div class="row" style="margin-bottom:10px;"><input id="srch" placeholder="🔍 بحث..." oninput="rS()" style="margin:0;"><select id="sgf" onchange="rS()" style="max-width:120px;"><option value="">الكل</option><option value="ذكر">ذكور</option><option value="أنثى">إناث</option></select></div>
+        <div id="stl-list"></div>
+        <button class="s" style="margin-top:10px;" onclick="printL()">🖨️ طباعة الأسماء</button>
+        <div class="card" style="margin-top:10px;background:#dcfce7;">
+          <h3 style="font-size:13px;color:#065f46;margin-bottom:5px;">🎓 الترحيل الجماعي</h3>
+          <div class="row"><select id="ufl"><option value="">-- من صف --</option></select><select id="utl"><option value="">-- إلى صف --</option></select></div>
+          <button class="s" onclick="upgradeAll()">ترقية الناجحين</button>
         </div>
-        <div class="card" style="margin-top:15px; background:#fef08a; border:1px solid #f59e0b;">
-          <h3 style="font-size:14px; color:#854d0e; margin-bottom:10px;">🚚 نقل الطلاب (تحديد متعدد)</h3>
-          <div class="row"><select id="move-to-level" style="margin-bottom:5px;"><option value="">-- الصف الجديد --</option></select><select id="move-to-sec" style="margin-bottom:5px;"><option value="">-- الشعبة الجديدة --</option></select></div>
-          <button class="btn-w" onclick="moveSelectedStudents()">🚚 نقل الطلاب المحددين</button>
+        <div class="card" style="margin-top:10px;background:#fef08a;">
+          <h3 style="font-size:13px;color:#854d0e;margin-bottom:5px;">🚚 نقل الطلاب</h3>
+          <div class="row"><select id="mvl" onchange="uMS()"><option value="">-- الصف --</option></select><select id="mvs"><option value="">-- الشعبة --</option></select></div>
+          <button class="w" onclick="moveSel()">نقل المحددين</button>
         </div>
       </div>
     </section>
     <section id="grades" class="tab">
       <div class="card">
-        <h2>📝 إدخال الدرجات</h2>
-        <p style="font-size:12px;color:var(--success);margin-bottom:10px;font-weight:bold;">* بمجرد الخروج من خانة الدرجة، سيتم حفظها تلقائياً.</p>
-        <div class="row"><select id="g-level" onchange="updateGradeSections()"><option value="">-- الصف --</option></select><select id="gs" onchange="renderGt()"><option value="">-- الشعبة --</option></select></div>
-        <select id="gsub" onchange="renderGt()"><option value="">-- المادة --</option></select>
-        <button class="btn-s" onclick="importGradesFromExcel()" style="margin-bottom:10px;">📥 استيراد الدرجات من إكسل</button>
-        <input type="file" id="grade-excel" accept=".xlsx,.xls,.csv" style="display:none;" onchange="processGradeExcel(this)">
-        <div id="gt" class="table-wrapper" style="margin-top:15px;"></div>
+        <h2>📝 الدرجات</h2>
+        <div class="row"><select id="gl" onchange="uGS()"><option value="">-- الصف --</option></select><select id="gs" onchange="rG()"><option value="">-- الشعبة --</option></select></div>
+        <select id="gsub" onchange="rG()"><option value="">-- المادة --</option></select>
+        <button class="s" onclick="importG()">📥 استيراد من إكسل</button>
+        <input type="file" id="gfile" accept=".xlsx,.xls,.csv" style="display:none;" onchange="procG(this)">
+        <div id="gt" style="overflow-x:auto;margin-top:10px;"></div>
       </div>
     </section>
     <section id="att" class="tab">
       <div class="card">
-        <h2>📅 تسجيل الغياب</h2>
-        <input type="date" id="ad" onchange="renderAtt()">
-        <div class="row"><select id="att-level" onchange="updateAttSections()"><option value="">-- الصف --</option></select><select id="as" onchange="renderAtt()"><option value="">-- الشعبة --</option></select></div>
-        <input id="search-att" placeholder="🔍 ابحث عن طالب..." oninput="renderAtt()">
-        <div id="al" style="margin-top:15px;"></div>
+        <h2>📅 الغياب</h2>
+        <input type="date" id="ad" onchange="rA()">
+        <div class="row"><select id="al" onchange="uAS()"><option value="">-- الصف --</option></select><select id="as" onchange="rA()"><option value="">-- الشعبة --</option></select></div>
+        <input id="sa" placeholder="🔍 بحث..." oninput="rA()">
+        <div id="att-list"></div>
       </div>
     </section>
     <section id="act" class="tab">
       <div class="card">
-        <h2>🏅 تقييم النشاط</h2>
-        <div class="row"><select id="act-level" onchange="updateActSections()"><option value="">-- الصف --</option></select><select id="acs" onchange="renderAct()"><option value="">-- الشعبة --</option></select></div>
-        <input id="search-act" placeholder="🔍 ابحث عن طالب..." oninput="renderAct()">
-        <div id="acl" style="margin-top:15px;"></div>
-        <button class="btn-s" id="sa" style="display:none;margin-top:15px;" onclick="saveAct()">💾 حفظ النشاط</button>
+        <h2>🏅 النشاط</h2>
+        <div class="row"><select id="acl" onchange="uACS()"><option value="">-- الصف --</option></select><select id="acs" onchange="rAC()"><option value="">-- الشعبة --</option></select></div>
+        <input id="sac" placeholder="🔍 بحث..." oninput="rAC()">
+        <div id="act-list"></div>
+        <button class="s" id="sact" style="display:none;margin-top:10px;" onclick="saveAC()">💾 حفظ</button>
       </div>
     </section>
     <section id="rep" class="tab">
       <div class="card">
-        <h2>📄 الملف الشامل للطالب</h2>
-        <input type="text" id="search-rep" placeholder="🔍 ابحث باسم الطالب..." oninput="searchReportStudent()">
-        <div id="rs-results"></div>
-        <div id="rep-box"></div>
-        <button class="btn-p" onclick="window.print()" style="margin-top:10px; display:none;" id="print-btn">🖨️ طباعة الملف الشامل</button>
-      </div>
-    </section>
-    <section id="att-report" class="tab">
-      <div class="card">
-        <h2>📋 كشف تفصيلي للغياب</h2>
-        <input type="text" id="search-att-report" placeholder="🔍 ابحث باسم الطالب..." oninput="searchAttReport()">
-        <div id="att-rep-results"></div>
-        <div id="att-rep-box"></div>
-      </div>
-    </section>
-    <section id="act-report" class="tab">
-      <div class="card">
-        <h2>📋 كشف تفصيلي للنشاط</h2>
-        <input type="text" id="search-act-report" placeholder="🔍 ابحث باسم الطالب..." oninput="searchActReport()">
-        <div id="act-rep-results"></div>
-        <div id="act-rep-box"></div>
+        <h2>📄 الملف الشامل</h2>
+        <input id="srp" placeholder="🔍 ابحث باسم الطالب..." oninput="searchR()">
+        <div id="rres"></div>
+        <div id="rbox"></div>
+        <button class="s" onclick="window.print()" style="margin-top:10px;display:none;" id="pbtn">🖨️ طباعة</button>
       </div>
     </section>
     <section id="levels" class="tab">
       <div class="card">
-        <h2>📈 كشف المستوى العلمي</h2>
-        <div class="row"><select id="lvl-level" onchange="updateLvlSections()"><option value="">-- الصف --</option></select><select id="lvl-sec" onchange="renderLevels()"><option value="">-- الشعبة --</option></select></div>
-        <select id="lvl-filter" onchange="renderLevels()" style="margin-bottom:10px;"><option value="all">كل الدرجات (المعدل العام)</option><option value="m1">الشهر الأول فقط</option><option value="m2">الشهر الثاني فقط</option><option value="mid">نصف السنة فقط</option><option value="final">النهائي فقط</option></select>
-        <div id="lvl-list" style="margin-top:15px;"></div>
+        <h2>📈 المستوى العلمي</h2>
+        <div class="row"><select id="ll" onchange="uLS()"><option value="">-- الصف --</option></select><select id="ls" onchange="rL()"><option value="">-- الشعبة --</option></select></div>
+        <select id="lf" onchange="rL()" style="margin-bottom:10px;"><option value="all">المعدل العام</option><option value="m1">الشهر الأول</option><option value="m2">الشهر الثاني</option><option value="mid">نصف السنة</option><option value="final">النهائي</option></select>
+        <div id="lvl-list"></div>
       </div>
     </section>
     <section id="set" class="tab">
       <div class="card">
-        <h2>🏫 إدارة الصفوف والشعب</h2>
-        <div class="row"><input id="new-level" placeholder="اسم الصف (مثال: الأول ثانوي)"><button class="btn-s" onclick="addLevel()" style="width:100px;margin:0;">إضافة صف</button></div>
-        <div id="levels-list" style="margin-top:10px;"></div>
-        <div class="row" style="margin-top:15px;"><select id="set-level" onchange="updateSetSections()"><option value="">-- اختر الصف --</option></select><input id="new-sec" placeholder="اسم الشعبة (أ، ب)"><button class="btn-s" onclick="addSection()" style="width:100px;margin:0;">إضافة شعبة</button></div>
-        <div id="sections-list" style="margin-top:10px;"></div>
+        <h2>🏫 الصفوف والشعب</h2>
+        <div class="row"><input id="nl" placeholder="اسم الصف"><button class="s" onclick="addL()" style="width:80px;margin:0;">إضافة</button></div>
+        <div id="llist"></div>
+        <div class="row" style="margin-top:10px;"><select id="sl" onchange="uSS()"><option value="">-- اختر الصف --</option></select><input id="ns" placeholder="الشعبة"><button class="s" onclick="addS()" style="width:80px;margin:0;">إضافة</button></div>
+        <div id="slist"></div>
       </div>
       <div class="card">
-        <h2>📥 استيراد إكسل للطلاب</h2>
-        <p style="font-size:12px; margin-bottom:5px;">ترتيب الأعمدة: (الاسم، الشعبة، الجنس، رقم ولي الأمر)</p>
-        <div class="row">
-          <select id="is-level" onchange="updateImportSections()"><option value="">-- الصف --</option></select>
-          <select id="is-sec" style="margin-bottom:10px;"><option value="">-- الشعبة --</option></select>
-        </div>
-        <select id="is-gender" style="margin-bottom:10px;">
-          <option value="ذكر">الطلاب ذكور (افتراضي)</option>
-          <option value="أنثى">الطلاب إناث</option>
-          <option value="auto">قراءة الجنس من عمود الإكسل</option>
-        </select>
-        <input type="file" id="ef" accept=".xlsx,.xls,.csv" style="border:1px dashed var(--border);padding:10px;">
-        <button class="btn-p" onclick="impEx()">استيراد الطلاب</button>
+        <h2>📥 استيراد الطلاب</h2>
+        <p style="font-size:12px;margin-bottom:5px;">(الاسم، الشعبة، الجنس، رقم ولي الأمر)</p>
+        <div class="row"><select id="il" onchange="uIS()"><option value="">-- الصف --</option></select><select id="is"><option value="">-- الشعبة --</option></select></div>
+        <select id="ig" style="margin-bottom:10px;"><option value="ذكر">ذكور</option><option value="أنثى">إناث</option><option value="auto">من الإكسل</option></select>
+        <input type="file" id="ef" accept=".xlsx,.xls,.csv">
+        <button class="s" onclick="importS()">استيراد</button>
       </div>
-      <div class="card">
-        <h2>📚 المواد</h2>
-        <div class="row"><input id="sub" placeholder="اسم المادة"><button class="btn-s" onclick="addSub()" style="width:100px;margin:0;">إضافة</button></div>
-        <div id="subl" style="margin-top:10px;"></div>
-      </div>
-      <div class="card"><h2>💾 تصدير البيانات</h2><button class="btn-w" onclick="exportCSV()">📤 تصدير جميع الدرجات إلى Excel</button></div>
-      <div class="card"><h2>⚠️ الخطر</h2><button class="btn-d" onclick="clearAll()">🗑️ حذف كل البيانات</button></div>
+      <div class="card"><h2>📚 المواد</h2><div class="row"><input id="sn" placeholder="اسم المادة"><button class="s" onclick="addSub()" style="width:80px;margin:0;">إضافة</button></div><div id="sublist"></div></div>
+      <div class="card"><h2>💾 تصدير</h2><button class="w" onclick="expCSV()">📤 تصدير Excel</button></div>
+      <div class="card"><h2>⚠️ الخطر</h2><button class="d" onclick="clearAll()">🗑️ حذف الكل</button></div>
     </section>
   </main>
 </div>
 <div id="toast" class="toast"></div>
-<div class="designer-footer">تم التصميم والتطوير بواسطة <strong>د. حسام الخالدي</strong> &copy; 2024</div>
+<div class="footer">تم التصميم بواسطة <strong>د. حسام الخالدي</strong> &copy; 2024</div>
+
 <script>
-let defaultSubs = [{id:1,name:'اسلامية'},{id:2,name:'عربي'},{id:3,name:'انكليزي'},{id:4,name:'رياضيات'},{id:5,name:'احياء'},{id:6,name:'فيزياء'},{id:7,name:'كيمياء'},{id:8,name:'اجتماعيات'},{id:9,name:'اخلاقيه'}];
 let DB;
-try {
-  let saved = localStorage.getItem('schoolDB_v30');
-  if (saved) { DB = JSON.parse(decodeURIComponent(atob(saved))); } 
-  else { DB = {"students":[],"levels":[],"sections":[],"subjects":[],"grades":[],"attendance":{},"activity":{},"adminPass":"admin"}; }
-} catch(e) { DB = {"students":[],"levels":[],"sections":[],"subjects":[],"grades":[],"attendance":{},"activity":{},"adminPass":"admin"}; }
-if(!DB.subjects || DB.subjects.length===0) { DB.subjects = defaultSubs; }
-
-function sv(){ let data = JSON.stringify(DB); let encoded = btoa(encodeURIComponent(data)); localStorage.setItem('schoolDB_v30', encoded); }
-function tst(m,t='success'){ let e=document.getElementById('toast'); e.textContent=m; e.className='toast show '+t; setTimeout(()=>e.className='toast '+t,2500); }
+try { let s = localStorage.getItem('schoolDB_v50'); if(s){ DB = JSON.parse(decodeURIComponent(atob(s))); } } catch(e){}
+if(!DB) DB = {"students":[],"levels":[],"sections":[],"subjects":[{"id":1,"name":"اسلامية"},{"id":2,"name":"عربي"},{"id":3,"name":"انكليزي"},{"id":4,"name":"رياضيات"},{"id":5,"name":"احياء"},{"id":6,"name":"فيزياء"},{"id":7,"name":"كيمياء"},{"id":8,"name":"اجتماعيات"},{"id":9,"name":"اخلاقيه"}],"grades":[],"attendance":{},"activity":{},"adminPass":"admin"};
+function sv(){ localStorage.setItem('schoolDB_v50', btoa(encodeURIComponent(JSON.stringify(DB)))); }
+function tst(m,t='s'){ let e=document.getElementById('toast'); e.textContent=m; e.className='toast show '+t; setTimeout(()=>e.className='toast '+t,2500); }
 function nid(a){ return a.length?Math.max(...a.map(x=>x.id))+1:1; }
+function toggleTheme(){ let b=document.body; if(b.getAttribute('data-theme')==='dark'){ b.removeAttribute('data-theme'); localStorage.setItem('theme','light'); } else { b.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); } }
+if(localStorage.getItem('theme')==='dark') document.body.setAttribute('data-theme','dark');
 
-function toggleTheme() { let body = document.body; if(body.getAttribute('data-theme') === 'dark') { body.removeAttribute('data-theme'); localStorage.setItem('theme', 'light'); } else { body.setAttribute('data-theme', 'dark'); localStorage.setItem('theme', 'dark'); } }
-if(localStorage.getItem('theme') === 'dark') document.body.setAttribute('data-theme', 'dark');
+let isL = localStorage.getItem('isLogged_v50')==='true';
+if(isL){ document.getElementById('login').style.display='none'; document.getElementById('admin').style.display='block'; setTimeout(init,100); }
+function loginAdmin(bypass=false){ let p=document.getElementById('lp').value; if(bypass || p===DB.adminPass || p==='admin'){ localStorage.setItem('isLogged_v50','true'); document.getElementById('login').style.display='none'; document.getElementById('admin').style.display='block'; init(); } else { document.getElementById('lerr').style.display='block'; } }
+function logout(){ localStorage.setItem('isLogged_v50','false'); document.getElementById('admin').style.display='none'; document.getElementById('login').style.display='flex'; }
+function showSP(){ document.getElementById('login').style.display='none'; document.getElementById('st-portal').style.display='flex'; }
+function hideSP(){ document.getElementById('st-portal').style.display='none'; document.getElementById('login').style.display='flex'; }
+function loginSt(){ let c=document.getElementById('sc').value.trim(); let s=DB.students.find(x=>x.code===c); if(s){ document.getElementById('st-portal').style.display='none'; document.getElementById('st-view').style.display='block'; document.getElementById('st-name').innerText='مرحباً، '+s.name; genR('st-grades',s.id); } else tst('كود خطأ','e'); }
 
-let isLogged = localStorage.getItem('isLogged_v30') === 'true';
-if(isLogged) { document.getElementById('login-screen').style.display='none'; document.getElementById('admin-view').style.display='block'; setTimeout(init, 100); }
-function loginAdmin(bypass = false){ let p=document.getElementById('login-pass').value; if(bypass || p===DB.adminPass || p==="admin"){ localStorage.setItem('isLogged_v30', 'true'); document.getElementById('login-screen').style.display='none'; document.getElementById('admin-view').style.display='block'; init(); } else { document.getElementById('login-err').style.display='block'; } }
-function logoutAdmin(){ localStorage.setItem('isLogged_v30', 'false'); document.getElementById('admin-view').style.display='none'; document.getElementById('login-screen').style.display='flex'; document.getElementById('login-pass').value=''; document.getElementById('login-err').style.display='none'; }
-function showStudentPortal(){ document.getElementById('login-screen').style.display='none'; document.getElementById('student-portal').style.display='flex'; }
-function hideStudentPortal(){ document.getElementById('student-portal').style.display='none'; document.getElementById('login-screen').style.display='flex'; }
-function loginStudent(){ let c=document.getElementById('student-code-input').value.trim(); let s=DB.students.find(x=>x.code===c); if(s){ document.getElementById('student-portal').style.display='none'; document.getElementById('student-view').style.display='block'; document.getElementById('st-name-display').innerText='مرحباً، '+s.name; genRep('st-grades-box',s.id); } else tst('كود خطأ','error'); }
-
-document.querySelectorAll('.nav-btn').forEach(b=>{
+document.querySelectorAll('.nb').forEach(b=>{
   b.addEventListener('click',()=>{
-    document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.nb').forEach(x=>x.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');
-    document.getElementById(b.dataset.tab).classList.add('active');
+    b.classList.add('active'); document.getElementById(b.dataset.tab).classList.add('active');
     if(b.dataset.tab==='att') document.getElementById('ad').valueAsDate=new Date();
-    if(b.dataset.tab==='dashboard') updateDash();
-    if(b.dataset.tab==='rep') { document.getElementById('search-rep').value=''; document.getElementById('rs-results').innerHTML=''; document.getElementById('rep-box').innerHTML=''; document.getElementById('print-btn').style.display='none'; }
-    if(b.dataset.tab==='att-report') { document.getElementById('search-att-report').value=''; document.getElementById('att-rep-results').innerHTML=''; document.getElementById('att-rep-box').innerHTML=''; }
-    if(b.dataset.tab==='act-report') { document.getElementById('search-act-report').value=''; document.getElementById('act-rep-results').innerHTML=''; document.getElementById('act-rep-box').innerHTML=''; }
+    if(b.dataset.tab==='dash') updateD();
+    if(b.dataset.tab==='rep'){ document.getElementById('srp').value=''; document.getElementById('rres').innerHTML=''; document.getElementById('rbox').innerHTML=''; document.getElementById('pbtn').style.display='none'; }
     ref();
   });
 });
 
-function updateDash(){
-  document.getElementById('dash-st-count').innerText = DB.students.length;
-  let today = new Date().toISOString().split('T')[0]; let absCount = 0;
-  for(let k in DB.attendance){ if(k.includes(today)) { absCount += Object.keys(DB.attendance[k]).length; } }
-  document.getElementById('dash-abs-count').innerText = absCount;
+function updateD(){
+  document.getElementById('ds').innerText = DB.students.length;
+  let today = new Date().toISOString().split('T')[0]; let ac = 0;
+  for(let k in DB.attendance){ if(k.includes(today)) ac += Object.keys(DB.attendance[k]).length; }
+  document.getElementById('da').innerText = ac;
   let ls = '';
-  DB.levels.forEach(lv => { let count = DB.students.filter(s => s.level === lv).length; ls += `<div style="background:var(--bg); padding:15px; border-radius:8px; text-align:center; border:1px solid var(--border);"><h4 style="color:var(--primary); margin-bottom:5px; font-size:14px;">${lv}</h4><strong style="font-size:18px;">${count} طالب</strong></div>`; });
-  document.getElementById('levels-stats').innerHTML = ls || '<p>لا توجد صفوف مضافة</p>';
+  DB.levels.forEach(lv=>{ let c=DB.students.filter(s=>s.level===lv).length; ls += `<div class="dash"><h4 style="color:var(--p);font-size:13px;">${lv}</h4><strong>${c}</strong></div>`; });
+  document.getElementById('lstats').innerHTML = ls || '';
   let top = [];
-  DB.students.forEach(st => { let gs = DB.grades.filter(g => g.student_id === st.id); let total = 0, subCount = 0; gs.forEach(g => { let s = DB.subjects.find(x => x.id === g.subject_id); if(s) { let m1 = ((g.m1_o||0) + (g.m1_w||0))/2, m2 = ((g.m2_o||0) + (g.m2_w||0))/2, f1 = (m1+m2)/2; let m3 = ((g.m3_o||0) + (g.m3_w||0))/2, m4 = ((g.m4_o||0) + (g.m4_w||0))/2, f2 = (m3+m4)/2; let an = (f1 + f2 + (g.mid||0)) / 3, fg = (an + (g.final||0)) / 2; total += fg; subCount++; } }); if(subCount>0) top.push({name: st.name, avg: (total/subCount).toFixed(1)}); });
-  top.sort((a,b) => b.avg - a.avg); top = top.slice(0, 3);
-  document.getElementById('top-students-list').innerHTML = top.map((t,i)=>`<div class="list-item"><div class="item-info"><b>${i+1}. ${t.name}</b></div><strong style="color:var(--success); font-size:18px;">${t.avg}%</strong></div>`).join('');
+  DB.students.forEach(st=>{ let gs=DB.grades.filter(g=>g.student_id===st.id); let t=0,c=0; gs.forEach(g=>{ let s=DB.subjects.find(x=>x.id===g.subject_id); if(s){ let m1=((g.m1_o||0)+(g.m1_w||0))/2, m2=((g.m2_o||0)+(g.m2_w||0))/2, f1=(m1+m2)/2; let m3=((g.m3_o||0)+(g.m3_w||0))/2, m4=((g.m4_o||0)+(g.m4_w||0))/2, f2=(m3+m4)/2; let an=(f1+f2+(g.mid||0))/3, fg=(an+(g.final||0))/2; t+=fg; c++; } }); if(c>0) top.push({name:st.name,avg:(t/c).toFixed(1)}); });
+  top.sort((a,b)=>b.avg-a.avg); top=top.slice(0,3);
+  document.getElementById('top').innerHTML = top.map((t,i)=>`<div class="li"><div><b>${i+1}. ${t.name}</b></div><strong style="color:var(--s);">${t.avg}%</strong></div>`).join('');
 }
 
-function showGenderStats(){
-  let males = DB.students.filter(s => s.gender === 'ذكر');
-  let females = DB.students.filter(s => s.gender === 'أنثى');
-  let calcRate = (arr) => { if(!arr.length) return '0'; let passed = 0; arr.forEach(st => { let gs = DB.grades.filter(g => g.student_id === st.id); let total = 0, subCount = 0; gs.forEach(g => { let s = DB.subjects.find(x => x.id === g.subject_id); if(s) { let m1 = ((g.m1_o||0) + (g.m1_w||0))/2, m2 = ((g.m2_o||0) + (g.m2_w||0))/2, f1 = (m1+m2)/2; let m3 = ((g.m3_o||0) + (g.m3_w||0))/2, m4 = ((g.m4_o||0) + (g.m4_w||0))/2, f2 = (m3+m4)/2; let an = (f1 + f2 + (g.mid||0)) / 3, fg = (an + (g.final||0)) / 2; total += fg; subCount++; } }); if(subCount>0 && (total/subCount) >= 50) passed++; }); return ((passed/arr.length)*100).toFixed(1); };
-  document.getElementById('gender-stats-box').innerHTML = `<div class="row"><div class="dash-card" style="background:#e0f2fe;"><h4>الذكور (${males.length})</h4><h3 style="color:var(--primary);">${calcRate(males)}%</h3><p>نسبة النجاح</p></div><div class="dash-card" style="background:#fce7f3;"><h4>الإناث (${females.length})</h4><h3 style="color:#db2777;">${calcRate(females)}%</h3><p>نسبة النجاح</p></div></div>`;
+function showG(){
+  let m = DB.students.filter(s=>s.gender==='ذكر'); let f = DB.students.filter(s=>s.gender==='أنثى');
+  let cr = (arr)=>{ if(!arr.length) return '0'; let p=0; arr.forEach(st=>{ let gs=DB.grades.filter(g=>g.student_id===st.id); let t=0,c=0; gs.forEach(g=>{ let s=DB.subjects.find(x=>x.id===g.subject_id); if(s){ let m1=((g.m1_o||0)+(g.m1_w||0))/2, m2=((g.m2_o||0)+(g.m2_w||0))/2, f1=(m1+m2)/2; let m3=((g.m3_o||0)+(g.m3_w||0))/2, m4=((g.m4_o||0)+(g.m4_w||0))/2, f2=(m3+m4)/2; let an=(f1+f2+(g.mid||0))/3, fg=(an+(g.final||0))/2; t+=fg; c++; } }); if(c>0 && (t/c)>=50) p++; }); return ((p/arr.length)*100).toFixed(1); };
+  document.getElementById('gbox').innerHTML = `<div class="row"><div class="dash" style="background:#e0f2fe;"><h4>ذكور (${m.length})</h4><h3>${cr(m)}%</h3></div><div class="dash" style="background:#fce7f3;"><h4>إناث (${f.length})</h4><h3 style="color:#db2777;">${cr(f)}%</h3></div></div>`;
 }
 
-function addLevel(){ let n = document.getElementById('new-level').value.trim(); if(n && !DB.levels.includes(n)) { DB.levels.push(n); sv(); ref(); document.getElementById('new-level').value=''; tst('تمت إضافة الصف'); } else { tst('موجود أو فارغ','error'); } }
-function delLevel(n){ if(confirm('حذف الصف؟')){ DB.levels = DB.levels.filter(x=>x!==n); DB.sections = DB.sections.filter(s=>s.level!==n); DB.students = DB.students.filter(st=>st.level!==n); sv(); init(); } }
-function addSection(){ let level = document.getElementById('set-level').value; let name = document.getElementById('new-sec').value.trim(); if(!level) return tst('اختر الصف','error'); if(name) { if(!DB.sections.some(s=>s.level===level && s.name===name)) { DB.sections.push({level: level, name: name}); sv(); ref(); document.getElementById('new-sec').value=''; tst('تمت إضافة الشعبة'); } else { tst('موجودة','error'); } } }
-function delSection(level, name){ if(confirm('حذف الشعبة؟')){ DB.sections = DB.sections.filter(s=>!(s.level===level && s.name===name)); DB.students = DB.students.filter(st=>!(st.level===level && st.section===name)); sv(); init(); } }
-function updateSetSections(){ let lv = document.getElementById('set-level').value; let filtered = DB.sections.filter(s=>s.level===lv); document.getElementById('sections-list').innerHTML = filtered.map(s=>`<div class="list-item"><div class="item-info"><b>${s.name}</b></div><button class="icon-btn" onclick="delSection('${s.level}','${s.name}')">🗑️</button></div>`).join(''); }
-function updateSectionFilter() { let lv = document.getElementById('st-filter-level').value; let filtered = DB.sections.filter(s=>s.level===lv); document.getElementById('st-filter-sec').innerHTML = '<option value="">-- كل الشعب --</option>' + filtered.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); renderSt(); }
-function updateGradeSections() { let lv = document.getElementById('g-level').value; let filtered = DB.sections.filter(s=>s.level===lv); document.getElementById('gs').innerHTML = '<option value="">-- الشعبة --</option>' + filtered.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); document.getElementById('gt').innerHTML = ''; }
-function updateAttSections() { let lv = document.getElementById('att-level').value; let filtered = DB.sections.filter(s=>s.level===lv); document.getElementById('as').innerHTML = '<option value="">-- الشعبة --</option>' + filtered.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); document.getElementById('al').innerHTML = ''; }
-function updateActSections() { let lv = document.getElementById('act-level').value; let filtered = DB.sections.filter(s=>s.level===lv); document.getElementById('acs').innerHTML = '<option value="">-- الشعبة --</option>' + filtered.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); document.getElementById('acl').innerHTML = ''; }
-function updateLvlSections() { let lv = document.getElementById('lvl-level').value; let filtered = DB.sections.filter(s=>s.level===lv); document.getElementById('lvl-sec').innerHTML = '<option value="">-- الشعبة --</option>' + filtered.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); document.getElementById('lvl-list').innerHTML = ''; }
-function updateImportSections() { let lv = document.getElementById('is-level').value; let filtered = DB.sections.filter(s=>s.level===lv); document.getElementById('is-sec').innerHTML = '<option value="">-- الشعبة --</option>' + filtered.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); }
-function updateMoveSections() { let lv = document.getElementById('move-to-level').value; let filtered = DB.sections.filter(s=>s.level===lv); document.getElementById('move-to-sec').innerHTML = '<option value="">-- الشعبة الجديدة --</option>' + filtered.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); }
+function addL(){ let n=document.getElementById('nl').value.trim(); if(n && !DB.levels.includes(n)){ DB.levels.push(n); sv(); ref(); document.getElementById('nl').value=''; tst('تمت الإضافة'); } else tst('موجود','e'); }
+function delL(n){ if(confirm('حذف؟')){ DB.levels=DB.levels.filter(x=>x!==n); DB.sections=DB.sections.filter(s=>s.level!==n); DB.students=DB.students.filter(s=>s.level!==n); sv(); init(); } }
+function addS(){ let lv=document.getElementById('sl').value, n=document.getElementById('ns').value.trim(); if(!lv) return tst('اختر الصف','e'); if(n && !DB.sections.some(s=>s.level===lv && s.name===n)){ DB.sections.push({level:lv,name:n}); sv(); ref(); document.getElementById('ns').value=''; tst('تمت'); } else tst('موجودة','e'); }
+function delS(l,n){ if(confirm('حذف؟')){ DB.sections=DB.sections.filter(s=>!(s.level===l && s.name===n)); DB.students=DB.students.filter(s=>!(s.level===l && s.section===n)); sv(); init(); } }
+function uSS(){ let lv=document.getElementById('sl').value; let f=DB.sections.filter(s=>s.level===lv); document.getElementById('slist').innerHTML=f.map(s=>`<div class="li"><div><b>${s.name}</b></div><button class="ib d" onclick="delS('${s.level}','${s.name}')">🗑️</button></div>`).join(''); }
+function uSF(){ let lv=document.getElementById('stl').value; let f=DB.sections.filter(s=>s.level===lv); document.getElementById('sts').innerHTML='<option value="">-- الكل --</option>'+f.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); rS(); }
+function uGS(){ let lv=document.getElementById('gl').value; let f=DB.sections.filter(s=>s.level===lv); document.getElementById('gs').innerHTML='<option value="">-- الكل --</option>'+f.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); document.getElementById('gt').innerHTML=''; }
+function uAS(){ let lv=document.getElementById('al').value; let f=DB.sections.filter(s=>s.level===lv); document.getElementById('as').innerHTML='<option value="">-- الكل --</option>'+f.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); document.getElementById('att-list').innerHTML=''; }
+function uACS(){ let lv=document.getElementById('acl').value; let f=DB.sections.filter(s=>s.level===lv); document.getElementById('acs').innerHTML='<option value="">-- الكل --</option>'+f.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); document.getElementById('act-list').innerHTML=''; }
+function uLS(){ let lv=document.getElementById('ll').value; let f=DB.sections.filter(s=>s.level===lv); document.getElementById('ls').innerHTML='<option value="">-- الكل --</option>'+f.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); document.getElementById('lvl-list').innerHTML=''; }
+function uIS(){ let lv=document.getElementById('il').value; let f=DB.sections.filter(s=>s.level===lv); document.getElementById('is').innerHTML='<option value="">-- الكل --</option>'+f.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); }
+function uMS(){ let lv=document.getElementById('mvl').value; let f=DB.sections.filter(s=>s.level===lv); document.getElementById('mvs').innerHTML='<option value="">-- الكل --</option>'+f.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); }
 
-function impEx(){
-  let f=document.getElementById('ef').files[0], lv=document.getElementById('is-level').value, sec=document.getElementById('is-sec').value;
-  let selectedGender = document.getElementById('is-gender').value;
-  if(!lv || !sec) return tst('اختر الصف والشعبة','error'); if(!f) return tst('اختر الملف','error');
+function importS(){
+  let f=document.getElementById('ef').files[0], lv=document.getElementById('il').value, sec=document.getElementById('is').value, sg=document.getElementById('ig').value;
+  if(!lv||!sec) return tst('اختر الصف والشعبة','e'); if(!f) return tst('اختر الملف','e');
   let r=new FileReader();
-  r.onload=e=>{ try{ let w=XLSX.read(new Uint8Array(e.target.result),{type:'array'}); let rows=XLSX.utils.sheet_to_json(w.Sheets[w.SheetNames[0]],{header:1}); let ci=0; for(let i=0;i<rows[0].length;i++){ if(String(rows[0][i]).includes('اسم')||String(rows[0][i]).toLowerCase().includes('name')){ ci=i; break; } } let imp=0, skp=0; for(let i=1;i<rows.length;i++){ let rw=rows[i]; if(rw && rw[ci]){ let n=String(rw[ci]).trim(); if(n){ if(DB.students.some(x=>x.name===n)){ skp++; continue; } let g = (selectedGender === 'auto') ? (rw[ci+1] || 'ذكر') : selectedGender; let parent = rw[ci+2] || ''; DB.students.push({id:nid(DB.students),name:n,level:lv,section:sec,code:sec+'-'+(1000+DB.students.length+1),gender:g,parentId:parent}); imp++; } } } sv(); init(); document.getElementById('ef').value=''; tst(`استيراد ${imp} (مكرر: ${skp})`); }catch(err){ tst('خطأ في الملف','error'); } };
+  r.onload=e=>{ try{ let w=XLSX.read(new Uint8Array(e.target.result),{type:'array'}); let rows=XLSX.utils.sheet_to_json(w.Sheets[w.SheetNames[0]],{header:1}); let ci=0; for(let i=0;i<rows[0].length;i++){ if(String(rows[0][i]).includes('اسم')||String(rows[0][i]).toLowerCase().includes('name')){ ci=i; break; } } let imp=0, skp=0; for(let i=1;i<rows.length;i++){ let rw=rows[i]; if(rw && rw[ci]){ let n=String(rw[ci]).trim(); if(n){ if(DB.students.some(x=>x.name===n)){ skp++; continue; } let g=(sg==='auto')?(rw[ci+1]||'ذكر'):sg; let par=rw[ci+2]||''; DB.students.push({id:nid(DB.students),name:n,level:lv,section:sec,code:sec+'-'+(1000+DB.students.length+1),gender:g,parentId:par}); imp++; } } } sv(); init(); document.getElementById('ef').value=''; tst(`استيراد ${imp} (مكرر: ${skp})`); }catch(err){ tst('خطأ','e'); } };
   r.readAsArrayBuffer(f);
 }
 
-function importGradesFromExcel(){ document.getElementById('grade-excel').click(); }
-function processGradeExcel(input){
-  let f = input.files[0]; if(!f) return;
-  let s = document.getElementById('gs').value, sid = +document.getElementById('gsub').value;
-  if(!s || !sid) { tst('اختر الشعبة والمادة أولاً','error'); return; }
-  let r = new FileReader();
-  r.onload = e => {
-    try {
-      let w = XLSX.read(new Uint8Array(e.target.result),{type:'array'});
-      let rows = XLSX.utils.sheet_to_json(w.Sheets[w.SheetNames[0]],{header:1});
-      let imp = 0;
-      for(let i=1; i<rows.length; i++){
-        let rw = rows[i]; if(!rw || !rw[0]) continue;
-        let n = String(rw[0]).trim(); let st = DB.students.find(x=>x.name===n);
-        if(st){
-          let ex = DB.grades.find(y=>y.student_id===st.id && y.subject_id===sid);
-          if(!ex) { ex = {id:nid(DB.grades), student_id:st.id, subject_id:sid}; DB.grades.push(ex); }
-          ex.m1_o = +rw[1]||0; ex.m1_w = +rw[2]||0; ex.m2_o = +rw[3]||0; ex.m2_w = +rw[4]||0; ex.mid = +rw[5]||0; ex.m3_o = +rw[6]||0; ex.m3_w = +rw[7]||0; ex.m4_o = +rw[8]||0; ex.m4_w = +rw[9]||0; ex.final = +rw[10]||0;
-          imp++;
-        }
-      }
-      sv(); renderGt(); input.value=''; tst(`تم استيراد درجات ${imp} طالب`);
-    } catch(err) { tst('خطأ في الملف','error'); }
-  };
+function importG(){ document.getElementById('gfile').click(); }
+function procG(input){
+  let f=input.files[0]; if(!f) return;
+  let s=document.getElementById('gs').value, sid=+document.getElementById('gsub').value;
+  if(!s||!sid) return tst('اختر الشعبة والمادة','e');
+  let r=new FileReader();
+  r.onload=e=>{ try{ let w=XLSX.read(new Uint8Array(e.target.result),{type:'array'}); let rows=XLSX.utils.sheet_to_json(w.Sheets[w.SheetNames[0]],{header:1}); let imp=0; for(let i=1;i<rows.length;i++){ let rw=rows[i]; if(!rw||!rw[0]) continue; let st=DB.students.find(x=>x.name===String(rw[0]).trim()); if(st){ let ex=DB.grades.find(y=>y.student_id===st.id&&y.subject_id===sid); if(!ex){ ex={id:nid(DB.grades),student_id:st.id,subject_id:sid}; DB.grades.push(ex); } ex.m1_o=+rw[1]||0; ex.m1_w=+rw[2]||0; ex.m2_o=+rw[3]||0; ex.m2_w=+rw[4]||0; ex.mid=+rw[5]||0; ex.m3_o=+rw[6]||0; ex.m3_w=+rw[7]||0; ex.m4_o=+rw[8]||0; ex.m4_w=+rw[9]||0; ex.final=+rw[10]||0; imp++; } } sv(); rG(); input.value=''; tst(`استيراد ${imp}`); }catch(err){ tst('خطأ','e'); } };
   r.readAsArrayBuffer(f);
 }
 
-function addSub(){ let n=document.getElementById('sub').value.trim(); if(n){ DB.subjects.push({id:nid(DB.subjects),name:n}); sv(); ref(); document.getElementById('sub').value=''; tst('تمت الإضافة'); } }
-function delSub(id){ if(confirm('حذف المادة؟')){ DB.subjects=DB.subjects.filter(x=>x.id!==id); sv(); init(); } }
-function delSt(id){ if(confirm('حذف الطالب؟')){ DB.students=DB.students.filter(x=>x.id!==id); sv(); renderSt(); } }
-function clearAll(){ if(confirm('تأكيد مسح الكل؟')){ if(prompt('اكتب "حذف":')==='حذف'){ DB={"students":[],"levels":[],"sections":[],"subjects":defaultSubs,"grades":[],"attendance":{},"activity":{},"adminPass":"admin"}; sv(); init(); tst('تم المسح'); } } }
+function addSub(){ let n=document.getElementById('sn').value.trim(); if(n){ DB.subjects.push({id:nid(DB.subjects),name:n}); sv(); ref(); document.getElementById('sn').value=''; tst('تمت'); } }
+function delSub(id){ if(confirm('حذف؟')){ DB.subjects=DB.subjects.filter(x=>x.id!==id); sv(); init(); } }
+function delSt(id){ if(confirm('حذف؟')){ DB.students=DB.students.filter(x=>x.id!==id); sv(); rS(); } }
+function clearAll(){ if(confirm('مسح الكل؟')){ if(prompt('اكتب "حذف":')==='حذف'){ DB={"students":[],"levels":[],"sections":[],"subjects":[{"id":1,"name":"اسلامية"},{"id":2,"name":"عربي"},{"id":3,"name":"انكليزي"},{"id":4,"name":"رياضيات"},{"id":5,"name":"احياء"},{"id":6,"name":"فيزياء"},{"id":7,"name":"كيمياء"},{"id":8,"name":"اجتماعيات"},{"id":9,"name":"اخلاقيه"}],"grades":[],"attendance":{},"activity":{},"adminPass":"admin"}; sv(); init(); tst('تم المسح'); } } }
 
-function renderSt(){
-  let q=document.getElementById('search-st').value, lv=document.getElementById('st-filter-level').value, sec=document.getElementById('st-filter-sec').value, g=document.getElementById('st-filter-gender').value;
-  let f=DB.students.filter(x=> (x.name.includes(q)||x.code.includes(q)) && (lv===''||x.level===lv) && (sec===''||x.section===sec) && (g===''||x.gender===g) );
-  let h=document.getElementById('st-list');
-  if(!f.length) return h.innerHTML='<p style="text-align:center;padding:20px;">لا يوجد طلاب مطابقون</p>';
-  h.innerHTML=f.map(x=>`<div class="list-item"><div style="display:flex; align-items:center; gap:10px;"><input type="checkbox" class="move-checkbox" value="${x.id}" style="width:20px; height:20px; margin:0;"><div class="item-info" style="cursor:pointer;" onclick="selectReportStudent(${x.id}); document.querySelector('[data-tab=\\'rep\\']').click();"><b style="text-decoration:underline; color:var(--primary);">${x.name}</b><small>${x.level} - شعبة ${x.section} | الكود: ${x.code} | الجنس: ${x.gender||'-'}</small></div></div><div style="display:flex; gap:5px;"><button class="icon-btn" style="background:var(--warning);" onclick="editStudent(${x.id})">⚙️</button><button class="icon-btn" onclick="delSt(${x.id})">🗑️</button></div></div>`).join('');
+function rS(){
+  let q=document.getElementById('srch').value, lv=document.getElementById('stl').value, sec=document.getElementById('sts').value, g=document.getElementById('sgf').value;
+  let f=DB.students.filter(x=>(x.name.includes(q)||x.code.includes(q))&&(lv===''||x.level===lv)&&(sec===''||x.section===sec)&&(g===''||x.gender===g));
+  let h=document.getElementById('stl-list');
+  if(!f.length) return h.innerHTML='<p style="text-align:center;padding:15px;">لا يوجد</p>';
+  h.innerHTML=f.map(x=>`<div class="li"><div style="display:flex;align-items:center;gap:8px;"><input type="checkbox" class="mvc" value="${x.id}" style="width:18px;height:18px;margin:0;"><div style="cursor:pointer;" onclick="selR(${x.id});document.querySelector('[data-tab=\\'rep\\']').click();"><b style="text-decoration:underline;">${x.name}</b><small>${x.level} - ${x.section} | ${x.code} | ${x.gender||'-'}</small></div></div><div style="display:flex;gap:4px;"><button class="ib w" onclick="editS(${x.id})">⚙️</button><button class="ib d" onclick="delSt(${x.id})">🗑️</button></div></div>`).join('');
 }
 
-function editStudent(id) {
-  let st = DB.students.find(x=>x.id===id);
-  if(!st) return;
-  let action = prompt(`ماذا تريد أن تفعل للطالب: ${st.name}؟\n1- تعديل الاسم\n2- تغيير الجنس (حالياً: ${st.gender || 'غير محدد'})\n3- ترقية الطالب لصف أعلى\n\nاكتب الرقم:`);
-  if(action === '1') { let newName = prompt("تعديل الاسم:", st.name); if(newName === null) return; st.name = newName.trim(); sv(); renderSt(); tst('تم تعديل الاسم ✅'); }
-  else if(action === '2') { let newGender = prompt("أدخل الجنس الجديد (ذكر أو أنثى):", st.gender || "ذكر"); if(newGender === null) return; if(newGender !== 'ذكر' && newGender !== 'أنثى') { tst('الجنس يجب أن يكون: ذكر أو أنثى','error'); return; } st.gender = newGender; sv(); renderSt(); tst('تم تغيير الجنس ✅'); }
-  else if(action === '3') {
-    let availableLevels = DB.levels.join('، ');
-    let newLvl = prompt(`إلى أي صف تريد ترقية الطالب؟\n(الصفوف: ${availableLevels})`, ""); if(newLvl === null || !newLvl.trim()) return;
-    if(!DB.levels.includes(newLvl.trim())) { tst('هذا الصف غير موجود','error'); return; }
-    let availableSecs = DB.sections.filter(s=>s.level===newLvl.trim()).map(s=>s.name).join('، ');
-    if(!availableSecs) { tst('لا توجد شعب لهذا الصف','error'); return; }
-    let newSec = prompt(`إلى أي شعبة في الصف (${newLvl})؟\n(الشعب: ${availableSecs})`, ""); if(newSec === null || !newSec.trim()) return;
-    if(!confirm('سيتم أرشفة درجاته الحالية وتصفيرها. هل أنت متأكد؟')) return;
-    let currentYear = new Date().getFullYear(); let gs = DB.grades.filter(g => g.student_id === st.id);
-    if(!st.archive) st.archive = {}; st.archive[currentYear] = gs.map(g => ({...g}));
-    st.level = newLvl.trim(); st.section = newSec.trim(); st.code = newSec.trim() + '-' + Math.floor(1000 + Math.random() * 9000);
-    DB.grades = DB.grades.filter(g => g.student_id !== st.id);
-    sv(); renderSt(); tst('تم ترقية الطالب وأرشفة درجاته 🎓');
+function editS(id){
+  let st=DB.students.find(x=>x.id===id); if(!st) return;
+  let a=prompt(`ماذا تريد؟\n1- تعديل الاسم\n2- تغيير الجنس (${st.gender||'-'})\n3- ترقية لصف أعلى\nاكتب الرقم:`);
+  if(a==='1'){ let n=prompt("الاسم:",st.name); if(n===null) return; st.name=n.trim(); sv(); rS(); tst('تم'); }
+  else if(a==='2'){ let g=prompt("الجنس (ذكر/أنثى):",st.gender||'ذكر'); if(g===null) return; if(g!=='ذكر'&&g!=='أنثى') return tst('خطأ','e'); st.gender=g; sv(); rS(); tst('تم'); }
+  else if(a==='3'){
+    let lv=prompt(`الصفوف: ${DB.levels.join('، ')}`, "");
+    if(!lv||!DB.levels.includes(lv.trim())) return tst('خطأ','e');
+    let secs=DB.sections.filter(s=>s.level===lv.trim()).map(s=>s.name).join('، ');
+    if(!secs) return tst('لا شعب','e');
+    let sec=prompt(`الشعب: ${secs}`, "");
+    if(!sec||!sec.trim()) return;
+    if(!confirm('سيتم أرشفة درجاته. متأكد؟')) return;
+    let yr=new Date().getFullYear(); let gs=DB.grades.filter(g=>g.student_id===st.id);
+    if(!st.archive) st.archive={}; st.archive[yr]=gs.map(g=>({...g}));
+    st.level=lv.trim(); st.section=sec.trim(); st.code=sec.trim()+'-'+Math.floor(1000+Math.random()*9000);
+    DB.grades=DB.grades.filter(g=>g.student_id!==st.id);
+    sv(); rS(); tst('تمت الترقية');
   }
 }
 
-function printClassList(){
-  let lv=document.getElementById('st-filter-level').value, sec=document.getElementById('st-filter-sec').value;
-  if(!lv||!sec) return tst('اختر الصف والشعبة','error');
-  let st=DB.students.filter(x=>x.level===lv && x.section===sec);
-  if(!st.length) return tst('لا يوجد طلاب','error');
+function printL(){
+  let lv=document.getElementById('stl').value, sec=document.getElementById('sts').value;
+  if(!lv||!sec) return tst('اختر الصف والشعبة','e');
+  let st=DB.students.filter(x=>x.level===lv&&x.section===sec);
+  if(!st.length) return tst('لا يوجد','e');
   let w=window.open('','','width=800,height=600');
-  w.document.write(`<div style="text-align:center;font-family:Tahoma;padding:20px;"><h2>كشف أسماء (${lv} - شعبة ${sec})</h2><table border="1" style="width:100%;border-collapse:collapse;"><tr><th>م</th><th>الاسم</th><th>الكود</th><th>الجنس</th></tr>`);
+  w.document.write(`<div style="text-align:center;font-family:Tahoma;padding:20px;"><h2>كشف (${lv} - ${sec})</h2><table border="1" style="width:100%;border-collapse:collapse;"><tr><th>م</th><th>الاسم</th><th>الكود</th><th>الجنس</th></tr>`);
   st.forEach((x,i)=>w.document.write(`<tr><td>${i+1}</td><td>${x.name}</td><td>${x.code}</td><td>${x.gender||'-'}</td></tr>`));
   w.document.write('</table></div>'); w.document.close(); w.print();
 }
 
-function moveSelectedStudents() {
-  let newLvl = document.getElementById('move-to-level').value; let newSec = document.getElementById('move-to-sec').value;
-  if(!newLvl || !newSec) return tst('اختر الصف والشعبة الجديدة','error');
-  let checked = document.querySelectorAll('.move-checkbox:checked');
-  if(!checked.length) return tst('لم تقم بتحديد أي طالب','error');
-  let count = 0;
-  checked.forEach(chk => { let st = DB.students.find(s=>s.id == chk.value); if(st) { st.level = newLvl; st.section = newSec; st.code = newSec + '-' + Math.floor(1000 + Math.random() * 9000); count++; } });
-  sv(); renderSt(); tst(`تم نقل ${count} طالب بنجاح ✅`);
+function moveSel(){
+  let lv=document.getElementById('mvl').value, sec=document.getElementById('mvs').value;
+  if(!lv||!sec) return tst('اختر','e');
+  let chk=document.querySelectorAll('.mvc:checked'); if(!chk.length) return tst('اختر طلاباً','e');
+  let c=0; chk.forEach(ch=>{ let st=DB.students.find(s=>s.id==ch.value); if(st){ st.level=lv; st.section=sec; st.code=sec+'-'+Math.floor(1000+Math.random()*9000); c++; } });
+  sv(); rS(); tst(`نقل ${c}`);
 }
 
-function upgradeStudents(){
-  let fromLvl = document.getElementById('upgrade-from-level').value; let toLvl = document.getElementById('upgrade-to-level').value;
-  if(!fromLvl || !toLvl) return tst('اختر الصف الحالي والصف الأعلى','error');
-  if(fromLvl === toLvl) return tst('لا يمكن الترقية لنفس الصف','error');
-  if(!confirm(`هل أنت متأكد من ترقية الطلاب الناجحين من (${fromLvl}) إلى (${toLvl})؟`)) return;
-  let studentsInLevel = DB.students.filter(s => s.level === fromLvl); if(!studentsInLevel.length) return tst('لا يوجد طلاب في هذا الصف','error');
-  let upgradedCount = 0; let currentYear = new Date().getFullYear();
-  studentsInLevel.forEach(st => {
-    let gs = DB.grades.filter(g => g.student_id === st.id); let total = 0, subCount = 0;
-    gs.forEach(g => { let s = DB.subjects.find(x => x.id === g.subject_id); if(s) { let m1 = ((g.m1_o||0) + (g.m1_w||0))/2, m2 = ((g.m2_o||0) + (g.m2_w||0))/2, f1 = (m1+m2)/2; let m3 = ((g.m3_o||0) + (g.m3_w||0))/2, m4 = ((g.m4_o||0) + (g.m4_w||0))/2, f2 = (m3+m4)/2; let an = (f1 + f2 + (g.mid||0)) / 3, fg = (an + (g.final||0)) / 2; total += fg; subCount++; } });
-    if(subCount > 0 && (total/subCount) >= 50) {
-      if(!st.archive) st.archive = {}; st.archive[currentYear] = gs.map(g => ({...g}));
-      st.level = toLvl; let availableSecs = DB.sections.filter(s=>s.level===toLvl).map(s=>s.name);
-      if(!availableSecs.includes(st.section)) { st.section = availableSecs.length > 0 ? availableSecs[0] : 'أ'; }
-      st.code = st.section + '-' + Math.floor(1000 + Math.random() * 9000);
-      DB.grades = DB.grades.filter(g => g.student_id !== st.id); upgradedCount++;
-    }
+function upgradeAll(){
+  let fl=document.getElementById('ufl').value, tl=document.getElementById('utl').value;
+  if(!fl||!tl||fl===tl) return tst('خطأ','e');
+  if(!confirm(`ترقية الناجحين من ${fl} إلى ${tl}؟`)) return;
+  let sts=DB.students.filter(s=>s.level===fl); if(!sts.length) return tst('لا يوجد','e');
+  let c=0, yr=new Date().getFullYear();
+  sts.forEach(st=>{
+    let gs=DB.grades.filter(g=>g.student_id===st.id); let t=0,sc=0;
+    gs.forEach(g=>{ let s=DB.subjects.find(x=>x.id===g.subject_id); if(s){ let m1=((g.m1_o||0)+(g.m1_w||0))/2,m2=((g.m2_o||0)+(g.m2_w||0))/2,f1=(m1+m2)/2; let m3=((g.m3_o||0)+(g.m3_w||0))/2,m4=((g.m4_o||0)+(g.m4_w||0))/2,f2=(m3+m4)/2; let an=(f1+f2+(g.mid||0))/3,fg=(an+(g.final||0))/2; t+=fg; sc++; } });
+    if(sc>0&&(t/sc)>=50){ if(!st.archive) st.archive={}; st.archive[yr]=gs.map(g=>({...g})); st.level=tl; let as=DB.sections.filter(s=>s.level===tl).map(s=>s.name); if(!as.includes(st.section)) st.section=as.length?as[0]:'أ'; st.code=st.section+'-'+Math.floor(1000+Math.random()*9000); DB.grades=DB.grades.filter(g=>g.student_id!==st.id); c++; }
   });
-  sv(); renderSt(); updateDash(); tst(`تم ترقية ${upgradedCount} طالب ناجح 🎓`);
+  sv(); rS(); updateD(); tst(`ترقية ${c}`);
 }
 
-function init(){ ref(); renderSt(); updateDash(); }
+function init(){ ref(); rS(); updateD(); }
 function ref(){
   let lo=DB.levels.map(x=>`<option value="${x}">${x}</option>`).join(''); let suo=DB.subjects.map(x=>`<option value="${x.id}">${x.name}</option>`).join('');
-  document.getElementById('st-filter-level').innerHTML='<option value="">-- كل الصفوف --</option>'+lo;
-  document.getElementById('set-level').innerHTML='<option value="">-- اختر الصف --</option>'+lo;
-  document.getElementById('g-level').innerHTML='<option value="">-- الصف --</option>'+lo;
-  document.getElementById('att-level').innerHTML='<option value="">-- الصف --</option>'+lo;
-  document.getElementById('act-level').innerHTML='<option value="">-- الصف --</option>'+lo;
-  document.getElementById('lvl-level').innerHTML='<option value="">-- الصف --</option>'+lo;
-  document.getElementById('is-level').innerHTML='<option value="">-- الصف --</option>'+lo;
-  document.getElementById('upgrade-from-level').innerHTML='<option value="">-- من صف --</option>'+lo;
-  document.getElementById('upgrade-to-level').innerHTML='<option value="">-- إلى صف --</option>'+lo;
-  document.getElementById('move-to-level').innerHTML='<option value="">-- الصف الجديد --</option>'+lo;
-  document.getElementById('move-to-level').onchange = updateMoveSections;
+  document.getElementById('stl').innerHTML='<option value="">-- الكل --</option>'+lo;
+  document.getElementById('sl').innerHTML='<option value="">-- اختر --</option>'+lo;
+  document.getElementById('gl').innerHTML='<option value="">-- الصف --</option>'+lo;
+  document.getElementById('al').innerHTML='<option value="">-- الصف --</option>'+lo;
+  document.getElementById('acl').innerHTML='<option value="">-- الصف --</option>'+lo;
+  document.getElementById('ll').innerHTML='<option value="">-- الصف --</option>'+lo;
+  document.getElementById('il').innerHTML='<option value="">-- الصف --</option>'+lo;
+  document.getElementById('ufl').innerHTML='<option value="">-- من صف --</option>'+lo;
+  document.getElementById('utl').innerHTML='<option value="">-- إلى صف --</option>'+lo;
+  document.getElementById('mvl').innerHTML='<option value="">-- الصف --</option>'+lo;
+  document.getElementById('mvl').onchange=uMS;
   document.getElementById('gsub').innerHTML='<option value="">-- المادة --</option>'+suo;
-  document.getElementById('levels-list').innerHTML=DB.levels.map(x=>`<div class="list-item"><div class="item-info"><b>${x}</b></div><button class="icon-btn" onclick="delLevel('${x}')">🗑️</button></div>`).join('');
-  document.getElementById('subl').innerHTML=DB.subjects.map(x=>`<div class="list-item"><div class="item-info"><b>${x.name}</b></div><button class="icon-btn" onclick="delSub(${x.id})">🗑️</button></div>`).join('');
-}
-  <script>
-function autoSave(subId, field, val, studentId) {
-  let existing = DB.grades.find(y => y.student_id === studentId && y.subject_id === subId);
-  if(!existing) { existing = { id: nid(DB.grades), student_id: studentId, subject_id: subId }; DB.grades.push(existing); }
-  existing[field] = val !== '' ? +val : null; sv();
+  document.getElementById('llist').innerHTML=DB.levels.map(x=>`<div class="li"><div><b>${x}</b></div><button class="ib d" onclick="delL('${x}')">🗑️</button></div>`).join('');
+  document.getElementById('sublist').innerHTML=DB.subjects.map(x=>`<div class="li"><div><b>${x.name}</b></div><button class="ib d" onclick="delSub(${x.id})">🗑️</button></div>`).join('');
 }
 
-function renderGt(){
+function autoS(sid,f,v,stId){ let e=DB.grades.find(y=>y.student_id===stId&&y.subject_id===sid); if(!e){ e={id:nid(DB.grades),student_id:stId,subject_id:sid}; DB.grades.push(e); } e[f]=v!==''?+v:null; sv(); }
+
+function rG(){
   let s=document.getElementById('gs').value, sid=+document.getElementById('gsub').value, c=document.getElementById('gt');
   if(!s||!sid){ c.innerHTML=''; return; }
-  let lv=document.getElementById('g-level').value; let st=DB.students.filter(x=>x.section===s && x.level===lv);
-  if(!st.length){ c.innerHTML='<p style="text-align:center;">لا يوجد طلاب</p>'; return; }
-  let h='<table><thead><tr><th>الطالب</th><th colspan="2">الشهر الأول</th><th>معدل ش1</th><th colspan="2">الشهر الثاني</th><th>معدل ش2</th><th>معدل الفصل الأول</th><th>نصف السنة</th><th colspan="2">الشهر الثالث</th><th>معدل ش3</th><th colspan="2">الشهر الرابع</th><th>معدل ش4</th><th>معدل الفصل الثاني</th><th>السعي السنوي</th><th>نهاية السنة</th><th>الدرجة النهائية</th></tr><tr><th></th><th>شفوي</th><th>تحريري</th><th></th><th>شفوي</th><th>تحريري</th><th></th><th></th><th></th><th>شفوي</th><th>تحريري</th><th></th><th>شفوي</th><th>تحريري</th><th></th><th></th><th></th><th></th><th></th></tr></thead><tbody>';
+  let lv=document.getElementById('gl').value; let st=DB.students.filter(x=>x.section===s&&x.level===lv);
+  if(!st.length){ c.innerHTML='<p style="text-align:center;">لا يوجد</p>'; return; }
+  let h='<table><thead><tr><th>الطالب</th><th>ش1 شفوي</th><th>ش1 تحريري</th><th>معدل ش1</th><th>ش2 شفوي</th><th>ش2 تحريري</th><th>معدل ش2</th><th>معدل ف1</th><th>نصف السنة</th><th>ش3 شفوي</th><th>ش3 تحريري</th><th>معدل ش3</th><th>ش4 شفوي</th><th>ش4 تحريري</th><th>معدل ش4</th><th>معدل ف2</th><th>السعي</th><th>نهائي</th><th>النهائية</th></tr></thead><tbody>';
   st.forEach(x=>{
-    let g=DB.grades.find(y=>y.student_id===x.id&&y.subject_id===sid)||{}; let v=k=>g[k]!==undefined && g[k]!==null ? g[k] : '';
-    let m1 = ((+g.m1_o||0) + (+g.m1_w||0)) / 2; let m2 = ((+g.m2_o||0) + (+g.m2_w||0)) / 2; let f1 = (m1+m2)/2;
-    let m3 = ((+g.m3_o||0) + (+g.m3_w||0)) / 2; let m4 = ((+g.m4_o||0) + (+g.m4_w||0)) / 2; let f2 = (m3+m4)/2;
-    let annual = (f1 + f2 + (+g.mid||0)) / 3; let finalGrade = (annual + (+g.final||0)) / 2;
-    let allFieldsFilled = g.m1_o!=null && g.m1_w!=null && g.m2_o!=null && g.m2_w!=null && g.m3_o!=null && g.m3_w!=null && g.m4_o!=null && g.m4_w!=null && g.mid!=null && g.final!=null;
-    h+=`<tr><td style="text-align:right;font-weight:bold; position:sticky; right:0; background:var(--card); border-left:2px solid var(--border);">${x.name}</td>
-    <td><input type="number" id="a1-${x.id}" value="${v('m1_o')}" onchange="autoSave(${sid},'m1_o',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
-    <td><input type="number" id="a2-${x.id}" value="${v('m1_w')}" onchange="autoSave(${sid},'m1_w',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
-    <td style="background:var(--bg); font-weight:bold;">${allFieldsFilled?m1.toFixed(1):'—'}</td>
-    <td><input type="number" id="a3-${x.id}" value="${v('m2_o')}" onchange="autoSave(${sid},'m2_o',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
-    <td><input type="number" id="a4-${x.id}" value="${v('m2_w')}" onchange="autoSave(${sid},'m2_w',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
-    <td style="background:var(--bg); font-weight:bold;">${allFieldsFilled?m2.toFixed(1):'—'}</td>
-    <td style="background:#e0f2fe; font-weight:bold; color:blue;">${allFieldsFilled?f1.toFixed(1):'—'}</td>
-    <td><input type="number" id="a5-${x.id}" value="${v('mid')}" onchange="autoSave(${sid},'mid',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
-    <td><input type="number" id="a6-${x.id}" value="${v('m3_o')}" onchange="autoSave(${sid},'m3_o',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
-    <td><input type="number" id="a7-${x.id}" value="${v('m3_w')}" onchange="autoSave(${sid},'m3_w',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
-    <td style="background:var(--bg); font-weight:bold;">${allFieldsFilled?m3.toFixed(1):'—'}</td>
-    <td><input type="number" id="a8-${x.id}" value="${v('m4_o')}" onchange="autoSave(${sid},'m4_o',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
-    <td><input type="number" id="a9-${x.id}" value="${v('m4_w')}" onchange="autoSave(${sid},'m4_w',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
-    <td style="background:var(--bg); font-weight:bold;">${allFieldsFilled?m4.toFixed(1):'—'}</td>
-    <td style="background:#e0f2fe; font-weight:bold; color:blue;">${allFieldsFilled?f2.toFixed(1):'—'}</td>
-    <td style="background:#fef08a; font-weight:bold; color:#854d0e;">${allFieldsFilled?annual.toFixed(1):'—'}</td>
-    <td><input type="number" id="a10-${x.id}" value="${v('final')}" onchange="autoSave(${sid},'final',this.value,${x.id});renderGt()" style="width:50px;padding:6px;margin:0;"></td>
-    <td style="background:#dcfce7; font-weight:bold; color:green; font-size:14px;">${allFieldsFilled?finalGrade.toFixed(1):'—'}</td></tr>`;
+    let g=DB.grades.find(y=>y.student_id===x.id&&y.subject_id===sid)||{}; let v=k=>g[k]!==undefined&&g[k]!==null?g[k]:'';
+    let m1=((+g.m1_o||0)+(+g.m1_w||0))/2, m2=((+g.m2_o||0)+(+g.m2_w||0))/2, f1=(m1+m2)/2; let m3=((+g.m3_o||0)+(+g.m3_w||0))/2, m4=((+g.m4_o||0)+(+g.m4_w||0))/2, f2=(m3+m4)/2; let an=(f1+f2+(+g.mid||0))/3, fg=(an+(+g.final||0))/2;
+    let ok=g.m1_o!=null&&g.m1_w!=null&&g.m2_o!=null&&g.m2_w!=null&&g.m3_o!=null&&g.m3_w!=null&&g.m4_o!=null&&g.m4_w!=null&&g.mid!=null&&g.final!=null;
+    h+=`<tr><td style="text-align:right;font-weight:bold;">${x.name}</td>
+    <td><input type="number" value="${v('m1_o')}" onchange="autoS(${sid},'m1_o',this.value,${x.id});rG()" style="width:45px;padding:4px;margin:0;"></td>
+    <td><input type="number" value="${v('m1_w')}" onchange="autoS(${sid},'m1_w',this.value,${x.id});rG()" style="width:45px;padding:4px;margin:0;"></td>
+    <td>${ok?m1.toFixed(1):'—'}</td>
+    <td><input type="number" value="${v('m2_o')}" onchange="autoS(${sid},'m2_o',this.value,${x.id});rG()" style="width:45px;padding:4px;margin:0;"></td>
+    <td><input type="number" value="${v('m2_w')}" onchange="autoS(${sid},'m2_w',this.value,${x.id});rG()" style="width:45px;padding:4px;margin:0;"></td>
+    <td>${ok?m2.toFixed(1):'—'}</td>
+    <td>${ok?f1.toFixed(1):'—'}</td>
+    <td><input type="number" value="${v('mid')}" onchange="autoS(${sid},'mid',this.value,${x.id});rG()" style="width:45px;padding:4px;margin:0;"></td>
+    <td><input type="number" value="${v('m3_o')}" onchange="autoS(${sid},'m3_o',this.value,${x.id});rG()" style="width:45px;padding:4px;margin:0;"></td>
+    <td><input type="number" value="${v('m3_w')}" onchange="autoS(${sid},'m3_w',this.value,${x.id});rG()" style="width:45px;padding:4px;margin:0;"></td>
+    <td>${ok?m3.toFixed(1):'—'}</td>
+    <td><input type="number" value="${v('m4_o')}" onchange="autoS(${sid},'m4_o',this.value,${x.id});rG()" style="width:45px;padding:4px;margin:0;"></td>
+    <td><input type="number" value="${v('m4_w')}" onchange="autoS(${sid},'m4_w',this.value,${x.id});rG()" style="width:45px;padding:4px;margin:0;"></td>
+    <td>${ok?m4.toFixed(1):'—'}</td>
+    <td>${ok?f2.toFixed(1):'—'}</td>
+    <td>${ok?an.toFixed(1):'—'}</td>
+    <td><input type="number" value="${v('final')}" onchange="autoS(${sid},'final',this.value,${x.id});rG()" style="width:45px;padding:4px;margin:0;"></td>
+    <td style="font-weight:bold;color:green;">${ok?fg.toFixed(1):'—'}</td></tr>`;
   });
   c.innerHTML=h+'</tbody></table>';
 }
 
-function renderAtt(){
-  let s=document.getElementById('as').value, d=document.getElementById('ad').value, q=document.getElementById('search-att').value, lv=document.getElementById('att-level').value;
+function rA(){
+  let s=document.getElementById('as').value, d=document.getElementById('ad').value, q=document.getElementById('sa').value, lv=document.getElementById('al').value;
   if(!s||!d||!lv) return; let k=s+'_'+d; if(!DB.attendance[k]) DB.attendance[k]={};
-  let st=DB.students.filter(x=>x.section===s && x.level===lv && x.name.includes(q));
-  document.getElementById('al').innerHTML=st.map(x=>{
-    let stat=DB.attendance[k][x.id]; let isAbsent=stat===true||stat==='مريض'||stat==='عمل'||stat==='أخرى';
-    let reasonText = stat===true ? 'غياب بدون عذر (خصم 5)' : (stat==='مريض'?'غياب بعذر (مريض)':(stat==='عمل'?'غياب بعذر (عمل)':(stat==='أخرى'?'غياب بعذر (أخرى)':'حاضر')));
-    return `<div class="list-item" style="flex-direction:column; align-items:flex-start;"><div style="margin-bottom:8px; display:flex; justify-content:space-between; width:100%;"><b>${x.name}</b><span style="color:${isAbsent?'var(--danger)':'var(--success)'}; font-weight:bold; font-size:13px;">${reasonText}</span></div><div style="display:flex; width:100%; gap:10px; align-items:center;"><label style="display:flex; align-items:center; gap:5px; font-size:13px;"><input type="checkbox" style="width:18px;height:18px;margin:0;" ${isAbsent?'checked':''} onchange="toggleAtt('${k}',${x.id},this.checked)"> تسجيل غياب</label><select onchange="changeAttReason('${k}',${x.id},this.value)" style="padding:6px; font-size:12px; width:auto; flex:1; margin:0; display:${isAbsent?'block':'none'};"><option value="true" ${stat===true?'selected':''}>بدون عذر (خصم 5)</option><option value="مريض" ${stat==='مريض'?'selected':''}>بعذر: مريض</option><option value="عمل" ${stat==='عمل'?'selected':''}>بعذر: عمل</option><option value="أخرى" ${stat==='أخرى'?'selected':''}>بعذر: أخرى</option></select></div></div>`;
+  let st=DB.students.filter(x=>x.section===s&&x.level===lv&&x.name.includes(q));
+  document.getElementById('att-list').innerHTML=st.map(x=>{
+    let stt=DB.attendance[k][x.id]; let isA=stt===true||stt==='مريض'||stt==='عمل'||stt==='أخرى';
+    let rt=stt===true?'بدون عذر (خصم 5)':(stt==='مريض'?'بعذر (مريض)':(stt==='عمل'?'بعذر (عمل)':(stt==='أخرى'?'بعذر (أخرى)':'حاضر')));
+    return `<div class="li" style="flex-direction:column;align-items:flex-start;"><div style="display:flex;justify-content:space-between;width:100%;margin-bottom:5px;"><b>${x.name}</b><span style="color:${isA?'var(--e)':'var(--s)'};font-size:12px;font-weight:bold;">${rt}</span></div><div style="display:flex;gap:8px;align-items:center;width:100%;"><label style="font-size:12px;"><input type="checkbox" style="width:16px;height:16px;" ${isA?'checked':''} onchange="tA('${k}',${x.id},this.checked)"> غياب</label><select onchange="cA('${k}',${x.id},this.value)" style="padding:4px;font-size:11px;width:auto;flex:1;margin:0;display:${isA?'block':'none'};"><option value="true" ${stt===true?'selected':''}>بدون عذر</option><option value="مريض" ${stt==='مريض'?'selected':''}>مريض</option><option value="عمل" ${stt==='عمل'?'selected':''}>عمل</option><option value="أخرى" ${stt==='أخرى'?'selected':''}>أخرى</option></select></div></div>`;
   }).join('');
 }
-function toggleAtt(k,sid,isChecked){ if(!isChecked){ delete DB.attendance[k][sid]; } else { DB.attendance[k][sid]='true'; } sv(); renderAtt(); updateDash(); }
-function changeAttReason(k,sid,val){ DB.attendance[k][sid]=val; sv(); renderAtt(); }
-function calcAbsences(sid){ let total=0, justified=0; for(let k in DB.attendance){ let stat=DB.attendance[k][sid]; if(stat){ if(stat===true||stat==='true') total++; else justified++; } } return {total, justified}; }
+function tA(k,sid,chk){ if(!chk) delete DB.attendance[k][sid]; else DB.attendance[k][sid]='true'; sv(); rA(); updateD(); }
+function cA(k,sid,v){ DB.attendance[k][sid]=v; sv(); rA(); }
+function calcA(sid){ let t=0,j=0; for(let k in DB.attendance){ let s=DB.attendance[k][sid]; if(s){ if(s===true||s==='true') t++; else j++; } } return {t,j}; }
 
-function renderAct() {
-  let s=document.getElementById('acs').value, q=document.getElementById('search-act').value, lv=document.getElementById('act-level').value;
-  if(!s||!lv) return; let st=DB.students.filter(x=>x.section===s && x.level===lv && x.name.includes(q));
-  document.getElementById('acl').innerHTML=st.map(x=>`<div class="list-item"><div class="item-info"><b>${x.name}</b></div><input type="number" id="ac-${x.id}" value="${DB.activity[x.id]||''}" style="width:80px;margin:0;padding:8px;text-align:center;"></div>`).join('');
-  document.getElementById('sa').style.display='block';
+function rAC(){
+  let s=document.getElementById('acs').value, q=document.getElementById('sac').value, lv=document.getElementById('acl').value;
+  if(!s||!lv) return; let st=DB.students.filter(x=>x.section===s&&x.level===lv&&x.name.includes(q));
+  document.getElementById('act-list').innerHTML=st.map(x=>`<div class="li"><div><b>${x.name}</b></div><input type="number" id="ac-${x.id}" value="${DB.activity[x.id]||''}" style="width:70px;margin:0;padding:6px;text-align:center;"></div>`).join('');
+  document.getElementById('sact').style.display='block';
 }
-function saveAct(){ let s=document.getElementById('acs').value; DB.students.filter(x=>x.section===s).forEach(x=>{ let v=document.getElementById(`ac-${x.id}`).value; if(v) DB.activity[x.id]=+v; else delete DB.activity[x.id]; }); sv(); tst('تم الحفظ ✅'); }
+function saveAC(){ let s=document.getElementById('acs').value; DB.students.filter(x=>x.section===s).forEach(x=>{ let v=document.getElementById(`ac-${x.id}`).value; if(v) DB.activity[x.id]=+v; else delete DB.activity[x.id]; }); sv(); tst('تم'); }
 
-function renderLevels() {
-  let lv = document.getElementById('lvl-level').value; let sec = document.getElementById('lvl-sec').value; let filter = document.getElementById('lvl-filter').value; let el = document.getElementById('lvl-list');
-  if(!lv || !sec) { el.innerHTML = '<p style="text-align:center;">اختر الصف والشعبة</p>'; return; }
-  let st = DB.students.filter(x=>x.level===lv && x.section===sec); if(!st.length) { el.innerHTML = '<p style="text-align:center;">لا يوجد طلاب</p>'; return; }
-  let results = [];
-  st.forEach(student => {
-    let gs = DB.grades.filter(g => g.student_id === student.id); let total = 0, subCount = 0;
-    gs.forEach(g => {
-      let s = DB.subjects.find(x => x.id === g.subject_id);
-      if(s) {
-        if(filter === 'm1') { total += ((g.m1_o||0) + (g.m1_w||0))/2; subCount++; }
-        else if(filter === 'm2') { total += ((g.m2_o||0) + (g.m2_w||0))/2; subCount++; }
-        else if(filter === 'mid') { total += (g.mid||0); subCount++; }
-        else if(filter === 'final') { total += (g.final||0); subCount++; }
-        else { let m1 = ((g.m1_o||0) + (g.m1_w||0))/2, m2 = ((g.m2_o||0) + (g.m2_w||0))/2, f1 = (m1+m2)/2; let m3 = ((g.m3_o||0) + (g.m3_w||0))/2, m4 = ((g.m4_o||0) + (g.m4_w||0))/2, f2 = (m3+m4)/2; let an = (f1 + f2 + (g.mid||0)) / 3, fg = (an + (g.final||0)) / 2; total += fg; subCount++; }
-      }
-    });
-    if(subCount > 0) { let avg = total / subCount; let grade = ''; if(avg >= 90) grade = 'ممتاز'; else if(avg >= 80) grade = 'جيد جداً'; else if(avg >= 70) grade = 'جيد'; else if(avg >= 60) grade = 'متوسط'; else if(avg >= 50) grade = 'مقبول'; else grade = 'راسب'; results.push({name: student.name, avg: avg.toFixed(1), grade: grade, gender: student.gender||'-'}); }
+function rL(){
+  let lv=document.getElementById('ll').value, sec=document.getElementById('ls').value, fl=document.getElementById('lf').value, el=document.getElementById('lvl-list');
+  if(!lv||!sec){ el.innerHTML='<p style="text-align:center;">اختر</p>'; return; }
+  let st=DB.students.filter(x=>x.level===lv&&x.section===sec); if(!st.length){ el.innerHTML='<p style="text-align:center;">لا يوجد</p>'; return; }
+  let res=[];
+  st.forEach(s=>{
+    let gs=DB.grades.filter(g=>g.student_id===s.id); let t=0,c=0;
+    gs.forEach(g=>{ let sb=DB.subjects.find(x=>x.id===g.subject_id); if(sb){ if(fl==='m1'){ t+=((g.m1_o||0)+(g.m1_w||0))/2; c++; } else if(fl==='m2'){ t+=((g.m2_o||0)+(g.m2_w||0))/2; c++; } else if(fl==='mid'){ t+=(g.mid||0); c++; } else if(fl==='final'){ t+=(g.final||0); c++; } else { let m1=((g.m1_o||0)+(g.m1_w||0))/2,m2=((g.m2_o||0)+(g.m2_w||0))/2,f1=(m1+m2)/2; let m3=((g.m3_o||0)+(g.m3_w||0))/2,m4=((g.m4_o||0)+(g.m4_w||0))/2,f2=(m3+m4)/2; let an=(f1+f2+(g.mid||0))/3,fg=(an+(g.final||0))/2; t+=fg; c++; } } });
+    if(c>0){ let avg=t/c; let gr=''; if(avg>=90) gr='ممتاز'; else if(avg>=80) gr='جيد جداً'; else if(avg>=70) gr='جيد'; else if(avg>=60) gr='متوسط'; else if(avg>=50) gr='مقبول'; else gr='راسب'; res.push({n:s.name,a:avg.toFixed(1),g:gr,gn:s.gender||'-'}); }
   });
-  results.sort((a,b) => b.avg - a.avg);
-  let h = '<div class="table-wrapper"><table><thead><tr><th>الترتيب</th><th>اسم الطالب</th><th>الجنس</th><th>المعدل</th><th>التقدير</th></tr></thead><tbody>';
-  results.forEach((r, i) => { let color = ''; if(r.grade === 'ممتاز') color = 'var(--success)'; else if(r.grade === 'جيد جداً' || r.grade === 'جيد') color = 'var(--primary)'; else if(r.grade === 'متوسط' || r.grade === 'مقبول') color = 'var(--warning)'; else color = 'var(--danger)'; h += `<tr><td>${i+1}</td><td style="font-weight:bold;">${r.name}</td><td>${r.gender}</td><td>${r.avg}%</td><td style="color:${color}; font-weight:bold;">${r.grade}</td></tr>`; });
-  h += '</tbody></table></div>'; el.innerHTML = h;
+  res.sort((a,b)=>b.a-a.a);
+  let h='<table><thead><tr><th>#</th><th>الاسم</th><th>الجنس</th><th>المعدل</th><th>التقدير</th></tr></thead><tbody>';
+  res.forEach((r,i)=>{ let col=r.g==='ممتاز'?'var(--s)':(r.g==='راسب'?'var(--e)':'var(--p)'); h+=`<tr><td>${i+1}</td><td style="font-weight:bold;">${r.n}</td><td>${r.gn}</td><td>${r.a}%</td><td style="color:${col};font-weight:bold;">${r.g}</td></tr>`; });
+  h+='</tbody></table>'; el.innerHTML=h;
 }
 
-function searchReportStudent(){
-  let q = document.getElementById('search-rep').value.trim(); let res = document.getElementById('rs-results');
-  if(q.length < 2) { res.innerHTML=''; return; }
-  let matches = DB.students.filter(s => s.name.includes(q) || s.code.includes(q));
-  if(matches.length === 0) { res.innerHTML = '<p style="font-size:12px; color:red; margin-top:5px;">لا يوجد طالب بهذا الاسم</p>'; return; }
-  res.innerHTML = matches.map(s => `<div class="list-item" style="cursor:pointer;" onclick="selectReportStudent(${s.id})"><div class="item-info"><b>${s.name}</b><small>${s.level} - ${s.section} | ${s.code}</small></div><button class="icon-btn" style="background:var(--primary);">عرض الملف</button></div>`).join('');
-}
-function selectReportStudent(id){
-  document.getElementById('rs-results').innerHTML = ''; document.getElementById('search-rep').value = '';
-  let st = DB.students.find(x=>x.id===id); if(!st) return;
-  let gs = DB.grades.filter(x=>x.student_id===id); let abs = calcAbsences(id); let activity = DB.activity ? (DB.activity[id]||0) : 0;
-  let relatives = DB.students.filter(s => s.parentId === st.parentId && s.id !== st.id && st.parentId); let relText = relatives.length ? relatives.map(r=>r.name).join('، ') : 'لا يوجد';
-  let h = `<div class="report-card"><div class="report-header"><h3>الملف الشامل للطالب</h3><div class="student-info"><div><strong>الاسم:</strong> ${st.name}</div><div><strong>الصف:</strong> ${st.level} - ${st.section}</div><div><strong>الكود:</strong> ${st.code}</div><div><strong>الجنس:</strong> ${st.gender||'-'}</div><div style="color:var(--danger);">الغياب بدون عذر: ${abs.total} | الغياب بعذر: ${abs.justified}</div><div style="color:var(--success);">النشاط: ${activity} درجة</div><div style="width:100%; margin-top:5px; color:var(--primary);">👨‍👩‍👦 صلة القرابة: ${relText}</div></div></div><h4 style="margin: 15px 0 10px; color:var(--primary); border-bottom:1px solid var(--border); padding-bottom:5px;">📝 الدرجات</h4><div class="grades-grid">`;
-  if(gs.length === 0) { h += '<p style="text-align:center; width:100%;">لا توجد درجات مسجلة</p>'; }
-  gs.forEach(g=>{ let s=DB.subjects.find(x=>x.id===g.subject_id); if(s){ let m1o=g.m1_o||0, m2o=g.m2_o||0, m3o=g.m3_o||0, m4o=g.m4_o||0; let deduction = abs.total*5; let m1o_final = Math.min(100, Math.max(0, m1o-deduction)+activity); let m2o_final = Math.min(100, Math.max(0, m2o-deduction)+activity); let m3o_final = Math.min(100, Math.max(0, m3o-deduction)+activity); let m4o_final = Math.min(100, Math.max(0, m4o-deduction)+activity); let m1 = (m1o_final + (g.m1_w||0))/2; let m2 = (m2o_final + (g.m2_w||0))/2; let f1 = (m1+m2)/2; let m3 = (m3o_final + (g.m3_w||0))/2; let m4 = (m4o_final + (g.m4_w||0))/2; let f2 = (m3+m4)/2; let mid = g.mid||0; let an = (f1+f2+mid)/3; let fe = g.final||0; let fg = (an+fe)/2; let stat = fg >= 50 ? 'ناجح' : 'راسب'; h+=`<div class="subject-card"><div class="subject-title">${s.name}</div><div class="grade-row">معدل ش1: <span>${m1.toFixed(1)}</span></div><div class="grade-row">معدل ش2: <span>${m2.toFixed(1)}</span></div><div class="grade-row" style="color:var(--primary); font-weight:bold;">معدل ف1: <span>${f1.toFixed(1)}</span></div><div class="grade-row">نصف السنة: <span>${mid}</span></div><div class="grade-row">معدل ش3: <span>${m3.toFixed(1)}</span></div><div class="grade-row">معدل ش4: <span>${m4.toFixed(1)}</span></div><div class="grade-row" style="color:var(--primary); font-weight:bold;">معدل ف2: <span>${f2.toFixed(1)}</span></div><div class="grade-row" style="color:var(--warning); font-weight:bold;">السعي: <span>${an.toFixed(1)}</span></div><div class="grade-row">نهائي: <span>${fe}</span></div><div class="final-badge ${stat==='راسب'?'fail':''}">النتيجة: ${fg.toFixed(1)} (${stat})</div></div>`; } });
-  h+=`</div></div>`; document.getElementById('rep-box').innerHTML = h; document.getElementById('print-btn').style.display = 'block';
+function searchR(){
+  let q=document.getElementById('srp').value.trim(), res=document.getElementById('rres');
+  if(q.length<2){ res.innerHTML=''; return; }
+  let m=DB.students.filter(s=>s.name.includes(q)||s.code.includes(q));
+  if(!m.length){ res.innerHTML='<p style="font-size:12px;color:red;">لا يوجد</p>'; return; }
+  res.innerHTML=m.map(s=>`<div class="li" style="cursor:pointer;" onclick="selR(${s.id})"><div><b>${s.name}</b><small>${s.level} - ${s.section} | ${s.code}</small></div><button class="ib" style="background:var(--p);">عرض</button></div>`).join('');
 }
 
-function searchAttReport(){ let q = document.getElementById('search-att-report').value.trim(); let res = document.getElementById('att-rep-results'); if(q.length < 2) { res.innerHTML=''; return; } let matches = DB.students.filter(s => s.name.includes(q) || s.code.includes(q)); if(matches.length === 0) { res.innerHTML = '<p style="font-size:12px; color:red;">لا يوجد طالب</p>'; return; } res.innerHTML = matches.map(s => `<div class="list-item" style="cursor:pointer;" onclick="showAttReport(${s.id})"><div class="item-info"><b>${s.name}</b><small>${s.level} - ${s.section}</small></div></div>`).join(''); }
-function showAttReport(id){ document.getElementById('att-rep-results').innerHTML = ''; document.getElementById('search-att-report').value = ''; let st = DB.students.find(x=>x.id===id); let logs=[]; let abs=calcAbsences(id); for(let k in DB.attendance){ let stat=DB.attendance[k][id]; if(stat){ let parts=k.split('_'); let dateStr=parts[1]; let dateObj=new Date(dateStr); let dayName = isNaN(dateObj) ? '' : dateObj.toLocaleDateString('ar-EG', {weekday: 'long'}); let reason = (stat===true||stat==='true') ? 'بدون عذر' : stat; logs.push({date:dateStr, day:dayName, reason:reason}); } } logs.sort((a,b)=> new Date(b.date) - new Date(a.date)); let h = `<div class="report-card"><div class="report-header"><h3>كشف غياب الطالب: ${st.name}</h3><p>الصف: ${st.level} - ${st.section}</p><p>إجمالي الغياب: ${abs.total + abs.justified} (بدون عذر: ${abs.total})</p></div>`; h += '<div class="table-wrapper"><table><thead><tr><th>التاريخ</th><th>اليوم</th><th>سبب الغياب</th></tr></thead><tbody>'; if(logs.length===0) { h += '<tr><td colspan="3" style="text-align:center;">لا يوجد سجل</td></tr>'; } else { logs.forEach(l=>{ h += `<tr><td>${l.date}</td><td>${l.day}</td><td style="color:red;">${l.reason}</td></tr>`; }); } h += '</tbody></table></div></div>'; document.getElementById('att-rep-box').innerHTML = h; }
-
-function searchActReport(){ let q = document.getElementById('search-act-report').value.trim(); let res = document.getElementById('act-rep-results'); if(q.length < 2) { res.innerHTML=''; return; } let matches = DB.students.filter(s => s.name.includes(q) || s.code.includes(q)); if(matches.length === 0) { res.innerHTML = '<p style="font-size:12px; color:red;">لا يوجد طالب</p>'; return; } res.innerHTML = matches.map(s => `<div class="list-item" style="cursor:pointer;" onclick="showActReport(${s.id})"><div class="item-info"><b>${s.name}</b><small>${s.level} - ${s.section}</small></div></div>`).join(''); }
-function showActReport(id){ document.getElementById('act-rep-results').innerHTML = ''; document.getElementById('search-act-report').value = ''; let st = DB.students.find(x=>x.id===id); let act = DB.activity[id]||0; let h = `<div class="report-card"><div class="report-header"><h3>كشف نشاط الطالب: ${st.name}</h3><p>الصف: ${st.level} - ${st.section}</p></div>`; h += `<div style="text-align:center; padding:20px; background:var(--bg); border-radius:8px; margin-top:15px;"><h4 style="color:var(--primary); margin-bottom:10px;">درجة النشاط</h4><strong style="font-size:30px; color:var(--success);">${act}</strong> <span style="font-size:16px;">درجة</span></div></div>`; document.getElementById('act-rep-box').innerHTML = h; }
-
-function genRep(box, sid){
-  let st=DB.students.find(x=>x.id===sid), gs=DB.grades.filter(x=>x.student_id===sid); let abs=calcAbsences(sid), activity = (DB.activity && DB.activity[sid]) ? DB.activity[sid] : 0;
-  let h=`<div class="report-card"><div class="report-header"><h3>كشف درجات الطالب</h3><div class="student-info"><div><strong>الاسم:</strong> ${st.name}</div><div><strong>الصف:</strong> ${st.level}</div><div><strong>الشعبة:</strong> ${st.section}</div><div><strong>الكود:</strong> ${st.code}</div></div><div style="margin-top:10px; font-size:13px; color:var(--danger); font-weight:bold;">${abs.total} غياب بدون عذر (خصم ${abs.total*5} درجات) | ${abs.justified} غياب بعذر | النشاط: ${activity} درجة</div></div><div class="grades-grid">`;
-  if(gs.length === 0) { h += '<p style="text-align:center; width:100%;">لا توجد درجات مسجلة</p>'; }
-  gs.forEach(g=>{ let s=DB.subjects.find(x=>x.id===g.subject_id); if(s){ let m1o=g.m1_o||0, m2o=g.m2_o||0, m3o=g.m3_o||0, m4o=g.m4_o||0; let deduction = abs.total*5; let m1o_final = Math.min(100, Math.max(0, m1o-deduction)+activity); let m2o_final = Math.min(100, Math.max(0, m2o-deduction)+activity); let m3o_final = Math.min(100, Math.max(0, m3o-deduction)+activity); let m4o_final = Math.min(100, Math.max(0, m4o-deduction)+activity); let m1 = (m1o_final + (g.m1_w||0))/2; let m2 = (m2o_final + (g.m2_w||0))/2; let f1 = (m1+m2)/2; let m3 = (m3o_final + (g.m3_w||0))/2; let m4 = (m4o_final + (g.m4_w||0))/2; let f2 = (m3+m4)/2; let mid = g.mid||0; let an = (f1+f2+mid)/3; let fe = g.final||0; let fg = (an+fe)/2; let stat = fg >= 50 ? 'ناجح' : 'راسب'; h+=`<div class="subject-card"><div class="subject-title">${s.name}</div><div class="grade-row">معدل ش1: <span>${m1.toFixed(1)}</span></div><div class="grade-row">معدل ش2: <span>${m2.toFixed(1)}</span></div><div class="grade-row" style="color:var(--primary); font-weight:bold;">معدل ف1: <span>${f1.toFixed(1)}</span></div><div class="grade-row">نصف السنة: <span>${mid}</span></div><div class="grade-row">معدل ش3: <span>${m3.toFixed(1)}</span></div><div class="grade-row">معدل ش4: <span>${m4.toFixed(1)}</span></div><div class="grade-row" style="color:var(--primary); font-weight:bold;">معدل ف2: <span>${f2.toFixed(1)}</span></div><div class="grade-row" style="color:var(--warning); font-weight:bold;">السعي: <span>${an.toFixed(1)}</span></div><div class="grade-row">نهائي: <span>${fe}</span></div><div class="final-badge ${stat==='راسب'?'fail':''}">النتيجة: ${fg.toFixed(1)} (${stat})</div></div>`; } });
-  h+=`</div></div>`; document.getElementById(box).innerHTML=h;
+function selR(id){
+  document.getElementById('rres').innerHTML=''; document.getElementById('srp').value='';
+  let st=DB.students.find(x=>x.id===id); if(!st) return;
+  let gs=DB.grades.filter(x=>x.student_id===id); let a=calcA(id); let act=DB.activity[id]||0;
+  let rel=DB.students.filter(s=>s.parentId===st.parentId&&s.id!==st.id&&st.parentId); let rt=rel.length?rel.map(r=>r.name).join('، '):'لا يوجد';
+  let h=`<div class="rc"><div class="rh"><h3>الملف الشامل</h3><div class="si"><div><strong>الاسم:</strong> ${st.name}</div><div><strong>الصف:</strong> ${st.level} - ${st.section}</div><div><strong>الكود:</strong> ${st.code}</div><div><strong>الجنس:</strong> ${st.gender||'-'}</div><div style="color:var(--e);">غياب: ${a.t} بدون | ${a.j} بعذر</div><div style="color:var(--s);">نشاط: ${act}</div><div style="width:100%;color:var(--p);">👨‍👩‍👦 ${rt}</div></div></div><h4 style="margin:10px 0;color:var(--p);">📝 الدرجات</h4><div class="gg">`;
+  if(!gs.length) h+='<p style="text-align:center;">لا توجد</p>';
+  gs.forEach(g=>{
+    let sb=DB.subjects.find(x=>x.id===g.subject_id); if(sb){
+      let m1o=g.m1_o||0,m2o=g.m2_o||0,m3o=g.m3_o||0,m4o=g.m4_o||0; let ded=a.t*5;
+      let m1f=Math.min(100,Math.max(0,m1o-ded)+act),m2f=Math.min(100,Math.max(0,m2o-ded)+act),m3f=Math.min(100,Math.max(0,m3o-ded)+act),m4f=Math.min(100,Math.max(0,m4o-ded)+act);
+      let m1=(m1f+(g.m1_w||0))/2,m2=(m2f+(g.m2_w||0))/2,f1=(m1+m2)/2; let m3=(m3f+(g.m3_w||0))/2,m4=(m4f+(g.m4_w||0))/2,f2=(m3+m4)/2;
+      let mid=g.mid||0,an=(f1+f2+mid)/3,fe=g.final||0,fg=(an+fe)/2,stt=fg>=50?'ناجح':'راسب';
+      h+=`<div class="sc"><div class="st">${sb.name}</div><div class="gr">ش1: <span>${m1.toFixed(1)}</span></div><div class="gr">ش2: <span>${m2.toFixed(1)}</span></div><div class="gr">ف1: <span>${f1.toFixed(1)}</span></div><div class="gr">نصف: <span>${mid}</span></div><div class="gr">ش3: <span>${m3.toFixed(1)}</span></div><div class="gr">ش4: <span>${m4.toFixed(1)}</span></div><div class="gr">ف2: <span>${f2.toFixed(1)}</span></div><div class="gr">السعي: <span>${an.toFixed(1)}</span></div><div class="gr">نهائي: <span>${fe}</span></div><div class="fb ${stt==='راسب'?'f':''}">${fg.toFixed(1)} (${stt})</div></div>`;
+    }
+  });
+  h+='</div></div>'; document.getElementById('rbox').innerHTML=h; document.getElementById('pbtn').style.display='block';
 }
 
-function exportCSV(){
-  let csv = '\uFEFFالاسم,الجنس,الصف,الشعبة,المادة,معدل ش1,معدل ش2,معدل ف1,نصف السنة,معدل ش3,معدل ش4,معدل ف2,السعي,النهائي,النتيجة\n';
-  DB.students.forEach(st=>{ let gs=DB.grades.filter(g=>g.student_id===st.id); gs.forEach(g=>{ let s=DB.subjects.find(x=>x.id===g.subject_id); if(s){ let abs=calcAbsences(st.id), activity=DB.activity[st.id]||0; let m1o=g.m1_o||0, m2o=g.m2_o||0, m3o=g.m3_o||0, m4o=g.m4_o||0; let deduction = abs.total*5; let m1o_final = Math.min(100, Math.max(0, m1o-deduction)+activity); let m2o_final = Math.min(100, Math.max(0, m2o-deduction)+activity); let m3o_final = Math.min(100, Math.max(0, m3o-deduction)+activity); let m4o_final = Math.min(100, Math.max(0, m4o-deduction)+activity); let m1 = (m1o_final + (g.m1_w||0))/2, m2 = (m2o_final + (g.m2_w||0))/2, f1=(m1+m2)/2; let m3 = (m3o_final + (g.m3_w||0))/2, m4 = (m4o_final + (g.m4_w||0))/2, f2=(m3+m4)/2; let an = (f1+f2+(g.mid||0))/3, fg = (an+(g.final||0))/2; let stat = fg >= 50 ? 'ناجح' : 'راسب'; csv += `"${st.name}","${st.gender||'-'}","${st.level}","${st.section}","${s.name}",${m1.toFixed(1)},${m2.toFixed(1)},${f1.toFixed(1)},${g.mid||0},${m3.toFixed(1)},${m4.toFixed(1)},${f2.toFixed(1)},${an.toFixed(1)},${g.final||0},"${stat}"\n`; } }); });
-  let blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'}); let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'درجات_الطلاب.csv'; a.click(); tst('تم تصدير الملف');
+function genR(box,sid){
+  let st=DB.students.find(x=>x.id===sid), gs=DB.grades.filter(x=>x.student_id===sid); let a=calcA(sid), act=DB.activity[sid]||0;
+  let h=`<div class="rc"><div class="rh"><h3>كشف الدرجات</h3><div class="si"><div>${st.name}</div><div>${st.level} - ${st.section}</div><div>${st.code}</div></div></div><div class="gg">`;
+  if(!gs.length) h+='<p>لا توجد</p>';
+  gs.forEach(g=>{
+    let sb=DB.subjects.find(x=>x.id===g.subject_id); if(sb){
+      let m1o=g.m1_o||0,m2o=g.m2_o||0,m3o=g.m3_o||0,m4o=g.m4_o||0; let ded=a.t*5;
+      let m1f=Math.min(100,Math.max(0,m1o-ded)+act),m2f=Math.min(100,Math.max(0,m2o-ded)+act),m3f=Math.min(100,Math.max(0,m3o-ded)+act),m4f=Math.min(100,Math.max(0,m4o-ded)+act);
+      let m1=(m1f+(g.m1_w||0))/2,m2=(m2f+(g.m2_w||0))/2,f1=(m1+m2)/2; let m3=(m3f+(g.m3_w||0))/2,m4=(m4f+(g.m4_w||0))/2,f2=(m3+m4)/2;
+      let mid=g.mid||0,an=(f1+f2+mid)/3,fe=g.final||0,fg=(an+fe)/2,stt=fg>=50?'ناجح':'راسب';
+      h+=`<div class="sc"><div class="st">${sb.name}</div><div class="gr">ف1: <span>${f1.toFixed(1)}</span></div><div class="gr">ف2: <span>${f2.toFixed(1)}</span></div><div class="gr">السعي: <span>${an.toFixed(1)}</span></div><div class="gr">نهائي: <span>${fe}</span></div><div class="fb ${stt==='راسب'?'f':''}">${fg.toFixed(1)} (${stt})</div></div>`;
+    }
+  });
+  h+='</div></div>'; document.getElementById(box).innerHTML=h;
+}
+
+function expCSV(){
+  let csv='\uFEFFالاسم,الجنس,الصف,الشعبة,المادة,ف1,ف2,السعي,النهائي,النتيجة\n';
+  DB.students.forEach(st=>{ let gs=DB.grades.filter(g=>g.student_id===st.id); gs.forEach(g=>{ let sb=DB.subjects.find(x=>x.id===g.subject_id); if(sb){ let a=calcA(st.id),act=DB.activity[st.id]||0; let m1o=g.m1_o||0,m2o=g.m2_o||0,m3o=g.m3_o||0,m4o=g.m4_o||0; let ded=a.t*5; let m1f=Math.min(100,Math.max(0,m1o-ded)+act),m2f=Math.min(100,Math.max(0,m2o-ded)+act),m3f=Math.min(100,Math.max(0,m3o-ded)+act),m4f=Math.min(100,Math.max(0,m4o-ded)+act); let m1=(m1f+(g.m1_w||0))/2,m2=(m2f+(g.m2_w||0))/2,f1=(m1+m2)/2; let m3=(m3f+(g.m3_w||0))/2,m4=(m4f+(g.m4_w||0))/2,f2=(m3+m4)/2; let an=(f1+f2+(g.mid||0))/3,fg=(an+(g.final||0))/2,stt=fg>=50?'ناجح':'راسب'; csv+=`"${st.name}","${st.gender||'-'}","${st.level}","${st.section}","${sb.name}",${f1.toFixed(1)},${f2.toFixed(1)},${an.toFixed(1)},${g.final||0},"${stt}"\n`; } }); });
+  let blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='درجات.csv'; a.click(); tst('تم');
 }
 </script>
 </body>
