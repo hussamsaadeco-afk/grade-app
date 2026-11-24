@@ -211,21 +211,21 @@ th { background: var(--bg); color: var(--p); }
   </main>
 </div>
 <div id="toast" class="toast"></div>
-<div class="footer">تم التصميم بواسطة <strong>د. حسام الخالدي</strong> &copy; 2027</div>
+<div class="footer">تم التصميم بواسطة <strong>د. حسام الخالدي</strong> &copy; 2026</div>
 <script>
 let DB;
-try { let s = localStorage.getItem('schoolDB_v140'); if(s){ DB = JSON.parse(decodeURIComponent(atob(s))); } } catch(e){}
+try { let s = localStorage.getItem('schoolDB_v150'); if(s){ DB = JSON.parse(decodeURIComponent(atob(s))); } } catch(e){}
 if(!DB) DB = {"students":[],"levels":[],"sections":[],"subjects":[{"id":1,"name":"اسلامية"},{"id":2,"name":"عربي"},{"id":3,"name":"انكليزي"},{"id":4,"name":"رياضيات"},{"id":5,"name":"احياء"},{"id":6,"name":"فيزياء"},{"id":7,"name":"كيمياء"},{"id":8,"name":"اجتماعيات"},{"id":9,"name":"اخلاقيه"}],"grades":[],"attendance":{},"activity":{},"adminPass":"admin"};
-function sv(){ localStorage.setItem('schoolDB_v140', btoa(encodeURIComponent(JSON.stringify(DB)))); }
+function sv(){ localStorage.setItem('schoolDB_v150', btoa(encodeURIComponent(JSON.stringify(DB)))); }
 function tst(m,t='s'){ let e=document.getElementById('toast'); e.textContent=m; e.className='toast show '+t; setTimeout(()=>e.className='toast '+t,2500); }
 function nid(a){ return a.length?Math.max(...a.map(x=>x.id))+1:1; }
 function toggleTheme(){ let b=document.body; if(b.getAttribute('data-theme')==='dark'){ b.removeAttribute('data-theme'); localStorage.setItem('theme','light'); } else { b.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); } }
 if(localStorage.getItem('theme')==='dark') document.body.setAttribute('data-theme','dark');
 
-let isL = localStorage.getItem('isLogged_v140')==='true';
+let isL = localStorage.getItem('isLogged_v150')==='true';
 if(isL){ document.getElementById('login').style.display='none'; document.getElementById('admin').style.display='block'; setTimeout(init,100); }
-function loginAdmin(bypass=false){ let p=document.getElementById('lp').value; if(bypass || p===DB.adminPass || p==='admin'){ localStorage.setItem('isLogged_v140','true'); document.getElementById('login').style.display='none'; document.getElementById('admin').style.display='block'; init(); } else { document.getElementById('lerr').style.display='block'; } }
-function logout(){ localStorage.setItem('isLogged_v140','false'); document.getElementById('admin').style.display='none'; document.getElementById('login').style.display='flex'; }
+function loginAdmin(bypass=false){ let p=document.getElementById('lp').value; if(bypass || p===DB.adminPass || p==='admin'){ localStorage.setItem('isLogged_v150','true'); document.getElementById('login').style.display='none'; document.getElementById('admin').style.display='block'; init(); } else { document.getElementById('lerr').style.display='block'; } }
+function logout(){ localStorage.setItem('isLogged_v150','false'); document.getElementById('admin').style.display='none'; document.getElementById('login').style.display='flex'; }
 function showSP(){ document.getElementById('login').style.display='none'; document.getElementById('st-portal').style.display='flex'; }
 function hideSP(){ document.getElementById('st-portal').style.display='none'; document.getElementById('login').style.display='flex'; }
 function loginSt(){ let c=document.getElementById('sc').value.trim(); let s=DB.students.find(x=>x.code===c); if(s){ document.getElementById('st-portal').style.display='none'; document.getElementById('st-view').style.display='block'; document.getElementById('st-name').innerText='مرحباً، '+s.name; genStudentReport(s.id, 'st-grades'); } else tst('كود خطأ','e'); }
@@ -432,7 +432,6 @@ function rG(){
     let g=DB.grades.find(y=>y.student_id===x.id&&y.subject_id===sid)||{};
     let v=k=>g[k]!==undefined&&g[k]!==null?g[k]:'';
     
-    // قراءة الحقول بشكل منفصل
     let p = +g.prep || 0;
     let b = +g.book || 0;
     let cnd = +g.cond || 0;
@@ -440,7 +439,10 @@ function rG(){
     
     let daily = p + b + cnd + at;
     let exam = +g.m1_w || 0;
-    let final = (daily + exam) / 2;
+    
+    // التقريب هنا
+    let final = Math.round((daily + exam) / 2);
+    
     let stat = final >= 50 ? 'ناجح' : 'راسب';
     
     h+=`<tr>
@@ -451,7 +453,7 @@ function rG(){
     <td><input type="number" max="25" value="${v('att')}" onchange="autoS(${sid},'att',this.value,${x.id})" style="width:45px;padding:4px;margin:0;text-align:center;"></td>
     <td style="font-weight:bold; background:var(--bg);">${daily}</td>
     <td><input type="number" max="100" value="${v('m1_w')}" onchange="autoS(${sid},'m1_w',this.value,${x.id})" style="width:55px;padding:4px;margin:0;text-align:center;"></td>
-    <td style="font-weight:bold;color:green;">${final.toFixed(1)}</td>
+    <td style="font-weight:bold;color:green;">${final}</td>
     <td style="font-weight:bold;color:${stat==='ناجح'?'green':'red'};">${stat}</td>
     </tr>`;
   });
@@ -487,13 +489,13 @@ function rL(){
   let res=[];
   st.forEach(s=>{
     let gs=DB.grades.filter(g=>g.student_id===s.id); let t=0,c=0;
-    gs.forEach(g=>{ let sb=DB.subjects.find(x=>x.id===g.subject_id); if(sb){ if(fl==='m1'){ let daily=((g.prep||0)+(g.book||0)+(g.cond||0)+(g.att||0)); let final=(daily+(g.m1_w||0))/2; t+=final; c++; } else if(fl==='m2'){ let daily=((g.prep||0)+(g.book||0)+(g.cond||0)+(g.att||0)); let final=(daily+(g.m2_w||0))/2; t+=final; c++; } else if(fl==='mid'){ t+=(g.mid||0); c++; } else if(fl==='final'){ t+=(g.final||0); c++; } else { let daily=((g.prep||0)+(g.book||0)+(g.cond||0)+(g.att||0)); let final=(daily+(g.m1_w||0))/2; t+=final; c++; } } });
-    if(c>0){ let avg=t/c; let gr=''; if(avg>=90) gr='ممتاز'; else if(avg>=80) gr='جيد جداً'; else if(avg>=70) gr='جيد'; else if(avg>=60) gr='متوسط'; else if(avg>=50) gr='مقبول'; else gr='راسب'; res.push({n:s.name,a:avg.toFixed(1),g:gr,gn:s.gender||'-'}); }
+    gs.forEach(g=>{ let sb=DB.subjects.find(x=>x.id===g.subject_id); if(sb){ if(fl==='m1'){ let daily=((g.prep||0)+(g.book||0)+(g.cond||0)+(g.att||0)); let final=Math.round((daily+(g.m1_w||0))/2); t+=final; c++; } else if(fl==='m2'){ let daily=((g.prep||0)+(g.book||0)+(g.cond||0)+(g.att||0)); let final=Math.round((daily+(g.m2_w||0))/2); t+=final; c++; } else if(fl==='mid'){ t+=(g.mid||0); c++; } else if(fl==='final'){ t+=(g.final||0); c++; } else { let daily=((g.prep||0)+(g.book||0)+(g.cond||0)+(g.att||0)); let final=Math.round((daily+(g.m1_w||0))/2); t+=final; c++; } } });
+    if(c>0){ let avg=Math.round(t/c); let gr=''; if(avg>=90) gr='ممتاز'; else if(avg>=80) gr='جيد جداً'; else if(avg>=70) gr='جيد'; else if(avg>=60) gr='متوسط'; else if(avg>=50) gr='مقبول'; else gr='راسب'; res.push({n:s.name,a:avg,g:gr,gn:s.gender||'-'}); }
   });
   res.sort((a,b)=>b.a-a.a);
   let males = res.filter(r=>r.gn==='ذكر'); let females = res.filter(r=>r.gn==='أنثى');
-  let avgM = males.length ? (males.reduce((a,b)=>a+parseFloat(b.a),0)/males.length).toFixed(1) : 0;
-  let avgF = females.length ? (females.reduce((a,b)=>a+parseFloat(b.a),0)/females.length).toFixed(1) : 0;
+  let avgM = males.length ? Math.round(males.reduce((a,b)=>a+parseFloat(b.a),0)/males.length) : 0;
+  let avgF = females.length ? Math.round(females.reduce((a,b)=>a+parseFloat(b.a),0)/females.length) : 0;
   let h = `<div class="row" style="margin-bottom:10px;"><div class="dash" style="background:#e0f2fe;"><h4>معدل الذكور (${males.length})</h4><h3>${avgM}%</h3></div><div class="dash" style="background:#fce7f3;"><h4>معدل الإناث (${females.length})</h4><h3 style="color:#db2777;">${avgF}%</h3></div></div>`;
   h += '<table><thead><tr><th>#</th><th>الاسم</th><th>الجنس</th><th>المعدل</th><th>التقدير</th></tr></thead><tbody>';
   res.forEach((r,i)=>{ let col=r.g==='ممتاز'?'var(--s)':(r.g==='راسب'?'var(--e)':'var(--p)'); h+=`<tr><td>${i+1}</td><td style="font-weight:bold;">${r.n}</td><td>${r.gn}</td><td>${r.a}%</td><td style="color:${col};font-weight:bold;">${r.g}</td></tr>`; });
@@ -510,8 +512,9 @@ function genRep(){
     h='<table><thead><tr><th>الطالب</th><th>ف1</th><th>ف2</th><th>السعي</th><th>النهائي</th><th>النتيجة</th></tr></thead><tbody>';
     st.forEach(s=>{
       let gs=DB.grades.filter(g=>g.student_id===s.id); let t=0,c=0;
-      gs.forEach(g=>{ let sb=DB.subjects.find(x=>x.id===g.subject_id); if(sb){ let daily=((g.prep||0)+(g.book||0)+(g.cond||0)+(g.att||0)); let final=(daily+(g.m1_w||0))/2; t+=final; c++; } });
-      let avg=c?(t/c):0; h+=`<tr><td>${s.name}</td><td>—</td><td>—</td><td>${avg.toFixed(1)}</td><td>—</td><td>${avg>=50?'ناجح':'راسب'}</td></tr>`;
+      gs.forEach(g=>{ let sb=DB.subjects.find(x=>x.id===g.subject_id); if(sb){ let daily=((g.prep||0)+(g.book||0)+(g.cond||0)+(g.att||0)); let final=Math.round((daily+(g.m1_w||0))/2); t+=final; c++; } });
+      let avg = c ? Math.round(t/c) : 0;
+      h+=`<tr><td>${s.name}</td><td>—</td><td>—</td><td>${avg}</td><td>—</td><td>${avg>=50?'ناجح':'راسب'}</td></tr>`;
     });
     h+='</tbody></table>';
   } else if(type==='att'){
@@ -536,9 +539,9 @@ function genStudentReport(sid, box){
     let sb=DB.subjects.find(x=>x.id===g.subject_id); if(sb){
       let daily = (+g.prep||0) + (+g.book||0) + (+g.cond||0) + (+g.att||0);
       let exam = g.m1_w || 0;
-      let final = (daily + exam) / 2;
+      let final = Math.round((daily + exam) / 2);
       let stat = final >= 50 ? 'ناجح' : 'راسب';
-      h+=`<div class="sc"><div class="st">${sb.name}</div><div class="gr">تحضير: <span>${g.prep||0}</span></div><div class="gr">دفتر: <span>${g.book||0}</span></div><div class="gr">سلوك: <span>${g.cond||0}</span></div><div class="gr">حضور: <span>${g.att||0}</span></div><div class="gr" style="color:var(--p);font-weight:bold;">اليومي: <span>${daily}</span></div><div class="gr">تحريري: <span>${exam}</span></div><div class="gr" style="color:var(--w);font-weight:bold;">النهائية: <span>${final.toFixed(1)}</span></div><div class="fb ${stat==='راسب'?'f':''}">${final.toFixed(1)} (${stat})</div></div>`;
+      h+=`<div class="sc"><div class="st">${sb.name}</div><div class="gr">تحضير: <span>${g.prep||0}</span></div><div class="gr">دفتر: <span>${g.book||0}</span></div><div class="gr">سلوك: <span>${g.cond||0}</span></div><div class="gr">حضور: <span>${g.att||0}</span></div><div class="gr" style="color:var(--p);font-weight:bold;">اليومي: <span>${daily}</span></div><div class="gr">تحريري: <span>${exam}</span></div><div class="gr" style="color:var(--w);font-weight:bold;">النهائية: <span>${final}</span></div><div class="fb ${stat==='راسب'?'f':''}">${final} (${stat})</div></div>`;
     }
   });
   h+='</div></div>'; document.getElementById(box).innerHTML=h;
@@ -546,7 +549,7 @@ function genStudentReport(sid, box){
 
 function expCSV(){
   let csv='\uFEFFالاسم,الجنس,الصف,الشعبة,المادة,تحضير,دفتر,سلوك,حضور,اليومي,تحريري,النهائية,النتيجة\n';
-  DB.students.forEach(st=>{ let gs=DB.grades.filter(g=>g.student_id===st.id); gs.forEach(g=>{ let sb=DB.subjects.find(x=>x.id===g.subject_id); if(sb){ let daily=((g.prep||0)+(g.book||0)+(g.cond||0)+(g.att||0)); let exam=g.m1_w||0; let final=(daily+exam)/2; let stt=final>=50?'ناجح':'راسب'; csv+=`"${st.name}","${st.gender||'-'}","${st.level}","${st.section}","${sb.name}",${g.prep||0},${g.book||0},${g.cond||0},${g.att||0},${daily},${exam},${final.toFixed(1)},"${stt}"\n`; } }); });
+  DB.students.forEach(st=>{ let gs=DB.grades.filter(g=>g.student_id===st.id); gs.forEach(g=>{ let sb=DB.subjects.find(x=>x.id===g.subject_id); if(sb){ let daily=((g.prep||0)+(g.book||0)+(g.cond||0)+(g.att||0)); let exam=g.m1_w||0; let final=Math.round((daily+exam)/2); let stt=final>=50?'ناجح':'راسب'; csv+=`"${st.name}","${st.gender||'-'}","${st.level}","${st.section}","${sb.name}",${g.prep||0},${g.book||0},${g.cond||0},${g.att||0},${daily},${exam},${final},"${stt}"\n`; } }); });
   let blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='درجات.csv'; a.click(); tst('تم');
 }
 </script>
