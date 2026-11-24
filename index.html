@@ -219,18 +219,18 @@ th { background: var(--bg); color: var(--p); }
 <div class="footer">تم التصميم بواسطة <strong>د. حسام الخالدي</strong> &copy; 2026</div>
 <script>
 let DB;
-try { let s = localStorage.getItem('schoolDB_v160'); if(s){ DB = JSON.parse(decodeURIComponent(atob(s))); } } catch(e){}
+try { let s = localStorage.getItem('schoolDB_v300'); if(s){ DB = JSON.parse(decodeURIComponent(atob(s))); } } catch(e){}
 if(!DB) DB = {"students":[],"levels":[],"sections":[],"subjects":[{"id":1,"name":"اسلامية"},{"id":2,"name":"عربي"},{"id":3,"name":"انكليزي"},{"id":4,"name":"رياضيات"},{"id":5,"name":"احياء"},{"id":6,"name":"فيزياء"},{"id":7,"name":"كيمياء"},{"id":8,"name":"اجتماعيات"},{"id":9,"name":"اخلاقيه"}],"grades":[],"attendance":{},"activity":{},"adminPass":"admin"};
-function sv(){ localStorage.setItem('schoolDB_v160', btoa(encodeURIComponent(JSON.stringify(DB)))); }
+function sv(){ localStorage.setItem('schoolDB_v300', btoa(encodeURIComponent(JSON.stringify(DB)))); }
 function tst(m,t='s'){ let e=document.getElementById('toast'); e.textContent=m; e.className='toast show '+t; setTimeout(()=>e.className='toast '+t,2500); }
 function nid(a){ return a.length?Math.max(...a.map(x=>x.id))+1:1; }
 function toggleTheme(){ let b=document.body; if(b.getAttribute('data-theme')==='dark'){ b.removeAttribute('data-theme'); localStorage.setItem('theme','light'); } else { b.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); } }
 if(localStorage.getItem('theme')==='dark') document.body.setAttribute('data-theme','dark');
 
-let isL = localStorage.getItem('isLogged_v160')==='true';
+let isL = localStorage.getItem('isLogged_v300')==='true';
 if(isL){ document.getElementById('login').style.display='none'; document.getElementById('admin').style.display='block'; setTimeout(init,100); }
-function loginAdmin(bypass=false){ let p=document.getElementById('lp').value; if(bypass || p===DB.adminPass || p==='admin'){ localStorage.setItem('isLogged_v160','true'); document.getElementById('login').style.display='none'; document.getElementById('admin').style.display='block'; init(); } else { document.getElementById('lerr').style.display='block'; } }
-function logout(){ localStorage.setItem('isLogged_v160','false'); document.getElementById('admin').style.display='none'; document.getElementById('login').style.display='flex'; }
+function loginAdmin(bypass=false){ let p=document.getElementById('lp').value; if(bypass || p===DB.adminPass || p==='admin'){ localStorage.setItem('isLogged_v300','true'); document.getElementById('login').style.display='none'; document.getElementById('admin').style.display='block'; init(); } else { document.getElementById('lerr').style.display='block'; } }
+function logout(){ localStorage.setItem('isLogged_v300','false'); document.getElementById('admin').style.display='none'; document.getElementById('login').style.display='flex'; }
 function showSP(){ document.getElementById('login').style.display='none'; document.getElementById('st-portal').style.display='flex'; }
 function hideSP(){ document.getElementById('st-portal').style.display='none'; document.getElementById('login').style.display='flex'; }
 function loginSt(){ let c=document.getElementById('sc').value.trim(); let s=DB.students.find(x=>x.code===c); if(s){ document.getElementById('st-portal').style.display='none'; document.getElementById('st-view').style.display='block'; document.getElementById('st-name').innerText='مرحباً، '+s.name; genStudentReport(s.id, 'st-grades'); } else tst('كود خطأ','e'); }
@@ -241,7 +241,7 @@ document.querySelectorAll('.nb').forEach(b=>{
     document.querySelectorAll('.nb').forEach(x=>x.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
     b.classList.add('active'); document.getElementById(b.dataset.tab).classList.add('active');
-    if(b.dataset.tab==='att'){ document.getElementById('ad').valueAsDate=new Date(); setTimeout(() => { uAS(); rA(); }, 100); }
+    if(b.dataset.tab==='att'){ document.getElementById('ad').valueAsDate=new Date(); setTimeout(() => { uAS(); rA(); }, 50); }
     if(b.dataset.tab==='dash') updateD();
     ref();
   });
@@ -318,7 +318,6 @@ function procG(input){
           let ex=DB.grades.find(y=>y.student_id===st.id && y.subject_id===sid); 
           if(!ex){ ex={id:nid(DB.grades), student_id:st.id, subject_id:sid}; DB.grades.push(ex); } 
           
-          // البحث الذكي عن الأعمدة
           let prepCol = rows[0].findIndex(c => String(c).includes('تحضير'));
           let bookCol = rows[0].findIndex(c => String(c).includes('دفتر'));
           let condCol = rows[0].findIndex(c => String(c).includes('سلوك'));
@@ -343,6 +342,45 @@ function procG(input){
     } 
   };
   r.readAsArrayBuffer(f);
+}
+
+function deleteGrades(){
+  let s = document.getElementById('gs').value;
+  let sid = +document.getElementById('gsub').value;
+  if(!s || !sid) return tst('اختر الشعبة والمادة أولاً', 'e');
+  
+  let target = prompt('ماذا تريد أن تحذف؟\n1- درجات مادة معينة لشعبة كاملة\n2- درجات مادة معينة لطالب واحد فقط\n\nاكتب الرقم (1 أو 2):');
+  
+  if(target === '1'){
+    if(confirm('هل أنت متأكد من حذف درجات هذه المادة لجميع طلاب الشعبة؟ لا يمكن التراجع!')){
+      let count = 0;
+      DB.grades = DB.grades.filter(g => {
+        let student = DB.students.find(st => st.id === g.student_id);
+        if(student && student.section === s && g.subject_id === sid){
+          count++;
+          return false;
+        }
+        return true;
+      });
+      sv();
+      rG();
+      tst(`تم حذف درجات ${count} طالب بنجاح`);
+    }
+  } 
+  else if(target === '2'){
+    let studentName = prompt('اكتب اسم الطالب الذي تريد حذف درجته:');
+    if(!studentName) return;
+    
+    let student = DB.students.find(st => st.name === studentName.trim() && st.section === s);
+    if(!student) return tst('لم يتم العثور على الطالب في هذه الشعبة', 'e');
+    
+    if(confirm(`هل أنت متأكد من حذف درجة مادة (${document.getElementById('gsub').options[document.getElementById('gsub').selectedIndex].text}) للطالب (${student.name})؟`)){
+      DB.grades = DB.grades.filter(g => !(g.student_id === student.id && g.subject_id === sid));
+      sv();
+      rG();
+      tst('تم حذف درجة الطالب بنجاح');
+    }
+  }
 }
 
 function addSub(){ let n=document.getElementById('sn').value.trim(); if(n){ DB.subjects.push({id:nid(DB.subjects),name:n}); sv(); ref(); document.getElementById('sn').value=''; tst('تمت'); } }
@@ -445,9 +483,7 @@ function rG(){
     let daily = p + b + cnd + at;
     let exam = +g.m1_w || 0;
     
-    // التقريب هنا
     let final = Math.round((daily + exam) / 2);
-    
     let stat = final >= 50 ? 'ناجح' : 'راسب';
     
     h+=`<tr>
