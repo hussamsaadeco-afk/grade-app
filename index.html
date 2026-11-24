@@ -144,8 +144,13 @@ th { background: var(--bg); color: var(--p); }
         <h2>📝 الدرجات</h2>
         <div class="row"><select id="gl" onchange="uGS()"><option value="">-- الصف --</option></select><select id="gs" onchange="rG()"><option value="">-- الشعبة --</option></select></div>
         <select id="gsub" onchange="rG()"><option value="">-- المادة --</option></select>
+        <div class="row" style="margin-bottom:10px;">
+          <select id="term"><option value="term1">الفصل الأول</option><option value="term2">الفصل الثاني</option></select>
+          <select id="month"><option value="m1">الشهر الأول</option><option value="m2">الشهر الثاني</option><option value="mid">نصف السنة</option><option value="final">النهائي</option></select>
+        </div>
         <button class="s" onclick="importG()">📥 استيراد من إكسل</button>
         <input type="file" id="gfile" accept=".xlsx,.xls,.csv" style="display:none;" onchange="procG(this)">
+        <button class="d" style="margin-top:10px;" onclick="deleteGrades()">🗑️ حذف درجات</button>
         <div id="gt"></div>
       </div>
     </section>
@@ -214,18 +219,18 @@ th { background: var(--bg); color: var(--p); }
 <div class="footer">تم التصميم بواسطة <strong>د. حسام الخالدي</strong> &copy; 2026</div>
 <script>
 let DB;
-try { let s = localStorage.getItem('schoolDB_v150'); if(s){ DB = JSON.parse(decodeURIComponent(atob(s))); } } catch(e){}
+try { let s = localStorage.getItem('schoolDB_v160'); if(s){ DB = JSON.parse(decodeURIComponent(atob(s))); } } catch(e){}
 if(!DB) DB = {"students":[],"levels":[],"sections":[],"subjects":[{"id":1,"name":"اسلامية"},{"id":2,"name":"عربي"},{"id":3,"name":"انكليزي"},{"id":4,"name":"رياضيات"},{"id":5,"name":"احياء"},{"id":6,"name":"فيزياء"},{"id":7,"name":"كيمياء"},{"id":8,"name":"اجتماعيات"},{"id":9,"name":"اخلاقيه"}],"grades":[],"attendance":{},"activity":{},"adminPass":"admin"};
-function sv(){ localStorage.setItem('schoolDB_v150', btoa(encodeURIComponent(JSON.stringify(DB)))); }
+function sv(){ localStorage.setItem('schoolDB_v160', btoa(encodeURIComponent(JSON.stringify(DB)))); }
 function tst(m,t='s'){ let e=document.getElementById('toast'); e.textContent=m; e.className='toast show '+t; setTimeout(()=>e.className='toast '+t,2500); }
 function nid(a){ return a.length?Math.max(...a.map(x=>x.id))+1:1; }
 function toggleTheme(){ let b=document.body; if(b.getAttribute('data-theme')==='dark'){ b.removeAttribute('data-theme'); localStorage.setItem('theme','light'); } else { b.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); } }
 if(localStorage.getItem('theme')==='dark') document.body.setAttribute('data-theme','dark');
 
-let isL = localStorage.getItem('isLogged_v150')==='true';
+let isL = localStorage.getItem('isLogged_v160')==='true';
 if(isL){ document.getElementById('login').style.display='none'; document.getElementById('admin').style.display='block'; setTimeout(init,100); }
-function loginAdmin(bypass=false){ let p=document.getElementById('lp').value; if(bypass || p===DB.adminPass || p==='admin'){ localStorage.setItem('isLogged_v150','true'); document.getElementById('login').style.display='none'; document.getElementById('admin').style.display='block'; init(); } else { document.getElementById('lerr').style.display='block'; } }
-function logout(){ localStorage.setItem('isLogged_v150','false'); document.getElementById('admin').style.display='none'; document.getElementById('login').style.display='flex'; }
+function loginAdmin(bypass=false){ let p=document.getElementById('lp').value; if(bypass || p===DB.adminPass || p==='admin'){ localStorage.setItem('isLogged_v160','true'); document.getElementById('login').style.display='none'; document.getElementById('admin').style.display='block'; init(); } else { document.getElementById('lerr').style.display='block'; } }
+function logout(){ localStorage.setItem('isLogged_v160','false'); document.getElementById('admin').style.display='none'; document.getElementById('login').style.display='flex'; }
 function showSP(){ document.getElementById('login').style.display='none'; document.getElementById('st-portal').style.display='flex'; }
 function hideSP(){ document.getElementById('st-portal').style.display='none'; document.getElementById('login').style.display='flex'; }
 function loginSt(){ let c=document.getElementById('sc').value.trim(); let s=DB.students.find(x=>x.code===c); if(s){ document.getElementById('st-portal').style.display='none'; document.getElementById('st-view').style.display='block'; document.getElementById('st-name').innerText='مرحباً، '+s.name; genStudentReport(s.id, 'st-grades'); } else tst('كود خطأ','e'); }
