@@ -211,21 +211,21 @@ th { background: var(--bg); color: var(--p); }
   </main>
 </div>
 <div id="toast" class="toast"></div>
-<div class="footer">تم التصميم بواسطة <strong>د. حسام الخالدي</strong> &copy; 2024</div>
+<div class="footer">تم التصميم بواسطة <strong>د. حسام الخالدي</strong> &copy; 2027</div>
 <script>
 let DB;
-try { let s = localStorage.getItem('schoolDB_v120'); if(s){ DB = JSON.parse(decodeURIComponent(atob(s))); } } catch(e){}
+try { let s = localStorage.getItem('schoolDB_v140'); if(s){ DB = JSON.parse(decodeURIComponent(atob(s))); } } catch(e){}
 if(!DB) DB = {"students":[],"levels":[],"sections":[],"subjects":[{"id":1,"name":"اسلامية"},{"id":2,"name":"عربي"},{"id":3,"name":"انكليزي"},{"id":4,"name":"رياضيات"},{"id":5,"name":"احياء"},{"id":6,"name":"فيزياء"},{"id":7,"name":"كيمياء"},{"id":8,"name":"اجتماعيات"},{"id":9,"name":"اخلاقيه"}],"grades":[],"attendance":{},"activity":{},"adminPass":"admin"};
-function sv(){ localStorage.setItem('schoolDB_v120', btoa(encodeURIComponent(JSON.stringify(DB)))); }
+function sv(){ localStorage.setItem('schoolDB_v140', btoa(encodeURIComponent(JSON.stringify(DB)))); }
 function tst(m,t='s'){ let e=document.getElementById('toast'); e.textContent=m; e.className='toast show '+t; setTimeout(()=>e.className='toast '+t,2500); }
 function nid(a){ return a.length?Math.max(...a.map(x=>x.id))+1:1; }
 function toggleTheme(){ let b=document.body; if(b.getAttribute('data-theme')==='dark'){ b.removeAttribute('data-theme'); localStorage.setItem('theme','light'); } else { b.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); } }
 if(localStorage.getItem('theme')==='dark') document.body.setAttribute('data-theme','dark');
 
-let isL = localStorage.getItem('isLogged_v120')==='true';
+let isL = localStorage.getItem('isLogged_v140')==='true';
 if(isL){ document.getElementById('login').style.display='none'; document.getElementById('admin').style.display='block'; setTimeout(init,100); }
-function loginAdmin(bypass=false){ let p=document.getElementById('lp').value; if(bypass || p===DB.adminPass || p==='admin'){ localStorage.setItem('isLogged_v120','true'); document.getElementById('login').style.display='none'; document.getElementById('admin').style.display='block'; init(); } else { document.getElementById('lerr').style.display='block'; } }
-function logout(){ localStorage.setItem('isLogged_v120','false'); document.getElementById('admin').style.display='none'; document.getElementById('login').style.display='flex'; }
+function loginAdmin(bypass=false){ let p=document.getElementById('lp').value; if(bypass || p===DB.adminPass || p==='admin'){ localStorage.setItem('isLogged_v140','true'); document.getElementById('login').style.display='none'; document.getElementById('admin').style.display='block'; init(); } else { document.getElementById('lerr').style.display='block'; } }
+function logout(){ localStorage.setItem('isLogged_v140','false'); document.getElementById('admin').style.display='none'; document.getElementById('login').style.display='flex'; }
 function showSP(){ document.getElementById('login').style.display='none'; document.getElementById('st-portal').style.display='flex'; }
 function hideSP(){ document.getElementById('st-portal').style.display='none'; document.getElementById('login').style.display='flex'; }
 function loginSt(){ let c=document.getElementById('sc').value.trim(); let s=DB.students.find(x=>x.code===c); if(s){ document.getElementById('st-portal').style.display='none'; document.getElementById('st-view').style.display='block'; document.getElementById('st-name').innerText='مرحباً، '+s.name; genStudentReport(s.id, 'st-grades'); } else tst('كود خطأ','e'); }
@@ -313,12 +313,18 @@ function procG(input){
           let ex=DB.grades.find(y=>y.student_id===st.id && y.subject_id===sid); 
           if(!ex){ ex={id:nid(DB.grades), student_id:st.id, subject_id:sid}; DB.grades.push(ex); } 
           
-          // الترتيب الدقيق للأعمدة بناءً على ملف الإكسل الخاص بك
-          ex.prep = +rw[1]||0;
-          ex.book = +rw[2]||0;
-          ex.cond = +rw[3]||0;
-          ex.att = +rw[4]||0;
-          ex.m1_w = +rw[5]||0;
+          // البحث الذكي عن الأعمدة
+          let prepCol = rows[0].findIndex(c => String(c).includes('تحضير'));
+          let bookCol = rows[0].findIndex(c => String(c).includes('دفتر'));
+          let condCol = rows[0].findIndex(c => String(c).includes('سلوك'));
+          let attCol = rows[0].findIndex(c => String(c).includes('حضور'));
+          let examCol = rows[0].findIndex(c => String(c).includes('تحريري'));
+          
+          ex.prep = prepCol !== -1 ? (+rw[prepCol] || 0) : 0;
+          ex.book = bookCol !== -1 ? (+rw[bookCol] || 0) : 0;
+          ex.cond = condCol !== -1 ? (+rw[condCol] || 0) : 0;
+          ex.att = attCol !== -1 ? (+rw[attCol] || 0) : 0;
+          ex.m1_w = examCol !== -1 ? (+rw[examCol] || 0) : 0;
           
           imp++; 
         } 
