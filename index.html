@@ -214,18 +214,18 @@ th { background: var(--bg); color: var(--p); }
 <div class="footer">تم التصميم بواسطة <strong>د. حسام الخالدي</strong> &copy; 2027</div>
 <script>
 let DB;
-try { let s = localStorage.getItem('schoolDB_v100'); if(s){ DB = JSON.parse(decodeURIComponent(atob(s))); } } catch(e){}
+try { let s = localStorage.getItem('schoolDB_v110'); if(s){ DB = JSON.parse(decodeURIComponent(atob(s))); } } catch(e){}
 if(!DB) DB = {"students":[],"levels":[],"sections":[],"subjects":[{"id":1,"name":"اسلامية"},{"id":2,"name":"عربي"},{"id":3,"name":"انكليزي"},{"id":4,"name":"رياضيات"},{"id":5,"name":"احياء"},{"id":6,"name":"فيزياء"},{"id":7,"name":"كيمياء"},{"id":8,"name":"اجتماعيات"},{"id":9,"name":"اخلاقيه"}],"grades":[],"attendance":{},"activity":{},"adminPass":"admin"};
-function sv(){ localStorage.setItem('schoolDB_v100', btoa(encodeURIComponent(JSON.stringify(DB)))); }
+function sv(){ localStorage.setItem('schoolDB_v110', btoa(encodeURIComponent(JSON.stringify(DB)))); }
 function tst(m,t='s'){ let e=document.getElementById('toast'); e.textContent=m; e.className='toast show '+t; setTimeout(()=>e.className='toast '+t,2500); }
 function nid(a){ return a.length?Math.max(...a.map(x=>x.id))+1:1; }
 function toggleTheme(){ let b=document.body; if(b.getAttribute('data-theme')==='dark'){ b.removeAttribute('data-theme'); localStorage.setItem('theme','light'); } else { b.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); } }
 if(localStorage.getItem('theme')==='dark') document.body.setAttribute('data-theme','dark');
 
-let isL = localStorage.getItem('isLogged_v100')==='true';
+let isL = localStorage.getItem('isLogged_v110')==='true';
 if(isL){ document.getElementById('login').style.display='none'; document.getElementById('admin').style.display='block'; setTimeout(init,100); }
-function loginAdmin(bypass=false){ let p=document.getElementById('lp').value; if(bypass || p===DB.adminPass || p==='admin'){ localStorage.setItem('isLogged_v100','true'); document.getElementById('login').style.display='none'; document.getElementById('admin').style.display='block'; init(); } else { document.getElementById('lerr').style.display='block'; } }
-function logout(){ localStorage.setItem('isLogged_v100','false'); document.getElementById('admin').style.display='none'; document.getElementById('login').style.display='flex'; }
+function loginAdmin(bypass=false){ let p=document.getElementById('lp').value; if(bypass || p===DB.adminPass || p==='admin'){ localStorage.setItem('isLogged_v110','true'); document.getElementById('login').style.display='none'; document.getElementById('admin').style.display='block'; init(); } else { document.getElementById('lerr').style.display='block'; } }
+function logout(){ localStorage.setItem('isLogged_v110','false'); document.getElementById('admin').style.display='none'; document.getElementById('login').style.display='flex'; }
 function showSP(){ document.getElementById('login').style.display='none'; document.getElementById('st-portal').style.display='flex'; }
 function hideSP(){ document.getElementById('st-portal').style.display='none'; document.getElementById('login').style.display='flex'; }
 function loginSt(){ let c=document.getElementById('sc').value.trim(); let s=DB.students.find(x=>x.code===c); if(s){ document.getElementById('st-portal').style.display='none'; document.getElementById('st-view').style.display='block'; document.getElementById('st-name').innerText='مرحباً، '+s.name; genStudentReport(s.id, 'st-grades'); } else tst('كود خطأ','e'); }
@@ -285,7 +285,7 @@ function importS(){
   let f=document.getElementById('ef').files[0], lv=document.getElementById('il').value, sec=document.getElementById('is').value, sg=document.getElementById('ig').value;
   if(!lv||!sec) return tst('اختر الصف والشعبة','e'); if(!f) return tst('اختر الملف','e');
   let r=new FileReader();
-  r.onload=e=>{ try{ let w=XLSX.read(new Uint8Array(e.target.result),{type:'array'}); let rows=XLSX.utils.sheet_to_json(w.Sheets[w.SheetNames[0]],{header:1}); let ci=0; for(let i=0;i<rows[0].length;i++){ if(String(rows[0][i]).includes('اسم')||String(rows[0][i]).toLowerCase().includes('name')){ ci=i; break; } } let imp=0, skp=0; for(let i=1;i<rows.length;i++){ let rw=rows[i]; if(rw && rw[ci]){ let n=String(rw[ci]).trim(); if(n){ if(DB.students.some(x=>x.name===n)){ skp++; continue; } let g=(sg==='auto')?(rw[ci+1]||'ذكر'):sg; let par=rw[ci+2]||''; DB.students.push({id:nid(DB.students),name:n,level:lv,section:sec,code:sec+'-'+(1000+DB.students.length+1),gender:g,parentId:par}); imp++; } } } sv(); init(); document.getElementById('ef').value=''; tst(`استيراد ${imp} (مكرر: ${skp})`); }catch(err){ tst('خطأ','e'); } };
+  r.onload=e=>{ try{ let w=XLSX.read(new Uint8Array(e.target.result),{type:'array'}); let rows=XLSX.utils.sheet_to_json(w.Sheets[w.SheetNames[0]],{header:1}); let ci=0; for(let i=0;i<rows[0].length;i++){ if(String(rows[0][i]).includes('اسم')||String(rows[0][i]).toLowerCase().includes('name')){ ci=i; break; } } let imp=0, skp=0; for(let i=1;i<rows.length;i++){ let rw=rows[i]; if(rw && rw[ci]){ let n=String(rw[ci]).trim(); if(n){ if(DB.students.some(x=>x.name===n)){ skp++; continue; } let g=(sg==='auto')?(rw[ci+1]||'ذكر'):sg; let par=rw[ci+2]||''; DB.students.push({id:nid(DB.students),name:n,level:lv,section:sec,code:sec+'-'+Math.floor(1000+Math.random()*9000),gender:g,parentId:par}); imp++; } } } sv(); init(); document.getElementById('ef').value=''; tst(`استيراد ${imp} (مكرر: ${skp})`); }catch(err){ tst('خطأ','e'); } };
   r.readAsArrayBuffer(f);
 }
 
@@ -420,14 +420,17 @@ function rG(){
   let lv=document.getElementById('gl').value; let st=DB.students.filter(x=>x.section===s&&x.level===lv);
   if(!st.length){ c.innerHTML='<p style="text-align:center;">لا يوجد</p>'; return; }
   
-  let h='<div style="overflow-x:auto;"><table><thead><tr><th>الطالب</th><th>تحضير (25)</th><th>دفتر (25)</th><th>سلوك (25)</th><th>حضور (25)</th><th>اليومي (100)</th><th>تحريري (100)</th><th>النهائية (100)</th><th>النتيجة</th></tr></thead><tbody>';
+  let h='<div style="overflow-x:auto;"><table><thead><tr><th>الطالب</th><th>تحضير (25)</th><th>دفتر (25)</th><th>سلوك (25)</th><th>حضور (25)</th><th>اليومي</th><th>تحريري (100)</th><th>النهائية</th><th>النتيجة</th></tr></thead><tbody>';
   st.forEach(x=>{
     let g=DB.grades.find(y=>y.student_id===x.id&&y.subject_id===sid)||{};
     let v=k=>g[k]!==undefined&&g[k]!==null?g[k]:'';
+    
+    // قراءة الحقول بشكل منفصل
     let p = +g.prep || 0;
     let b = +g.book || 0;
     let cnd = +g.cond || 0;
     let at = +g.att || 0;
+    
     let daily = p + b + cnd + at;
     let exam = +g.m1_w || 0;
     let final = (daily + exam) / 2;
@@ -435,12 +438,12 @@ function rG(){
     
     h+=`<tr>
     <td style="text-align:right;font-weight:bold; position:sticky; right:0; background:var(--card);">${x.name}</td>
-    <td><input type="number" max="25" value="${v('prep')}" onchange="autoS(${sid},'prep',this.value,${x.id})" style="width:50px;padding:4px;margin:0;text-align:center;"></td>
-    <td><input type="number" max="25" value="${v('book')}" onchange="autoS(${sid},'book',this.value,${x.id})" style="width:50px;padding:4px;margin:0;text-align:center;"></td>
-    <td><input type="number" max="25" value="${v('cond')}" onchange="autoS(${sid},'cond',this.value,${x.id})" style="width:50px;padding:4px;margin:0;text-align:center;"></td>
-    <td><input type="number" max="25" value="${v('att')}" onchange="autoS(${sid},'att',this.value,${x.id})" style="width:50px;padding:4px;margin:0;text-align:center;"></td>
-    <td style="font-weight:bold;">${daily}</td>
-    <td><input type="number" max="100" value="${v('m1_w')}" onchange="autoS(${sid},'m1_w',this.value,${x.id})" style="width:60px;padding:4px;margin:0;text-align:center;"></td>
+    <td><input type="number" max="25" value="${v('prep')}" onchange="autoS(${sid},'prep',this.value,${x.id})" style="width:45px;padding:4px;margin:0;text-align:center;"></td>
+    <td><input type="number" max="25" value="${v('book')}" onchange="autoS(${sid},'book',this.value,${x.id})" style="width:45px;padding:4px;margin:0;text-align:center;"></td>
+    <td><input type="number" max="25" value="${v('cond')}" onchange="autoS(${sid},'cond',this.value,${x.id})" style="width:45px;padding:4px;margin:0;text-align:center;"></td>
+    <td><input type="number" max="25" value="${v('att')}" onchange="autoS(${sid},'att',this.value,${x.id})" style="width:45px;padding:4px;margin:0;text-align:center;"></td>
+    <td style="font-weight:bold; background:var(--bg);">${daily}</td>
+    <td><input type="number" max="100" value="${v('m1_w')}" onchange="autoS(${sid},'m1_w',this.value,${x.id})" style="width:55px;padding:4px;margin:0;text-align:center;"></td>
     <td style="font-weight:bold;color:green;">${final.toFixed(1)}</td>
     <td style="font-weight:bold;color:${stat==='ناجح'?'green':'red'};">${stat}</td>
     </tr>`;
