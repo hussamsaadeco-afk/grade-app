@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>مدرستي PRO - نظام إدارة المدرسة</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{--navy:#17324d;--blue:#2463a6;--bg:#f3f6fa;--line:#dce4ee;--green:#16845b;--red:#c0392b}
 *{box-sizing:border-box}body{margin:0;font-family:Tahoma,Arial,sans-serif;background:var(--bg);color:#1d2937}
@@ -43,7 +44,7 @@ label{font-size:13px;color:#526273;display:block;margin-bottom:5px}input,select,
 <div><label>الجنس</label><select id="stGender"><option>ذكر</option><option>أنثى</option></select></div>
 <div><label>رمز الطالب (اختياري)</label><input id="stCode" placeholder="يُنشأ تلقائياً إن تُرك فارغاً"></div>
 </div>
-<div class="actions"><button onclick="addStudent()">إضافة الطالب</button><button class="secondary" onclick="exportStudentsCSV()">تصدير قائمة الطلاب CSV</button><button class="secondary" onclick="document.getElementById('studentFile').click()">استيراد CSV</button><input id="studentFile" type="file" accept=".csv,text/csv" hidden onchange="importStudentsCSV(event)"></div>
+<div class="actions"><button onclick="addStudent()">إضافة الطالب</button><button class="secondary" onclick="exportStudentsExcel()">تصدير الطلاب Excel</button><button class="secondary" onclick="exportStudentsCSV()">تصدير الطلاب CSV</button><button class="secondary" onclick="document.getElementById('studentFile').click()">استيراد Excel / CSV</button><input id="studentFile" type="file" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv" hidden onchange="importStudentsFile(event)"></div>
 <div class="grid"><div><label>تصفية الصف</label><select id="filterGrade" onchange="renderStudents()"></select></div><div><label>تصفية الشعبة</label><select id="filterSection" onchange="renderStudents()"></select></div><div><label>بحث بالاسم</label><input id="studentSearch" oninput="renderStudents()"></div></div>
 <div class="table-wrap"><table><thead><tr><th>#</th><th>اسم الطالب</th><th>الصف</th><th>الشعبة</th><th>الجنس</th><th>الرمز</th><th>إجراء</th></tr></thead><tbody id="studentsBody"></tbody></table></div>
 <p class="muted">استيراد CSV: الأعمدة بالترتيب: اسم الطالب، الصف، الشعبة، الجنس، الرمز. يمكن حفظ ملف Excel بصيغة CSV UTF-8 ثم استيراده.</p>
@@ -59,7 +60,7 @@ label{font-size:13px;color:#526273;display:block;margin-bottom:5px}input,select,
 </div>
 <p class="muted">الشفوي يحتسب من النشاط التراكمي (بحد أقصى 100) بعد خصم غياب واحد عن كل سجل غياب مرتبط بالطالب والمادة والشهر. الشهري = (الشفوي + التحريري) ÷ 2 مع تقريب النصف للأعلى.</p>
 <div class="table-wrap"><table><thead><tr><th>#</th><th>اسم الطالب</th><th>النشاط المتراكم</th><th>الغياب</th><th>الشفوي بعد الخصم</th><th>التحريري</th><th>درجة الشهر</th></tr></thead><tbody id="gradesBody"></tbody></table></div>
-<div class="actions"><button class="success" onclick="saveGrades()">حفظ الدرجات</button><button class="secondary" onclick="exportGradesCSV()">تصدير الدرجات CSV</button></div>
+<div class="actions"><button class="success" onclick="saveGrades()">حفظ الدرجات</button><button class="secondary" onclick="exportGradesExcel()">تصدير الدرجات Excel</button><button class="secondary" onclick="exportGradesCSV()">تصدير الدرجات CSV</button></div>
 </section>
 <section id="activity" class="panel">
 <h2>تسجيل النشاط لكل درس</h2><div class="grid">
@@ -143,6 +144,47 @@ function parseCSV(t){let rows=[],row=[],v='',q=false;for(let i=0;i<t.length;i++)
 function importStudentsCSV(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{let rows=parseCSV(r.result.replace(/^\uFEFF/,''));let added=0;rows.slice(1).forEach(a=>{let [name,grade,section,gender,code]=a.map(x=>x.trim());if(name&&grades.includes(grade)&&sections.includes(section)&&!DB.students.some(s=>s.name===name&&s.grade===grade&&s.section===section)){DB.students.push({id:String(Date.now()+Math.random()),name,grade,section,gender:gender||'ذكر',code:code||('ST'+Math.random().toString(36).slice(2,9))});added++}});persist();renderAll();alert('تم استيراد '+added+' طالباً. تأكد من ترتيب أعمدة ملف CSV.');};r.readAsText(f,'UTF-8');e.target.value=''}
 function exportGradesCSV(){let subject=el('gSubject').value,term=el('gTerm').value,month=el('gMonth').value,arr=DB.students.filter(s=>s.grade===el('gGrade').value&&s.section===el('gSection').value);let rows=[['اسم الطالب','الصف','الشعبة','المادة','الفصل','الشهر','النشاط','الغياب','الشفوي','التحريري','الدرجة'],...arr.map(s=>{let c=getComputed(s,subject,term,month);return[s.name,s.grade,s.section,subject,term,month,c.act,c.abs,c.oral,c.written??'',c.total??'']})];download('grades.csv','\ufeff'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n'),'text/csv;charset=utf-8')}
 function clearAll(){if(!confirm('سيتم حذف كل الطلاب والدرجات والسجلات من هذا المتصفح. هل أنت متأكد؟'))return;DB=blankDB();persist();init()}
+
+function requireXLSX(){if(typeof XLSX==='undefined'){alert('مكتبة Excel لم تُحمّل. اتصل بالإنترنت ثم أعد فتح البرنامج.');return false}return true}
+function exportStudentsExcel(){
+ if(!requireXLSX())return;
+ const rows=[['اسم الطالب','الصف','الشعبة','الجنس','الرمز'],...DB.students.map(s=>[s.name,s.grade,s.section,s.gender,s.code])];
+ const ws=XLSX.utils.aoa_to_sheet(rows),wb=XLSX.utils.book_new();
+ XLSX.utils.book_append_sheet(wb,ws,'الطلاب');XLSX.writeFile(wb,'students.xlsx');
+}
+function exportGradesExcel(){
+ if(!requireXLSX())return;
+ const subject=el('gSubject').value,term=el('gTerm').value,month=el('gMonth').value;
+ const arr=DB.students.filter(s=>s.grade===el('gGrade').value&&s.section===el('gSection').value);
+ const rows=[['اسم الطالب','الصف','الشعبة','المادة','الفصل','الشهر','النشاط','الغياب','الشفوي','التحريري','الدرجة'],
+ ...arr.map(s=>{let c=getComputed(s,subject,term,month);return[s.name,s.grade,s.section,subject,term,month,c.act,c.abs,c.oral,c.written??'',c.total??'']})];
+ const ws=XLSX.utils.aoa_to_sheet(rows),wb=XLSX.utils.book_new();
+ XLSX.utils.book_append_sheet(wb,ws,'الدرجات');XLSX.writeFile(wb,'grades.xlsx');
+}
+function importStudentsFile(e){
+ const f=e.target.files[0];if(!f)return;
+ const isCSV=/\.csv$/i.test(f.name);
+ const processRows=(rows)=>{
+   if(!rows||rows.length<2){alert('الملف لا يحتوي على صفوف طلاب');return}
+   let added=0,skipped=0;
+   rows.slice(1).forEach(row=>{
+     let [name,grade,section,gender,code]=row.map(x=>String(x??'').trim());
+     if(!name||!grades.includes(grade)||!sections.includes(section)){skipped++;return}
+     if(DB.students.some(s=>s.name===name&&s.grade===grade&&s.section===section)){skipped++;return}
+     if(!code||DB.students.some(s=>s.code===code))code='ST'+Math.random().toString(36).slice(2,10).toUpperCase();
+     DB.students.push({id:String(Date.now()+Math.random()),name,grade,section,gender:gender||'ذكر',code});added++;
+   });
+   persist();renderAll();alert('اكتمل الاستيراد. تمت إضافة '+added+' طالباً، وتم تجاوز '+skipped+' صفاً غير صالح أو مكرر.');
+ };
+ if(isCSV){const reader=new FileReader();reader.onload=()=>processRows(parseCSV(String(reader.result).replace(/^\uFEFF/,'')));reader.readAsText(f,'UTF-8')}
+ else{
+   if(!requireXLSX())return;
+   const reader=new FileReader();reader.onload=()=>{try{const wb=XLSX.read(reader.result,{type:'array'});const sheet=wb.Sheets[wb.SheetNames[0]];processRows(XLSX.utils.sheet_to_json(sheet,{header:1,defval:''}))}catch(err){alert('تعذر قراءة ملف Excel. تأكد من سلامة الملف وترتيب الأعمدة.')}};
+   reader.readAsArrayBuffer(f);
+ }
+ e.target.value='';
+}
+
 el('attDate').value=new Date().toISOString().slice(0,10);init();
 </script>
 </body></html>
