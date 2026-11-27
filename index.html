@@ -36,7 +36,8 @@ th, td { border: 1px solid var(--b); padding: 6px; text-align: center; }
 th { background: var(--bg); color: var(--p); }
 #gt table { display: block; overflow-x: auto; white-space: nowrap; }
 #gt th:first-child, #gt td:first-child { position: sticky; right: 0; background: var(--card); border-left: 2px solid var(--b); }
-.dash { background: var(--bg); border: 1px solid var(--b); border-radius: 12px; padding: 15px; text-align: center; flex: 1; }
+.dash { background: var(--bg); border: 1px solid var(--b); border-radius: 12px; padding: 15px; text-align: center; flex: 1; cursor: pointer; transition: 0.2s; }
+.dash:hover { background: var(--b); }
 .dash h3 { font-size: 24px; color: var(--p); }
 .rc { background: var(--card); border-radius: 12px; padding: 15px; border: 1px solid var(--b); margin-top: 10px; }
 .rh { border-bottom: 2px dashed var(--b); padding-bottom: 10px; margin-bottom: 10px; text-align: center; }
@@ -50,7 +51,7 @@ th { background: var(--bg); color: var(--p); }
 .fb.f { background: var(--e); }
 .footer { text-align: center; padding: 20px; margin-top: 20px; color: #64748b; font-size: 12px; border-top: 1px solid var(--b); }
 .footer strong { color: var(--p); }
-.toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--d); color: #fff; padding: 10px 20px; border-radius: 25px; font-size: 13px; opacity: 0; transition: all .3s; z-index: 10001; }
+.toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--d); color: #fff; padding: 10px 20px; border-radius: 25px; font-size: 13px; opacity: 0; transition: all .3s; z-index: 10001; text-align: center; }
 .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 </style>
 </head>
@@ -107,6 +108,7 @@ th { background: var(--bg); color: var(--p); }
     <button class="nb" data-tab="grades">📝<span>الدرجات</span></button>
     <button class="nb" data-tab="att">📅<span>الغياب</span></button>
     <button class="nb" data-tab="act">🏅<span>النشاط</span></button>
+    <button class="nb" data-tab="beh">🤝<span>السلوك</span></button>
     <button class="nb" data-tab="rep">📄<span>الكشوف</span></button>
     <button class="nb" data-tab="levels">📈<span>المستوى</span></button>
     <button class="nb" data-tab="set">⚙️<span>الإدارة</span></button>
@@ -115,8 +117,12 @@ th { background: var(--bg); color: var(--p); }
     <section id="dash" class="tab active">
       <div class="card">
         <h2>📊 لوحة القيادة</h2>
-        <div class="row" style="margin-bottom:10px;"><div class="dash"><h3 id="ds">0</h3><p>الطلاب</p></div><div class="dash"><h3 id="da">0</h3><p>غياب اليوم</p></div></div>
-        <button class="s" onclick="showStats()" style="margin-bottom:10px;">📊 إحصائيات الصفوف والجنسين</button>
+        <div class="row" style="margin-bottom:10px;">
+          <div class="dash" onclick="showStats()"><h3 id="ds">0</h3><p>الطلاب</p></div>
+          <div class="dash" onclick="showAttList()"><h3 id="da">0</h3><p>الغياب</p></div>
+          <div class="dash" onclick="showActList()"><h3 id="dac">0</h3><p>النشاط</p></div>
+          <div class="dash" onclick="showBehList()"><h3 id="dbc">0</h3><p>السلوك</p></div>
+        </div>
         <div id="stats-box"></div>
       </div>
     </section>
@@ -172,6 +178,15 @@ th { background: var(--bg); color: var(--p); }
         <button class="s" id="sact" style="display:none;margin-top:10px;" onclick="saveAC()">💾 حفظ</button>
       </div>
     </section>
+    <section id="beh" class="tab">
+      <div class="card">
+        <h2>🤝 السلوك</h2>
+        <div class="row"><select id="bhl" onchange="uBS()"><option value="">-- الصف --</option></select><select id="bs" onchange="rB()"><option value="">-- الشعبة --</option></select></div>
+        <input id="bsch" placeholder="🔍 بحث..." oninput="rB()">
+        <div id="beh-list"></div>
+        <button class="s" id="sbeh" style="display:none;margin-top:10px;" onclick="saveB()">💾 حفظ السلوك</button>
+      </div>
+    </section>
     <section id="rep" class="tab">
       <div class="card">
         <h2>📄 الكشوفات</h2>
@@ -180,6 +195,7 @@ th { background: var(--bg); color: var(--p); }
           <option value="grades">كشف درجات الشعبة</option>
           <option value="att">كشف غياب الشعبة</option>
           <option value="act">كشف نشاط الشعبة</option>
+          <option value="beh">كشف سلوك الشعبة</option>
         </select>
         <button class="p" onclick="genRep()" style="background:var(--p);">عرض الكشف</button>
         <div id="rbox"></div>
@@ -219,18 +235,18 @@ th { background: var(--bg); color: var(--p); }
 <div class="footer">تم التصميم بواسطة <strong>د. حسام الخالدي</strong> &copy; 2026</div>
 <script>
 let DB;
-try { let s = localStorage.getItem('schoolDB_v300'); if(s){ DB = JSON.parse(decodeURIComponent(atob(s))); } } catch(e){}
-if(!DB) DB = {"students":[],"levels":[],"sections":[],"subjects":[{"id":1,"name":"اسلامية"},{"id":2,"name":"عربي"},{"id":3,"name":"انكليزي"},{"id":4,"name":"رياضيات"},{"id":5,"name":"احياء"},{"id":6,"name":"فيزياء"},{"id":7,"name":"كيمياء"},{"id":8,"name":"اجتماعيات"},{"id":9,"name":"اخلاقيه"}],"grades":[],"attendance":{},"activity":{},"adminPass":"admin"};
-function sv(){ localStorage.setItem('schoolDB_v300', btoa(encodeURIComponent(JSON.stringify(DB)))); }
+try { let s = localStorage.getItem('schoolDB_v400'); if(s){ DB = JSON.parse(decodeURIComponent(atob(s))); } } catch(e){}
+if(!DB) DB = {"students":[],"levels":[],"sections":[],"subjects":[{"id":1,"name":"اسلامية"},{"id":2,"name":"عربي"},{"id":3,"name":"انكليزي"},{"id":4,"name":"رياضيات"},{"id":5,"name":"احياء"},{"id":6,"name":"فيزياء"},{"id":7,"name":"كيمياء"},{"id":8,"name":"اجتماعيات"},{"id":9,"name":"اخلاقيه"}],"grades":[],"attendance":{},"activity":{},"behavior":{},"adminPass":"admin"};
+function sv(){ localStorage.setItem('schoolDB_v400', btoa(encodeURIComponent(JSON.stringify(DB)))); }
 function tst(m,t='s'){ let e=document.getElementById('toast'); e.textContent=m; e.className='toast show '+t; setTimeout(()=>e.className='toast '+t,2500); }
 function nid(a){ return a.length?Math.max(...a.map(x=>x.id))+1:1; }
 function toggleTheme(){ let b=document.body; if(b.getAttribute('data-theme')==='dark'){ b.removeAttribute('data-theme'); localStorage.setItem('theme','light'); } else { b.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); } }
 if(localStorage.getItem('theme')==='dark') document.body.setAttribute('data-theme','dark');
 
-let isL = localStorage.getItem('isLogged_v300')==='true';
+let isL = localStorage.getItem('isLogged_v400')==='true';
 if(isL){ document.getElementById('login').style.display='none'; document.getElementById('admin').style.display='block'; setTimeout(init,100); }
-function loginAdmin(bypass=false){ let p=document.getElementById('lp').value; if(bypass || p===DB.adminPass || p==='admin'){ localStorage.setItem('isLogged_v300','true'); document.getElementById('login').style.display='none'; document.getElementById('admin').style.display='block'; init(); } else { document.getElementById('lerr').style.display='block'; } }
-function logout(){ localStorage.setItem('isLogged_v300','false'); document.getElementById('admin').style.display='none'; document.getElementById('login').style.display='flex'; }
+function loginAdmin(bypass=false){ let p=document.getElementById('lp').value; if(bypass || p===DB.adminPass || p==='admin'){ localStorage.setItem('isLogged_v400','true'); document.getElementById('login').style.display='none'; document.getElementById('admin').style.display='block'; init(); } else { document.getElementById('lerr').style.display='block'; } }
+function logout(){ localStorage.setItem('isLogged_v400','false'); document.getElementById('admin').style.display='none'; document.getElementById('login').style.display='flex'; }
 function showSP(){ document.getElementById('login').style.display='none'; document.getElementById('st-portal').style.display='flex'; }
 function hideSP(){ document.getElementById('st-portal').style.display='none'; document.getElementById('login').style.display='flex'; }
 function loginSt(){ let c=document.getElementById('sc').value.trim(); let s=DB.students.find(x=>x.code===c); if(s){ document.getElementById('st-portal').style.display='none'; document.getElementById('st-view').style.display='block'; document.getElementById('st-name').innerText='مرحباً، '+s.name; genStudentReport(s.id, 'st-grades'); } else tst('كود خطأ','e'); }
@@ -252,6 +268,8 @@ function updateD(){
   let today = new Date().toISOString().split('T')[0]; let ac = 0;
   for(let k in DB.attendance){ if(k.includes(today)) ac += Object.keys(DB.attendance[k]).length; }
   document.getElementById('da').innerText = ac;
+  document.getElementById('dac').innerText = Object.keys(DB.activity).length;
+  document.getElementById('dbc').innerText = Object.keys(DB.behavior).length;
 }
 
 function showStats(){
@@ -272,6 +290,52 @@ function showStats(){
   document.getElementById('stats-box').innerHTML = h;
 }
 
+function showAttList(){
+  let h = '<h4 style="margin-bottom:10px; color:var(--p);">سجل الغياب الكامل:</h4>';
+  let hasAtt = false;
+  for(let k in DB.attendance){
+    let parts = k.split('_'); let sec = parts[0], date = parts[1];
+    for(let sid in DB.attendance[k]){
+      let st = DB.students.find(x=>x.id == sid);
+      if(st){
+        hasAtt = true;
+        let reason = DB.attendance[k][sid] === true || DB.attendance[k][sid] === 'true' ? 'بدون عذر' : DB.attendance[k][sid];
+        h += `<div class="li"><div><b>${st.name}</b><small>${st.level} - ${st.section} | ${date} | ${reason}</small></div></div>`;
+      }
+    }
+  }
+  if(!hasAtt) h = '<p style="text-align:center;">لا يوجد غياب مسجل</p>';
+  document.getElementById('stats-box').innerHTML = h;
+}
+
+function showActList(){
+  let h = '<h4 style="margin-bottom:10px; color:var(--p);">سجل النشاط الكامل:</h4>';
+  let hasAct = false;
+  for(let sid in DB.activity){
+    let st = DB.students.find(x=>x.id == sid);
+    if(st){
+      hasAct = true;
+      h += `<div class="li"><div><b>${st.name}</b><small>${st.level} - ${st.section} | النشاط: ${DB.activity[sid]}</small></div></div>`;
+    }
+  }
+  if(!hasAct) h = '<p style="text-align:center;">لا يوجد نشاط مسجل</p>';
+  document.getElementById('stats-box').innerHTML = h;
+}
+
+function showBehList(){
+  let h = '<h4 style="margin-bottom:10px; color:var(--p);">سجل السلوك الكامل:</h4>';
+  let hasBeh = false;
+  for(let sid in DB.behavior){
+    let st = DB.students.find(x=>x.id == sid);
+    if(st){
+      hasBeh = true;
+      h += `<div class="li"><div><b>${st.name}</b><small>${st.level} - ${st.section} | السلوك: ${DB.behavior[sid]}</small></div></div>`;
+    }
+  }
+  if(!hasBeh) h = '<p style="text-align:center;">لا يوجد سلوك مسجل</p>';
+  document.getElementById('stats-box').innerHTML = h;
+}
+
 function addL(){ let n=document.getElementById('nl').value.trim(); if(n && !DB.levels.includes(n)){ DB.levels.push(n); sv(); ref(); document.getElementById('nl').value=''; tst('تمت الإضافة'); } else tst('موجود','e'); }
 function delL(n){ if(confirm('حذف؟')){ DB.levels=DB.levels.filter(x=>x!==n); DB.sections=DB.sections.filter(s=>s.level!==n); DB.students=DB.students.filter(s=>s.level!==n); sv(); init(); } }
 function addS(){ let lv=document.getElementById('sl').value, n=document.getElementById('ns').value.trim(); if(!lv) return tst('اختر الصف','e'); if(n && !DB.sections.some(s=>s.level===lv && s.name===n)){ DB.sections.push({level:lv,name:n}); sv(); ref(); document.getElementById('ns').value=''; tst('تمت'); } else tst('موجودة','e'); }
@@ -281,6 +345,7 @@ function uSF(){ let lv=document.getElementById('stl').value; let f=DB.sections.f
 function uGS(){ let lv=document.getElementById('gl').value; let f=DB.sections.filter(s=>s.level===lv); document.getElementById('gs').innerHTML='<option value="">-- الكل --</option>'+f.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); document.getElementById('gt').innerHTML=''; }
 function uAS(){ let lv=document.getElementById('al').value; let f=DB.sections.filter(s=>s.level===lv); document.getElementById('as').innerHTML='<option value="">-- الكل --</option>'+f.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); document.getElementById('att-list').innerHTML=''; }
 function uACS(){ let lv=document.getElementById('acl').value; let f=DB.sections.filter(s=>s.level===lv); document.getElementById('acs').innerHTML='<option value="">-- الكل --</option>'+f.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); document.getElementById('act-list').innerHTML=''; }
+function uBS(){ let lv=document.getElementById('bhl').value; let f=DB.sections.filter(s=>s.level===lv); document.getElementById('bs').innerHTML='<option value="">-- الكل --</option>'+f.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); document.getElementById('beh-list').innerHTML=''; }
 function uLS(){ let lv=document.getElementById('ll').value; let f=DB.sections.filter(s=>s.level===lv); document.getElementById('ls').innerHTML='<option value="">-- الكل --</option>'+f.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); document.getElementById('lvl-list').innerHTML=''; }
 function uIS(){ let lv=document.getElementById('il').value; let f=DB.sections.filter(s=>s.level===lv); document.getElementById('is').innerHTML='<option value="">-- الكل --</option>'+f.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); }
 function uMS(){ let lv=document.getElementById('mvl').value; let f=DB.sections.filter(s=>s.level===lv); document.getElementById('mvs').innerHTML='<option value="">-- الكل --</option>'+f.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); }
@@ -386,7 +451,7 @@ function deleteGrades(){
 function addSub(){ let n=document.getElementById('sn').value.trim(); if(n){ DB.subjects.push({id:nid(DB.subjects),name:n}); sv(); ref(); document.getElementById('sn').value=''; tst('تمت'); } }
 function delSub(id){ if(confirm('حذف؟')){ DB.subjects=DB.subjects.filter(x=>x.id!==id); sv(); init(); } }
 function delSt(id){ if(confirm('حذف؟')){ DB.students=DB.students.filter(x=>x.id!==id); sv(); rS(); } }
-function clearAll(){ if(confirm('مسح الكل؟')){ if(prompt('اكتب "حذف":')==='حذف'){ DB={"students":[],"levels":[],"sections":[],"subjects":[{"id":1,"name":"اسلامية"},{"id":2,"name":"عربي"},{"id":3,"name":"انكليزي"},{"id":4,"name":"رياضيات"},{"id":5,"name":"احياء"},{"id":6,"name":"فيزياء"},{"id":7,"name":"كيمياء"},{"id":8,"name":"اجتماعيات"},{"id":9,"name":"اخلاقيه"}],"grades":[],"attendance":{},"activity":{},"adminPass":"admin"}; sv(); init(); tst('تم المسح'); } } }
+function clearAll(){ if(confirm('مسح الكل؟')){ if(prompt('اكتب "حذف":')==='حذف'){ DB={"students":[],"levels":[],"sections":[],"subjects":[{"id":1,"name":"اسلامية"},{"id":2,"name":"عربي"},{"id":3,"name":"انكليزي"},{"id":4,"name":"رياضيات"},{"id":5,"name":"احياء"},{"id":6,"name":"فيزياء"},{"id":7,"name":"كيمياء"},{"id":8,"name":"اجتماعيات"},{"id":9,"name":"اخلاقيه"}],"grades":[],"attendance":{},"activity":{},"behavior":{},"adminPass":"admin"}; sv(); init(); tst('تم المسح'); } } }
 
 function rS(){
   let q=document.getElementById('srch').value, lv=document.getElementById('stl').value, sec=document.getElementById('sts').value;
@@ -450,6 +515,7 @@ function ref(){
   document.getElementById('gl').innerHTML='<option value="">-- الصف --</option>'+lo;
   document.getElementById('al').innerHTML='<option value="">-- الصف --</option>'+lo;
   document.getElementById('acl').innerHTML='<option value="">-- الصف --</option>'+lo;
+  document.getElementById('bhl').innerHTML='<option value="">-- الصف --</option>'+lo;
   document.getElementById('ll').innerHTML='<option value="">-- الصف --</option>'+lo;
   document.getElementById('rl').innerHTML='<option value="">-- الصف --</option>'+lo;
   document.getElementById('il').innerHTML='<option value="">-- الصف --</option>'+lo;
@@ -523,6 +589,14 @@ function rAC(){
 }
 function saveAC(){ let s=document.getElementById('acs').value; DB.students.filter(x=>x.section===s).forEach(x=>{ let v=document.getElementById(`ac-${x.id}`).value; if(v) DB.activity[x.id]=+v; else delete DB.activity[x.id]; }); sv(); tst('تم'); }
 
+function rB(){
+  let s=document.getElementById('bs').value, q=document.getElementById('bsch').value, lv=document.getElementById('bhl').value;
+  if(!s||!lv) return; let st=DB.students.filter(x=>x.section===s&&x.level===lv&&x.name.includes(q));
+  document.getElementById('beh-list').innerHTML=st.map(x=>`<div class="li"><div><b>${x.name}</b></div><input type="number" id="bh-${x.id}" value="${DB.behavior[x.id]||''}" style="width:70px;margin:0;padding:6px;text-align:center;"></div>`).join('');
+  document.getElementById('sbeh').style.display='block';
+}
+function saveB(){ let s=document.getElementById('bs').value; DB.students.filter(x=>x.section===s).forEach(x=>{ let v=document.getElementById(`bh-${x.id}`).value; if(v) DB.behavior[x.id]=+v; else delete DB.behavior[x.id]; }); sv(); tst('تم'); }
+
 function rL(){
   let lv=document.getElementById('ll').value, sec=document.getElementById('ls').value, fl=document.getElementById('lf').value, el=document.getElementById('lvl-list');
   if(!lv||!sec){ el.innerHTML='<p style="text-align:center;">اختر</p>'; return; }
@@ -566,15 +640,19 @@ function genRep(){
     h='<table><thead><tr><th>الطالب</th><th>النشاط</th></tr></thead><tbody>';
     st.forEach(s=>{ h+=`<tr><td>${s.name}</td><td>${DB.activity[s.id]||0}</td></tr>`; });
     h+='</tbody></table>';
+  } else if(type==='beh'){
+    h='<table><thead><tr><th>الطالب</th><th>السلوك</th></tr></thead><tbody>';
+    st.forEach(s=>{ h+=`<tr><td>${s.name}</td><td>${DB.behavior[s.id]||0}</td></tr>`; });
+    h+='</tbody></table>';
   }
   el.innerHTML=h;
 }
 
 function genStudentReport(sid, box){
   let st=DB.students.find(x=>x.id===sid); if(!st) return;
-  let gs=DB.grades.filter(x=>x.student_id===sid); let a=calcA(sid); let act=DB.activity[sid]||0;
+  let gs=DB.grades.filter(x=>x.student_id===sid); let a=calcA(sid); let act=DB.activity[sid]||0; let beh=DB.behavior[sid]||0;
   let rel=DB.students.filter(s=>s.parentId===st.parentId&&s.id!==st.id&&st.parentId); let rt=rel.length?rel.map(r=>r.name).join('، '):'لا يوجد';
-  let h=`<div class="rc"><div class="rh"><h3>${st.name}</h3><div class="si"><div>${st.level} - ${st.section}</div><div>${st.code}</div><div>${st.gender||'-'}</div><div style="color:var(--e);">غياب: ${a.t} | ${a.j}</div><div style="color:var(--s);">نشاط: ${act}</div><div style="width:100%;">👨‍👩‍👦 ${rt}</div></div></div><div class="gg">`;
+  let h=`<div class="rc"><div class="rh"><h3>${st.name}</h3><div class="si"><div>${st.level} - ${st.section}</div><div>${st.code}</div><div>${st.gender||'-'}</div><div style="color:var(--e);">غياب: ${a.t} | ${a.j}</div><div style="color:var(--s);">نشاط: ${act}</div><div style="color:var(--p);">سلوك: ${beh}</div><div style="width:100%;">👨‍👩‍👦 ${rt}</div></div></div><div class="gg">`;
   if(!gs.length) h+='<p style="text-align:center;">لا توجد</p>';
   gs.forEach(g=>{
     let sb=DB.subjects.find(x=>x.id===g.subject_id); if(sb){
