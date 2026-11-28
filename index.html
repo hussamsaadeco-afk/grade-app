@@ -67,9 +67,10 @@ function importStudentsFile(e){
   if(!rows||!rows.length){alert('الملف فارغ أو تعذر قراءة محتواه.');return}
   const aliases={name:['اسمالطالب','اسم الطالب','الاسم','اسم','studentname','student','name','اسم التلميذ'],grade:['الصف','المرحله','المرحلة','grade','class','الصف الدراسي'],section:['الشعبه','الشعبة','section','division','القسم'],gender:['الجنس','نوع','gender','sex'],code:['الرمز','رمزالطالب','الكود','code','studentid','رقم الطالب'],father:['اسمالاب','اسم الاب','الاب','father','fathername'],mother:['اسمالام','اسم الام','الام','mother','mothername'],phone:['هاتفوليالامر','هاتف ولي الامر','هاتف الولي','الهاتف','رقم الهاتف','phone','mobile','رقم ولي الامر'],family:['رقمالعائله','رقم العائلة','العائله','معرف العائلة','familyid','family'],guardian:['اسموليامر','اسم ولي الامر','ولي الامر','guardian'],notes:['ملاحظات','notes']};
   const matchHeader=(row)=>{let hs=row.map(normalizeHeader),out={};for(const k of Object.keys(aliases))out[k]=hs.findIndex(h=>aliases[k].some(a=>normalizeHeader(a)===h));return out};
-  let headerRow=-1,idx={};for(let r=0;r<Math.min(rows.length,8);r++){let m=matchHeader(rows[r]||[]);if(m.name>=0&&(m.grade>=0||m.section>=0)){headerRow=r;idx=m;break}}
+  let headerRow=-1,idx={};for(let r=0;r<Math.min(rows.length,12);r++){let m=matchHeader(rows[r]||[]);if(m.name>=0){headerRow=r;idx=m;break}}
   const hasHeader=headerRow>=0;let data=hasHeader?rows.slice(headerRow+1):rows;
-  const defaults={grade:el('stGrade')?.value||'',section:el('stSection')?.value||''};
+  const defaults={grade:el('stGrade')?.value||'',section:el('stSection')?.value||'',gender:el('stGender')?.value||'ذكر'};
+  if(!defaults.grade||!defaults.section){alert('اختر الصف والشعبة من حقلي الصف والشعبة في نموذج بيانات الطالب أولاً، ثم أعد الاستيراد.');return}
   let added=0,updated=0,skipped=0,reasonName=0,reasonGrade=0,reasonSection=0;
   const fixed={name:0,grade:1,section:2,gender:3,code:4,father:5,mother:6,phone:7,family:8,guardian:9,notes:10};
   data.forEach(row=>{
@@ -82,7 +83,7 @@ function importStudentsFile(e){
    if(!section||!sections.includes(section)){skipped++;reasonSection++;return}
    let existing=DB.students.find(s=>normalizeHeader(s.name)===normalizeHeader(name)&&s.grade===grade&&s.section===section);
    let code=val('code')||existing?.code||('ST'+Math.random().toString(36).slice(2,10).toUpperCase());
-   let obj={id:existing?.id||uid(),name,grade,section,gender:/^(انثى|أنثى|female|f)$/i.test(val('gender'))?'أنثى':'ذكر',code,father:val('father')||existing?.father||'',mother:val('mother')||existing?.mother||'',phone:normalizePhone(val('phone')||existing?.phone||''),family:val('family')||existing?.family||'',guardian:val('guardian')||existing?.guardian||'',notes:val('notes')||existing?.notes||''};
+   let obj={id:existing?.id||uid(),name,grade,section,gender:val('gender')?(/^(انثى|أنثى|female|f)$/i.test(val('gender'))?'أنثى':'ذكر'):defaults.gender,code,father:val('father')||existing?.father||'',mother:val('mother')||existing?.mother||'',phone:normalizePhone(val('phone')||existing?.phone||''),family:val('family')||existing?.family||'',guardian:val('guardian')||existing?.guardian||'',notes:val('notes')||existing?.notes||''};
    if(existing){Object.assign(existing,obj);updated++}else{if(DB.students.some(s=>s.code===obj.code))obj.code='ST'+Math.random().toString(36).slice(2,10).toUpperCase();DB.students.push(obj);added++}
   });
   persist();renderAll();
@@ -99,12 +100,12 @@ function importGradesFile(e){
   if(!rows||!rows.length){alert('الملف فارغ أو لا يحتوي على بيانات.');return}
   const norm=x=>normalizeHeader(x).replace(/[()\[\]ـ]/g,'');
   const aliases={name:['اسمالطالب','الاسم','اسم','اسم التلميذ','studentname','student','name'],grade:['الصف','المرحلة','الصف الدراسي','grade','class'],section:['الشعبة','القسم','section','division'],subject:['المادة','اسم المادة','subject'],term:['الفصل','الفصل الدراسي','term'],month:['الشهر','الشهر الدراسي','month'],written:['التحريري','درجة التحريري','الامتحان التحريري','تحريري','written','writtenmark','درجة الامتحان','درجة الشهر']};
-  const header=rows[0].map(norm),find=k=>header.findIndex(h=>aliases[k].some(a=>norm(a)===h));
-  const ix={};Object.keys(aliases).forEach(k=>ix[k]=find(k));
+  let headerAt=-1,header=[],ix={};for(let ri=0;ri<Math.min(rows.length,12);ri++){const h=(rows[ri]||[]).map(norm),findIn=k=>h.findIndex(x=>aliases[k].some(a=>norm(a)===x));if(findIn('name')>=0&&findIn('written')>=0){headerAt=ri;header=h;Object.keys(aliases).forEach(k=>ix[k]=findIn(k));break}}
+  if(headerAt<0){alert('لم أجد صف عناوين يحتوي على اسم الطالب ودرجة التحريري.');return}
   if(ix.name<0){alert('لم أجد عمود اسم الطالب. يجب أن يحتوي عنوان العمود على: اسم الطالب أو الاسم أو Student Name.');return}
   if(ix.written<0){alert('لم أجد عمود درجة التحريري. سمّ العمود: التحريري أو درجة التحريري أو Written.');return}
   let added=0,updated=0,skipped=0,bad=0;
-  rows.slice(1).forEach(row=>{
+  rows.slice(headerAt+1).forEach(row=>{
    const v=k=>ix[k]>=0?String(row[ix[k]]??'').trim():'';
    const name=v('name').replace(/\s+/g,' ');if(!name){skipped++;return}
    const grade=normalizeGradeValue(v('grade'))||el('gGrade').value;
